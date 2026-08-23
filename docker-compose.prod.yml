@@ -1,0 +1,87 @@
+# Production compose file — deliberately separate from docker-compose.yml
+# (the local-dev infra file used by `pnpm dev`), not an override of it:
+# - no MinIO here, object storage is Cloudflare R2 (external, see .env)
+# - postgres/redis aren't published to the host at all, only reachable from
+#   web/worker over the compose network — dev exposes them on 5433/6380 for
+#   direct psql/redis-cli access, prod has no reason to
+# - web/worker actually run as built containers here (apps/web/Dockerfile,
+#   apps/worker/Dockerfile); in dev they run via `pnpm dev` on the host for
+#   hot-reload, never as containers
+#
+# Usage on the VPS:
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# Expects a `.env` file next to this one (git-ignored, never committed) with
+# real production values — see `.env.production.example` for the required
+# keys and how they differ from local-dev `.env.example` (DATABASE_URL/
+# REDIS_URL point at the `postgres`/`redis` service names below, not
+# localhost; STORAGE_* point at R2, not MinIO).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: voidlog
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+      POSTGRES_DB: voidlog
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U voidlog -d voidlog"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file: .env
+    # Bound to the host's loopback only — not directly internet-facing.
+    # Caddy (see ADR/hosting plan) reverse-proxies to 127.0.0.1:4000 once
+    # it's set up; until then this is reachable only via SSH port-forward or
+    # from the VPS itself, not from the public internet.
+    ports:
+      - "127.0.0.1:4000:4000"
+    healthcheck:
+      # No dedicated /api/health route exists yet — /login is a cheap,
+      # always-unauthenticated page, good enough as a liveness signal.
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4000/login"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file: .env
+
+volumes:
+  postgres_data:
+  redis_data:
