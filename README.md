@@ -7,6 +7,7 @@
 ![BullMQ](https://img.shields.io/badge/BullMQ-5.28-c53030?logo=redis&logoColor=white)
 ![pnpm](https://img.shields.io/badge/pnpm-11.22-f69220?logo=pnpm&logoColor=white)
 ![Node](https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 A web app for uploading, parsing, and comparing Guild Wars 2 EVTC combat
 logs, organized into projects ("training groups") tracked across weeks or
@@ -153,5 +154,4 @@ pnpm typecheck        # tsc --noEmit across all packages
 
 ## License
 
-No license has been set for this repository yet — all rights reserved by
-default until one is added.
+MIT — see [LICENSE](LICENSE).
