@@ -4,6 +4,34 @@ import { NextResponse } from "next/server";
 import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 
+/** Renames a batch's label. */
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ batchId: string }> },
+) {
+  const { batchId } = await params;
+  const session = await requireSession();
+
+  const batch = await prisma.uploadBatch.findUnique({ where: { id: batchId } });
+  if (!batch) {
+    return NextResponse.json({ error: "Batch not found" }, { status: 404 });
+  }
+  await requireProjectMembership(batch.projectId, session.user.id);
+
+  const body = await request.json().catch(() => null);
+  const label = typeof body?.label === "string" ? body.label.trim() : "";
+  if (!label) {
+    return NextResponse.json({ error: "Label must not be empty" }, { status: 400 });
+  }
+
+  const updated = await prisma.uploadBatch.update({
+    where: { id: batchId },
+    data: { label },
+  });
+
+  return NextResponse.json({ label: updated.label });
+}
+
 /**
  * Deletes an UploadBatch and everything under it. DB rows (LogFile,
  * EncounterResult, PhaseResult, PlayerResult, MechanicEvent) cascade away

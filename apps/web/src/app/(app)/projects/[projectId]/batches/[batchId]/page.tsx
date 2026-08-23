@@ -15,6 +15,7 @@ import {
   type BatchPhaseStat,
   type BatchRosterRow,
 } from "./batch-attempts";
+import { BatchLabelEditor } from "./batch-label-editor";
 import { DeleteBatchButton } from "./delete-batch-button";
 import { RemoveLogButton } from "./remove-log-button";
 import { RetryLogButton } from "./retry-log-button";
@@ -418,7 +419,7 @@ export default async function BatchDetailPage(
       />
       <div className="mb-6 flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="font-heading text-foreground-strong text-2xl font-bold">{batch.label}</h1>
+          <BatchLabelEditor batchId={batchId} label={batch.label} />
           {allBatches.length > 1 ? (
             <BatchSwitcher projectId={projectId} batches={allBatches} currentBatchId={batchId} />
           ) : null}
