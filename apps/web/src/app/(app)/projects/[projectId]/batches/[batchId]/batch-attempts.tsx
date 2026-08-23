@@ -1,7 +1,12 @@
 "use client";
 
-import { ChevronRightIcon, Cross2Icon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
-import { Card, Tabs, Table } from "@radix-ui/themes";
+import {
+  CheckCircledIcon,
+  ChevronRightIcon,
+  Cross2Icon,
+  ExclamationTriangleIcon,
+} from "@radix-ui/react-icons";
+import { Card, HoverCard, Select, Tabs, Table } from "@radix-ui/themes";
 import Link from "next/link";
 import { useMemo, useState, type ReactNode } from "react";
 import { PhaseBadge, phaseColor, readableHeadingColor } from "@/components/phase-badge";
@@ -11,6 +16,7 @@ import { RemoveLogButton } from "./remove-log-button";
 
 export interface AttemptRow {
   logFileId: string;
+  fileName: string;
   bossId: string;
   isCM: boolean;
   n: number;
@@ -26,12 +32,15 @@ export interface AttemptRow {
     player: string | null;
     /** Only populated for stealth-phase events (see stealth-phases.ts on the worker) — currently just "Invis.Cast". */
     msSincePhaseEnd?: number;
+    /** Only populated on "Revealed" events — time since the causing Mass-Invisibility cast's channel ended, not the phase end. */
+    msSinceInvisCast?: number;
   }[];
   phases: {
     name: string;
     order: number;
     reached: boolean;
     success: boolean;
+    durationMs: number;
     mechanics: { mechanicName: string; name: string; player: string | null }[];
   }[];
 }
@@ -117,9 +126,19 @@ function formatDuration(ms: number): string {
   return `${Math.floor(totalSeconds / 60)}:${String(totalSeconds % 60).padStart(2, "0")}`;
 }
 
-function phaseStatusLabel(phase: { reached: boolean; success: boolean }): string {
-  if (!phase.reached) return "Nicht erreicht";
-  return phase.success ? "Abgeschlossen" : "Nicht abgeschlossen";
+// One label/value pair in an attempt's stat overview row (Ergebnis, Modus,
+// Dauer, ...) — plain text, unlike the icon-only mechanic cards below it.
+function StatItem({
+  label,
+  value,
+  valueClassName,
+}: Readonly<{ label: string; value: ReactNode; valueClassName?: string }>) {
+  return (
+    <div>
+      <div className="text-muted text-[10px] uppercase tracking-wide">{label}</div>
+      <div className={`text-xs font-semibold ${valueClassName ?? "text-foreground"}`}>{value}</div>
+    </div>
+  );
 }
 
 const MARKER_CLUSTER_GAP_MS = 500;
@@ -133,6 +152,8 @@ interface MarkerCluster {
   players: string[];
   /** Taken from the cluster's first event, like `name`/`timeMs` above — see AttemptRow.mechanics. */
   msSincePhaseEnd?: number;
+  /** Taken from the cluster's first event — see AttemptRow.mechanics. */
+  msSinceInvisCast?: number;
 }
 
 // Collapses same-mechanic markers that land within MARKER_CLUSTER_GAP_MS of
@@ -150,6 +171,7 @@ function clusterMarkers(
     mechanicName: string;
     player?: string | null;
     msSincePhaseEnd?: number;
+    msSinceInvisCast?: number;
   }[],
 ): MarkerCluster[] {
   const byMechanic = new Map<string, typeof events>();
@@ -171,6 +193,7 @@ function clusterMarkers(
       count: group.length,
       players,
       msSincePhaseEnd: group[0]!.msSincePhaseEnd,
+      msSinceInvisCast: group[0]!.msSinceInvisCast,
     });
   }
 
@@ -191,11 +214,74 @@ function clusterMarkers(
   return clusters;
 }
 
-function markerTooltip(cluster: MarkerCluster): string {
-  const base = cluster.count > 1 ? `${cluster.name} (${cluster.count}×)` : cluster.name;
-  const withPlayers = cluster.players.length > 0 ? `${base} — ${cluster.players.join(", ")}` : base;
-  if (cluster.msSincePhaseEnd === undefined) return withPlayers;
-  return `${withPlayers} — ${(cluster.msSincePhaseEnd / 1000).toFixed(1)}s seit Phasenende`;
+// Unlike clusterMarkers (time-windowed, for the timeline lanes), this
+// collapses every occurrence of a mechanic in a phase into one icon
+// regardless of when it happened — the phase-summary cards below show one
+// glyph per distinct mechanic, not one per timeline moment.
+function groupFailMechanics(
+  events: { mechanicName: string; name: string; player: string | null }[],
+): MarkerCluster[] {
+  const byMechanic = new Map<string, { name: string; players: string[]; count: number }>();
+  for (const e of events) {
+    const entry = byMechanic.get(e.mechanicName) ?? { name: e.name, players: [], count: 0 };
+    entry.count += 1;
+    if (e.player && !entry.players.includes(e.player)) entry.players.push(e.player);
+    byMechanic.set(e.mechanicName, entry);
+  }
+  return [...byMechanic.entries()].map(([mechanicName, v]) => ({
+    timeMs: 0,
+    mechanicName,
+    name: v.name,
+    count: v.count,
+    players: v.players,
+  }));
+}
+
+// Rich replacement for a native `title` tooltip on a timeline marker: a small
+// Card showing which mechanic fired and, in its own row, which players it
+// hit — the plain-text `title` couldn't lay those out as separate lines.
+function MechanicHoverCard({
+  cluster,
+  icon,
+  children,
+}: Readonly<{ cluster: MarkerCluster; icon: ReactNode; children: ReactNode }>) {
+  return (
+    <HoverCard.Root openDelay={150} closeDelay={80}>
+      <HoverCard.Trigger>{children}</HoverCard.Trigger>
+      <HoverCard.Content size="1" sideOffset={6} className="!border-none !bg-transparent !p-0">
+        <Card size="1" className="border-line bg-surface-2 min-w-[170px] border shadow-lg">
+          <div className="flex items-center gap-1.5">
+            {icon}
+            <span className="text-foreground-strong text-xs font-semibold">{cluster.name}</span>
+          </div>
+          {cluster.players.length > 0 ? (
+            <div className="border-line-soft mt-1.5 border-t pt-1.5">
+              <div className="text-muted text-[10px] font-semibold uppercase tracking-wide">
+                Spieler ({cluster.players.length})
+              </div>
+              <div className="text-foreground mt-0.5 text-[11px]">{cluster.players.join(", ")}</div>
+            </div>
+          ) : null}
+          {cluster.msSincePhaseEnd !== undefined ? (
+            <div className="mt-1.5 flex items-baseline gap-1">
+              <span className="text-foreground text-[11px] font-semibold">
+                {(cluster.msSincePhaseEnd / 1000).toFixed(1)}s
+              </span>
+              <span className="text-muted-strong text-[10px]">seit Phasenende</span>
+            </div>
+          ) : null}
+          {cluster.msSinceInvisCast !== undefined ? (
+            <div className="mt-1 flex items-baseline gap-1">
+              <span className="text-foreground text-[11px] font-semibold">
+                {(cluster.msSinceInvisCast / 1000).toFixed(1)}s
+              </span>
+              <span className="text-muted-strong text-[10px]">seit Ende Mass Invis Cast</span>
+            </div>
+          ) : null}
+        </Card>
+      </HoverCard.Content>
+    </HoverCard.Root>
+  );
 }
 
 // Normal Mode and Challenge Mode share the same bossId (see EncounterResult
@@ -566,14 +652,27 @@ function MechanicToggle({
 // visitor needs. Grouping by phase (instead of one flat list) mirrors the
 // aggregate phase cards above it, so the same phase names/colors orient the
 // user here too.
-function failMechanicIcon(mechanicName: string, options?: { distinguishGreen?: boolean }) {
+function failMechanicIcon(
+  mechanicName: string,
+  options?: { distinguishGreen?: boolean; size?: "sm" | "md" },
+) {
+  // "sm" matches the compact timeline lanes/filter chips (unchanged); "md"
+  // is for spots like the phase-summary cards where a 14px glyph at this
+  // component's tiny label sizes read as blurry rather than just small.
+  const size = options?.size ?? "sm";
   if (mechanicName === "Downed") {
     // eslint-disable-next-line @next/next/no-img-element -- fixed-size static icon, next/image is unnecessary overhead here
-    return <img src="/icons/downed.png" alt="" className="h-4 w-2.5" />;
+    return <img src="/icons/downed.png" alt="" className={size === "md" ? "h-5 w-3" : "h-4 w-2.5"} />;
   }
   if (mechanicName === "Debilitated") {
     // eslint-disable-next-line @next/next/no-img-element -- fixed-size static icon, next/image is unnecessary overhead here
-    return <img src="/icons/debilitated.png" alt="" className="h-3.5 w-3.5" />;
+    return (
+      <img
+        src="/icons/debilitated.png"
+        alt=""
+        className={size === "md" ? "h-4 w-4" : "h-3.5 w-3.5"}
+      />
+    );
   }
   if (mechanicName === "F.Green" && options?.distinguishGreen !== false) {
     // Reuse the same green-circle glyph as the boss-attack lane's
@@ -584,7 +683,9 @@ function failMechanicIcon(mechanicName: string, options?: { distinguishGreen?: b
     // glyph — there the two lanes need to stay visually distinct.
     return <AttackGlyph type="green" />;
   }
-  return <ExclamationTriangleIcon className="text-warning h-3.5 w-3.5" />;
+  return (
+    <ExclamationTriangleIcon className={`text-warning ${size === "md" ? "h-4 w-4" : "h-3.5 w-3.5"}`} />
+  );
 }
 
 // One filter-table cell's worth of toggle chips — used for both the
@@ -603,6 +704,10 @@ function MechanicCell({ children, empty }: Readonly<{ children: ReactNode; empty
   );
 }
 
+// Sentinel for Select.Item's value (Radix disallows an empty-string value) —
+// stands in for "no player selected", mapped back to `null` at the callback.
+const ALL_PLAYERS_VALUE = "__all__";
+
 function MechanicFilterAccordion({
   bossId,
   phaseGroups,
@@ -613,6 +718,9 @@ function MechanicFilterAccordion({
   onToggle,
   onSelectAll,
   onDeselectAll,
+  playerNames,
+  selectedPlayer,
+  onSelectPlayer,
 }: Readonly<{
   bossId: string;
   phaseGroups: PhaseFilterGroup[];
@@ -623,6 +731,9 @@ function MechanicFilterAccordion({
   onToggle: (mechanicName: string) => void;
   onSelectAll: () => void;
   onDeselectAll: () => void;
+  playerNames: string[];
+  selectedPlayer: string | null;
+  onSelectPlayer: (player: string | null) => void;
 }>) {
   return (
     <details className="border-line-soft group mb-3.5 border-b pb-3.5">
@@ -631,6 +742,29 @@ function MechanicFilterAccordion({
         Mechanik-Filter
       </summary>
       <div className="mt-3 hidden flex-col gap-3 group-open:flex">
+        {/* Restricts the "Mechaniken"/fail markers below to one player's own
+            fails (boss-attack markers stay unfiltered — those aren't
+            attributable mistakes) — separate axis from the mechanic-type
+            toggles below, the two combine rather than replace each other. */}
+        <div className="flex items-center gap-2.5">
+          <span className="text-muted-strong text-xs font-semibold">Spieler:</span>
+          <Select.Root
+            value={selectedPlayer ?? ALL_PLAYERS_VALUE}
+            onValueChange={(value) =>
+              onSelectPlayer(value === ALL_PLAYERS_VALUE ? null : value)
+            }
+          >
+            <Select.Trigger variant="surface" className="min-w-[160px]" />
+            <Select.Content>
+              <Select.Item value={ALL_PLAYERS_VALUE}>Alle Spieler</Select.Item>
+              {playerNames.map((name) => (
+                <Select.Item key={name} value={name}>
+                  {name}
+                </Select.Item>
+              ))}
+            </Select.Content>
+          </Select.Root>
+        </div>
         <Table.Root variant="surface" className="border-line bg-surface-2 border">
           <Table.Header>
             <Table.Row>
@@ -793,7 +927,23 @@ export function BatchAttempts({
 }>) {
   const [expanded, setExpanded] = useState<number | null>(null);
   const [hiddenMechanics, setHiddenMechanics] = useState<Set<string>>(new Set());
+  const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const maxDurationMs = Math.max(1, ...attempts.map((a) => a.durationMs));
+
+  // Every character name in the batch's roster, regardless of whether they
+  // ever failed a mechanic — lets the filter pick a player who's had zero
+  // fails and correctly see an empty timeline, not just the ones who show up
+  // in a marker already.
+  const playerNames = useMemo(() => {
+    const names = new Set<string>();
+    for (const entry of roster) {
+      for (const name of entry.characterNames.split(",")) {
+        const trimmed = name.trim();
+        if (trimmed) names.add(trimmed);
+      }
+    }
+    return [...names].sort((a, b) => a.localeCompare(b));
+  }, [roster]);
 
   const [rosterSortKey, setRosterSortKey] = useState<RosterSortKey>("failedMechanics");
   const [rosterDirection, setRosterDirection] = useState<"asc" | "desc">("desc");
@@ -1028,6 +1178,9 @@ export function BatchAttempts({
           onToggle={toggleMechanic}
           onSelectAll={selectAllMechanics}
           onDeselectAll={deselectAllMechanics}
+          playerNames={playerNames}
+          selectedPlayer={selectedPlayer}
+          onSelectPlayer={setSelectedPlayer}
         />
         <div className="border-line bg-surface divide-line-soft flex flex-col divide-y rounded-sm border">
           {attempts.map((a) => {
@@ -1048,8 +1201,14 @@ export function BatchAttempts({
               }),
             );
             const beamClusters = attackClusters.filter((c) => c.mechanicName === "Beam.Cast");
+            // Boss-attack lanes above stay unfiltered by selectedPlayer — a
+            // cast isn't an attributable mistake, only a fail is.
             const failClusters = clusterMarkers(
-              visibleMechanics.filter((m) => !isVisibleCastMarker(a.bossId, m.mechanicName)),
+              visibleMechanics.filter(
+                (m) =>
+                  !isVisibleCastMarker(a.bossId, m.mechanicName) &&
+                  (selectedPlayer === null || m.player === selectedPlayer),
+              ),
             );
             return (
               <div key={a.logFileId}>
@@ -1086,14 +1245,18 @@ export function BatchAttempts({
                       {highFreqClusters.map((c) => {
                         const type = attackType(c.mechanicName)!;
                         return (
-                          <span
+                          <MechanicHoverCard
                             key={`${c.mechanicName}-${c.timeMs}`}
-                            title={markerTooltip(c)}
-                            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
-                            style={{ left: `${(c.timeMs / a.durationMs) * 100}%` }}
+                            cluster={c}
+                            icon={<AttackGlyph type={type} />}
                           >
-                            <AttackGlyph type={type} />
-                          </span>
+                            <span
+                              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
+                              style={{ left: `${(c.timeMs / a.durationMs) * 100}%` }}
+                            >
+                              <AttackGlyph type={type} />
+                            </span>
+                          </MechanicHoverCard>
                         );
                       })}
                     </span>
@@ -1108,14 +1271,18 @@ export function BatchAttempts({
                             ? beamClusters.indexOf(c) % 2 === 1
                             : undefined;
                         return (
-                          <span
+                          <MechanicHoverCard
                             key={`${c.mechanicName}-${c.timeMs}`}
-                            title={markerTooltip(c)}
-                            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
-                            style={{ left: `${(c.timeMs / a.durationMs) * 100}%` }}
+                            cluster={c}
+                            icon={<AttackGlyph type={type} flipped={flipped} />}
                           >
-                            <AttackGlyph type={type} flipped={flipped} />
-                          </span>
+                            <span
+                              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
+                              style={{ left: `${(c.timeMs / a.durationMs) * 100}%` }}
+                            >
+                              <AttackGlyph type={type} flipped={flipped} />
+                            </span>
+                          </MechanicHoverCard>
                         );
                       })}
                     </span>
@@ -1147,14 +1314,18 @@ export function BatchAttempts({
                         </span>
                       ))}
                       {failClusters.map((c) => (
-                        <span
+                        <MechanicHoverCard
                           key={`${c.mechanicName}-${c.timeMs}`}
-                          title={markerTooltip(c)}
-                          className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
-                          style={{ left: `${(c.timeMs / a.durationMs) * 100}%` }}
+                          cluster={c}
+                          icon={failMechanicIcon(c.mechanicName, { distinguishGreen: false })}
                         >
-                          {failMechanicIcon(c.mechanicName, { distinguishGreen: false })}
-                        </span>
+                          <span
+                            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
+                            style={{ left: `${(c.timeMs / a.durationMs) * 100}%` }}
+                          >
+                            {failMechanicIcon(c.mechanicName, { distinguishGreen: false })}
+                          </span>
+                        </MechanicHoverCard>
                       ))}
                     </span>
                   </span>
@@ -1163,15 +1334,66 @@ export function BatchAttempts({
                   </span>
                 </button>
                 {isOpen ? (
-                  <div className="border-line-soft border-t px-4 py-3.5 pl-[62px]">
-                    <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-3">
+                  <div className="border-line-soft bg-background border-t px-4 py-3.5 pl-[62px]">
+                    {/* Small stat overview first — the attempt-level numbers
+                        that used to only live in the collapsed row above,
+                        now spelled out here since the phase cards below no
+                        longer carry any text of their own. */}
+                    <div className="border-line-soft mb-3.5 flex flex-wrap gap-x-6 gap-y-2 border-b pb-3.5">
+                      <StatItem label="Log" value={a.fileName} />
+                      <StatItem
+                        label="Ergebnis"
+                        value={a.success ? "Kill" : "Wipe"}
+                        valueClassName={a.success ? "text-success" : "text-danger"}
+                      />
+                      <StatItem label="Modus" value={a.isCM ? "CM" : "NM"} />
+                      <StatItem
+                        label="Weiteste Phase"
+                        value={
+                          a.furthestPhase ? (
+                            <PhaseBadge
+                              bossId={a.bossId}
+                              name={a.furthestPhase.name}
+                              order={a.furthestPhase.order}
+                            />
+                          ) : (
+                            "—"
+                          )
+                        }
+                      />
+                      <StatItem label="Dauer" value={formatDuration(a.durationMs)} />
+                      <StatItem
+                        label="Reveals"
+                        value={String(
+                          a.mechanics.filter(
+                            (m) =>
+                              m.mechanicName === "Revealed" &&
+                              (selectedPlayer === null || m.player === selectedPlayer),
+                          ).length,
+                        )}
+                      />
+                      <StatItem
+                        label="Downstates"
+                        value={String(
+                          a.mechanics.filter(
+                            (m) =>
+                              m.mechanicName === "Downed" &&
+                              (selectedPlayer === null || m.player === selectedPlayer),
+                          ).length,
+                        )}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
                       {a.phases.map((phase) => {
                         // Boss-attack cast markers ride along in phase.mechanics
                         // (needed to build the filter accordion above) but stay
-                        // out of this plain-text fail summary.
+                        // out of this icon-only fail summary.
                         const failMechanics = phase.mechanics.filter(
-                          (m) => !isVisibleCastMarker(a.bossId, m.mechanicName),
+                          (m) =>
+                            !isVisibleCastMarker(a.bossId, m.mechanicName) &&
+                            (selectedPlayer === null || m.player === selectedPlayer),
                         );
+                        const failGroups = groupFailMechanics(failMechanics);
                         return (
                           <div
                             key={phase.order}
@@ -1180,17 +1402,35 @@ export function BatchAttempts({
                               borderLeftColor: phaseColor(a.bossId, phase.order, phase.name),
                             }}
                           >
-                            <div className="text-muted mb-1 text-[10px] uppercase">
-                              {phase.name}
+                            <div className="mb-1.5 flex items-center justify-between gap-1.5">
+                              <span className="text-muted flex items-center gap-1.5 text-xs uppercase">
+                                {phase.name}
+                                {phase.reached && phase.success ? (
+                                  <CheckCircledIcon className="text-success h-4 w-4" />
+                                ) : null}
+                              </span>
+                              {phase.reached ? (
+                                <span className="text-muted-strong text-xs">
+                                  {formatDuration(phase.durationMs)}
+                                </span>
+                              ) : null}
                             </div>
-                            <div className="text-foreground text-xs font-semibold">
-                              {phaseStatusLabel(phase)}
-                            </div>
-                            {failMechanics.length > 0 ? (
-                              <div className="text-muted-strong mt-1 text-[10.5px]">
-                                {failMechanics
-                                  .map((m) => m.name + (m.player ? ` (${m.player})` : ""))
-                                  .join(", ")}
+                            {failGroups.length > 0 ? (
+                              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                                {failGroups.map((g) => (
+                                  <MechanicHoverCard
+                                    key={g.mechanicName}
+                                    cluster={g}
+                                    icon={failMechanicIcon(g.mechanicName, { size: "md" })}
+                                  >
+                                    <span className="bg-line-soft/40 flex items-center gap-1 rounded-sm px-2 py-1.5">
+                                      {failMechanicIcon(g.mechanicName, { size: "md" })}
+                                      <span className="text-foreground-strong text-xs font-bold">
+                                        {g.count}
+                                      </span>
+                                    </span>
+                                  </MechanicHoverCard>
+                                ))}
                               </div>
                             ) : null}
                           </div>

@@ -52,13 +52,13 @@ export interface StealthPhaseConfig {
    * later "Revealed" application can't be caused by (or even meaningfully
    * related to) this cast. Measured from `castTime + duration` (cast end),
    * not from `castTime` (cast start) — the channel itself (~1-1.5s observed)
-   * delays when the buff actually applies. Confirmed on two real logs (4
-   * invis windows, 13 reveals total): every genuine reveal landed
-   * 425-5808ms after its cast's *end*, comfortably inside 6000ms; nothing
-   * was ever close to that boundary, so this isn't a tight cutoff in
-   * practice — it exists to stop a much later, unrelated Revealed
-   * application (e.g. from a totally different stealth source later in the
-   * fight) from being misattributed to a stale invis window.
+   * delays when the buff actually applies.
+   *
+   * Deliberately trimmed below the buff's actual ~6000ms duration: a
+   * "reveal" landing in that last half-second is unreliable — close enough
+   * to the buff's own natural expiry that it's not clearly the player's
+   * fault rather than the stealth simply running out, so it's excluded
+   * rather than counted as a mistake.
    */
   stealthDurationMs: number;
   /**
@@ -115,7 +115,7 @@ export const STEALTH_PHASES_BY_BOSS: Record<string, StealthPhaseConfig[]> = {
       revealBuffId: 890,
       revealMechanicName: "Revealed",
       revealDisplayName: "Aufgedeckt (Revealed)",
-      stealthDurationMs: 6_000,
+      stealthDurationMs: 5_500,
       groupRevealClusterGapMs: 250,
       groupRevealMinSize: 3,
       causingSkillToleranceMs: 500,

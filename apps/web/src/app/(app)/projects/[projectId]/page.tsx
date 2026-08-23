@@ -1,4 +1,4 @@
-import { ProjectRole, prisma } from "@voidlog/db";
+import { prisma, ProjectRole } from "@voidlog/db";
 import { Card, Table } from "@radix-ui/themes";
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -9,7 +9,19 @@ import { requireSession } from "@/lib/session";
 import { DeleteProjectButton } from "./delete-project-button";
 import { DpsTrendChart, GreenFailTrendChart, ShockwaveTrendChart } from "./trend-chart";
 
-export default async function ProjectDetailPage(props: PageProps<"/projects/[projectId]">) {
+type MechanicEncounter = {
+  phaseResults: { mechanicEvents: { mechanicName: string }[] }[];
+};
+
+function hasMechanic(encounter: MechanicEncounter, mechanicName: string): boolean {
+  return encounter.phaseResults.some((phase) =>
+    phase.mechanicEvents.some((event) => event.mechanicName === mechanicName),
+  );
+}
+
+export default async function ProjectDetailPage(
+  props: Readonly<PageProps<"/projects/[projectId]">>,
+) {
   const { projectId } = await props.params;
   const session = await requireSession();
   const membership = await requireProjectMembership(projectId, session.user.id);
@@ -54,17 +66,13 @@ export default async function ProjectDetailPage(props: PageProps<"/projects/[pro
       // "F.Green" is HTCM's raw EI mechanic code for a failed Green stack
       // (see harvest-temple.ts) — hardcoded like the same stat on the batch
       // detail page, pending a boss-pluggable stat system.
-      const greenFailedCount = encounters.filter((e) =>
-        e.phaseResults.some((p) => p.mechanicEvents.some((m) => m.mechanicName === "F.Green")),
-      ).length;
+      const greenFailedCount = encounters.filter((e) => hasMechanic(e, "F.Green")).length;
       const greenFailRate =
         encounters.length > 0 ? Math.round((greenFailedCount / encounters.length) * 100) : null;
 
       // "ShckWv.H" is Mordremoth's raw EI code for a Schockwelle hit — same
       // hardcoded-stat treatment as the Green-fail count above.
-      const shockwaveHitCount = encounters.filter((e) =>
-        e.phaseResults.some((p) => p.mechanicEvents.some((m) => m.mechanicName === "ShckWv.H")),
-      ).length;
+      const shockwaveHitCount = encounters.filter((e) => hasMechanic(e, "ShckWv.H")).length;
       const shockwaveHitRate =
         encounters.length > 0 ? Math.round((shockwaveHitCount / encounters.length) * 100) : null;
       const avgGroupDps =
@@ -137,7 +145,7 @@ export default async function ProjectDetailPage(props: PageProps<"/projects/[pro
         <div className="flex items-center gap-3">
           <Link
             href={`/projects/${projectId}/batches/new`}
-            className="bg-primary text-primary-foreground rounded-sm px-3.5 py-2 text-sm font-semibold"
+            className="bg-primary text-primary-foreground inline-flex h-8 items-center justify-center rounded-sm px-3.5 text-sm font-semibold"
           >
             + Batch hochladen
           </Link>

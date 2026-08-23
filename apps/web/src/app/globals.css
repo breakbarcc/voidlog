@@ -67,11 +67,13 @@ body {
   --color-background: var(--background);
 }
 
-a {
-  color: var(--accent);
-}
-a:hover {
-  color: #c9b3ea;
+@layer base {
+  a {
+    color: var(--accent);
+  }
+  a:hover {
+    color: #c9b3ea;
+  }
 }
 
 ::-webkit-scrollbar {

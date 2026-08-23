@@ -31,6 +31,16 @@ function readMsSincePhaseEnd(context: unknown): number | undefined {
   return typeof value === "number" ? value : undefined;
 }
 
+// Reads MechanicEvent.context.msSinceInvisCast (see persist-encounter.ts on
+// the worker) — only populated on "Revealed" events, measuring from the
+// causing Mass-Invisibility cast's channel *end* (not its start, and not the
+// dragon phase's end like `msSincePhaseEnd`).
+function readMsSinceInvisCast(context: unknown): number | undefined {
+  if (!context || typeof context !== "object") return undefined;
+  const value = (context as Record<string, unknown>).msSinceInvisCast;
+  return typeof value === "number" ? value : undefined;
+}
+
 // storageKeyRaw looks like "raw/<batchId>/<uuid>-<sanitized filename>" — strip
 // the batch/uuid prefix so failed uploads show the original filename.
 function displayFileName(storageKeyRaw: string): string {
@@ -315,6 +325,7 @@ export default async function BatchDetailPage(
     const furthest = reachedMainPhases.at(-1) ?? null;
     return {
       logFileId: logFile.id,
+      fileName: displayFileName(logFile.storageKeyRaw),
       bossId: encounter.bossId,
       isCM: encounter.isCM,
       n: i + 1,
@@ -347,6 +358,7 @@ export default async function BatchDetailPage(
             mechanicName: m.mechanicName,
             player: m.playerResult?.characterName ?? null,
             msSincePhaseEnd: readMsSincePhaseEnd(m.context),
+            msSinceInvisCast: readMsSinceInvisCast(m.context),
           })),
       ),
       phases: mainPhases.map((p) => {
@@ -375,6 +387,7 @@ export default async function BatchDetailPage(
           order: p.order,
           reached: p.reached,
           success: p.success,
+          durationMs: p.endMs - p.startMs,
           // Keeps cast markers (boss attacks) in here too, unlike the death/
           // fail-only `mechanics` field above — the client needs them to
           // build the per-phase attack filter groups. isVisibleCastMarker is
