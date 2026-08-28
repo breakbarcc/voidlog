@@ -1,7 +1,7 @@
 import { prisma } from "@voidlog/db";
 import { Card } from "@radix-ui/themes";
 import { notFound } from "next/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/locale";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { phaseColor } from "@/components/phase-badge";
@@ -10,13 +10,31 @@ import { isNoiseMechanic } from "@/lib/mechanics";
 import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 
+// Matches messages/*.json's `logDetail.completed`/`reached`/`notReached` keys
+// 1:1 — callers pass this straight to `t()`.
+type PhaseStatus = "completed" | "reached" | "notReached";
+
+function getPhaseStatus(phase: Readonly<{ reached: boolean; success: boolean }>): PhaseStatus {
+  if (!phase.reached) return "notReached";
+  return phase.success ? "completed" : "reached";
+}
+
+const PHASE_STATUS_CLASS: Record<PhaseStatus, string> = {
+  completed: "bg-warning/15 text-warning",
+  reached: "bg-line-soft text-muted-strong",
+  notReached: "bg-line-soft/60 text-muted",
+};
+
 export default async function LogAnalysisPage(
-  props: PageProps<"/projects/[projectId]/batches/[batchId]/logs/[logFileId]">,
+  props: Readonly<PageProps<"/projects/[projectId]/batches/[batchId]/logs/[logFileId]">>,
 ) {
   const { projectId, batchId, logFileId } = await props.params;
   const session = await requireSession();
   const membership = await requireProjectMembership(projectId, session.user.id);
   const locale = (await getLocale()) as Locale;
+  const t = await getTranslations("logDetail");
+  const tCommon = await getTranslations("common");
+  const tSidebar = await getTranslations("sidebar");
 
   const logFile = await prisma.logFile.findUnique({
     where: { id: logFileId },
@@ -66,7 +84,7 @@ export default async function LogAnalysisPage(
     <div className="max-w-3xl px-10 py-8">
       <Breadcrumbs
         items={[
-          { label: "Projekte", href: "/" },
+          { label: tSidebar("projects"), href: "/" },
           { label: membership.project.name, href: `/projects/${projectId}` },
           { label: logFile.batch.label, href: `/projects/${projectId}/batches/${batchId}` },
           { label: encounter.bossName },
@@ -87,8 +105,12 @@ export default async function LogAnalysisPage(
             </span>
           </h1>
           <p className="text-muted mt-1 text-sm">
-            {encounter.success ? "Success" : "Wipe"} bei {logFile.batch.label} · Dauer{" "}
-            {Math.round(encounter.durationMs / 1000)}s · {encounter.playerResults.length} Spieler
+            {t("summary", {
+              result: encounter.success ? tCommon("kill") : tCommon("wipe"),
+              batchLabel: logFile.batch.label,
+              duration: Math.round(encounter.durationMs / 1000),
+              playerCount: encounter.playerResults.length,
+            })}
           </p>
         </div>
         {logFile.externalReportUrl ? (
@@ -98,7 +120,7 @@ export default async function LogAnalysisPage(
             rel="noopener noreferrer"
             className="text-accent text-sm hover:underline"
           >
-            Externen Report öffnen →
+            {t("openExternalReport")}
           </a>
         ) : null}
       </div>
@@ -121,6 +143,7 @@ export default async function LogAnalysisPage(
             return deathTime === undefined || deathTime > phase.startMs;
           });
           const color = phaseColor(encounter.bossId, phase.order, phase.name);
+          const status = getPhaseStatus(phase);
           return (
             <Card
               key={phase.id}
@@ -135,25 +158,18 @@ export default async function LogAnalysisPage(
                     {phase.name}
                   </span>
                   <span
-                    className={`rounded-sm px-2 py-0.5 text-[11px] font-semibold ${
-                      phase.reached
-                        ? phase.success
-                          ? "bg-warning/15 text-warning"
-                          : "bg-line-soft text-muted-strong"
-                        : "bg-line-soft/60 text-muted"
-                    }`}
+                    className={`rounded-sm px-2 py-0.5 text-[11px] font-semibold ${PHASE_STATUS_CLASS[status]}`}
                   >
-                    {phase.reached
-                      ? phase.success
-                        ? "Abgeschlossen"
-                        : "Erreicht"
-                      : "Nicht erreicht"}
+                    {t(status)}
                   </span>
                 </div>
                 <span className="text-muted text-xs">
                   {phase.reached
-                    ? `lebend zu Phasenbeginn: ${aliveAtStart.length}/${encounter.playerResults.length}`
-                    : "—"}
+                    ? t("aliveAtPhaseStart", {
+                        alive: aliveAtStart.length,
+                        total: encounter.playerResults.length,
+                      })
+                    : tCommon("dash")}
                 </span>
               </div>
 

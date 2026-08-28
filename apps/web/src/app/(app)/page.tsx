@@ -2,14 +2,20 @@ import { ProjectRole, prisma } from "@voidlog/db";
 import { Card } from "@radix-ui/themes";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 import { CreateProjectDialog } from "@/components/create-project-dialog";
 import { PhaseBadge } from "@/components/phase-badge";
 import { Sidebar } from "@/components/sidebar";
+import type { Locale } from "@/i18n/locale";
 import { isMainPhase } from "@/lib/main-phases";
 import { requireSession } from "@/lib/session";
+import { formatDate } from "@/lib/utils";
 
 export default async function DashboardPage() {
   const session = await requireSession();
+  const t = await getTranslations("dashboard");
+  const tCommon = await getTranslations("common");
+  const locale = (await getLocale()) as Locale;
 
   const projects = await prisma.project.findMany({
     where: { members: { some: { userId: session.user.id } } },
@@ -70,7 +76,8 @@ export default async function DashboardPage() {
 
   async function createProject(formData: FormData) {
     "use server";
-    const name = String(formData.get("name") ?? "").trim();
+    const rawName = formData.get("name");
+    const name = typeof rawName === "string" ? rawName.trim() : "";
     if (!name) return;
 
     const currentSession = await requireSession();
@@ -90,8 +97,8 @@ export default async function DashboardPage() {
       <div className="min-w-0 flex-1 overflow-y-auto px-10 py-8">
         <div className="mb-6 flex items-end justify-between">
           <div>
-            <h1 className="font-heading text-foreground-strong text-2xl font-bold">Projekte</h1>
-            <p className="text-muted mt-1 text-sm">Trainingsgruppen im Überblick</p>
+            <h1 className="font-heading text-foreground-strong text-2xl font-bold">{t("title")}</h1>
+            <p className="text-muted mt-1 text-sm">{t("subtitle")}</p>
           </div>
           <CreateProjectDialog action={createProject} />
         </div>
@@ -104,20 +111,20 @@ export default async function DashboardPage() {
                   {p.name}
                 </div>
                 <div className="text-muted mb-4 text-xs">
-                  Letzter Upload: {p.lastBatchAt ? p.lastBatchAt.toLocaleDateString("de-DE") : "—"}
+                  {t("lastUpload")}: {p.lastBatchAt ? formatDate(p.lastBatchAt, locale) : tCommon("dash")}
                 </div>
                 <div className="flex flex-col gap-3.5">
                   <div>
                     <div className="text-muted mb-1 text-[11px] font-medium uppercase tracking-wide">
-                      Erfolgsquote
+                      {t("successRate")}
                     </div>
                     <div className="font-heading text-warning text-xl font-bold">
-                      {p.successRate === null ? "—" : `${p.successRate}%`}
+                      {p.successRate === null ? tCommon("dash") : `${p.successRate}%`}
                     </div>
                   </div>
                   <div className="min-w-0">
                     <div className="text-muted mb-1 text-[11px] font-medium uppercase tracking-wide">
-                      Weiteste Phase
+                      {t("furthestPhase")}
                     </div>
                     {p.furthestPhase ? (
                       <PhaseBadge
@@ -126,7 +133,7 @@ export default async function DashboardPage() {
                         order={p.furthestPhase.order}
                       />
                     ) : (
-                      <span className="text-muted text-sm">—</span>
+                      <span className="text-muted text-sm">{tCommon("dash")}</span>
                     )}
                   </div>
                 </div>
@@ -134,7 +141,7 @@ export default async function DashboardPage() {
             </Link>
           ))}
           {summaries.length === 0 ? (
-            <p className="text-muted col-span-full">Noch keine Projekte — leg oben eins an.</p>
+            <p className="text-muted col-span-full">{t("empty")}</p>
           ) : null}
         </div>
       </div>

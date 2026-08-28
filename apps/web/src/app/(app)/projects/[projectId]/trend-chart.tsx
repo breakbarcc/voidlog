@@ -1,12 +1,15 @@
 "use client";
 
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import { useLocale, useTranslations } from "next-intl";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import type { Locale } from "@/i18n/locale";
+import { formatDate, formatNumber } from "@/lib/utils";
 
 export interface TrendPoint {
   id: string;
@@ -16,8 +19,8 @@ export interface TrendPoint {
   shockwaveHitRate: number | null;
 }
 
-function formatAxisDate(date: Date): string {
-  return date.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" });
+function formatAxisDate(date: Date, locale: Locale): string {
+  return formatDate(date, locale, { day: "2-digit", month: "2-digit" });
 }
 
 function SingleLineChart({
@@ -27,16 +30,17 @@ function SingleLineChart({
   color,
   label,
   formatValue,
-}: {
+}: Readonly<{
   points: TrendPoint[];
   dataKey: string;
   valueOf: (p: TrendPoint) => number;
   color: string;
   label: string;
   formatValue: (v: number) => string;
-}) {
+}>) {
+  const locale = useLocale() as Locale;
   const data = points.map((p) => ({
-    date: formatAxisDate(p.occurredAt),
+    date: formatAxisDate(p.occurredAt, locale),
     [dataKey]: valueOf(p),
   }));
 
@@ -77,40 +81,44 @@ function SingleLineChart({
   );
 }
 
-export function DpsTrendChart({ points }: { points: TrendPoint[] }) {
+export function DpsTrendChart({ points }: Readonly<{ points: TrendPoint[] }>) {
+  const t = useTranslations("trendChart");
+  const locale = useLocale() as Locale;
   return (
     <SingleLineChart
       points={points}
       dataKey="dps"
       valueOf={(p) => p.avgGroupDps}
       color="var(--primary)"
-      label="Ø Gruppen-DPS"
-      formatValue={(v) => Math.round(v).toLocaleString("de-DE")}
+      label={t("avgGroupDps")}
+      formatValue={(v) => formatNumber(Math.round(v), locale)}
     />
   );
 }
 
-export function GreenFailTrendChart({ points }: { points: TrendPoint[] }) {
+export function GreenFailTrendChart({ points }: Readonly<{ points: TrendPoint[] }>) {
+  const t = useTranslations("trendChart");
   return (
     <SingleLineChart
       points={points}
       dataKey="greenFail"
       valueOf={(p) => p.greenFailRate ?? 0}
       color="var(--danger)"
-      label="Greens-Fail-Rate"
+      label={t("greenFailRate")}
       formatValue={(v) => `${Math.round(v)}%`}
     />
   );
 }
 
-export function ShockwaveTrendChart({ points }: { points: TrendPoint[] }) {
+export function ShockwaveTrendChart({ points }: Readonly<{ points: TrendPoint[] }>) {
+  const t = useTranslations("trendChart");
   return (
     <SingleLineChart
       points={points}
       dataKey="shockwave"
       valueOf={(p) => p.shockwaveHitRate ?? 0}
       color="var(--warning)"
-      label="Schockwellen-Rate"
+      label={t("shockwaveRate")}
       formatValue={(v) => `${Math.round(v)}%`}
     />
   );

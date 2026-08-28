@@ -4,12 +4,15 @@ import { Pencil1Icon } from "@radix-ui/react-icons";
 import { Button, TextField } from "@radix-ui/themes";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 export function BatchLabelEditor({
   batchId,
   label,
 }: Readonly<{ batchId: string; label: string }>) {
   const router = useRouter();
+  const t = useTranslations("batchLabelEditor");
+  const tCommon = useTranslations("common");
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(label);
   const [pending, setPending] = useState(false);
@@ -59,7 +62,7 @@ export function BatchLabelEditor({
         <button
           type="button"
           onClick={startEditing}
-          title="Batch umbenennen"
+          title={t("rename")}
           className="text-muted hover:text-foreground"
         >
           <Pencil1Icon className="h-4 w-4" />
@@ -83,10 +86,10 @@ export function BatchLabelEditor({
           }}
         />
         <Button type="button" onClick={save} disabled={pending}>
-          {pending ? "Speichert…" : "Speichern"}
+          {pending ? tCommon("saving") : tCommon("save")}
         </Button>
         <Button type="button" variant="soft" color="gray" onClick={cancel} disabled={pending}>
-          Abbrechen
+          {tCommon("cancel")}
         </Button>
       </div>
       {error ? <p className="text-danger text-sm">{error}</p> : null}

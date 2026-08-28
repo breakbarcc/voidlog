@@ -3,9 +3,11 @@
 import { Button } from "@radix-ui/themes";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
-export function RetryLogButton({ logFileId }: { logFileId: string }) {
+export function RetryLogButton({ logFileId }: Readonly<{ logFileId: string }>) {
   const router = useRouter();
+  const tCommon = useTranslations("common");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +30,7 @@ export function RetryLogButton({ logFileId }: { logFileId: string }) {
   return (
     <div className="flex flex-col items-end gap-1">
       <Button type="button" size="1" variant="soft" onClick={handleRetry} disabled={pending}>
-        {pending ? "Wird neu eingereiht…" : "Reload"}
+        {pending ? tCommon("retrying") : tCommon("retry")}
       </Button>
       {error ? <p className="text-danger text-xs">{error}</p> : null}
     </div>

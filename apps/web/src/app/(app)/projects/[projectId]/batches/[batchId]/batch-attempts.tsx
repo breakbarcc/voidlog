@@ -9,6 +9,7 @@ import {
 import { Card, HoverCard, Select, Tabs, Table } from "@radix-ui/themes";
 import Link from "next/link";
 import { useMemo, useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { PhaseBadge, phaseColor, readableHeadingColor } from "@/components/phase-badge";
 import { SortableColumnHeader } from "@/components/sortable-column-header";
 import { isVisibleCastMarker } from "@/lib/mechanics";
@@ -126,8 +127,8 @@ function formatDuration(ms: number): string {
   return `${Math.floor(totalSeconds / 60)}:${String(totalSeconds % 60).padStart(2, "0")}`;
 }
 
-// One label/value pair in an attempt's stat overview row (Ergebnis, Modus,
-// Dauer, ...) — plain text, unlike the icon-only mechanic cards below it.
+// One label/value pair in an attempt's stat overview row (result, mode,
+// duration, ...) — plain text, unlike the icon-only mechanic cards below it.
 function StatItem({
   label,
   value,
@@ -245,6 +246,7 @@ function MechanicHoverCard({
   icon,
   children,
 }: Readonly<{ cluster: MarkerCluster; icon: ReactNode; children: ReactNode }>) {
+  const t = useTranslations("batchAttempts.timeline");
   return (
     <HoverCard.Root openDelay={150} closeDelay={80}>
       <HoverCard.Trigger>{children}</HoverCard.Trigger>
@@ -257,7 +259,7 @@ function MechanicHoverCard({
           {cluster.players.length > 0 ? (
             <div className="border-line-soft mt-1.5 border-t pt-1.5">
               <div className="text-muted text-[10px] font-semibold uppercase tracking-wide">
-                Spieler ({cluster.players.length})
+                {t("players", { count: cluster.players.length })}
               </div>
               <div className="text-foreground mt-0.5 text-[11px]">{cluster.players.join(", ")}</div>
             </div>
@@ -267,7 +269,7 @@ function MechanicHoverCard({
               <span className="text-foreground text-[11px] font-semibold">
                 {(cluster.msSincePhaseEnd / 1000).toFixed(1)}s
               </span>
-              <span className="text-muted-strong text-[10px]">seit Phasenende</span>
+              <span className="text-muted-strong text-[10px]">{t("sincePhaseEnd")}</span>
             </div>
           ) : null}
           {cluster.msSinceInvisCast !== undefined ? (
@@ -275,7 +277,7 @@ function MechanicHoverCard({
               <span className="text-foreground text-[11px] font-semibold">
                 {(cluster.msSinceInvisCast / 1000).toFixed(1)}s
               </span>
-              <span className="text-muted-strong text-[10px]">seit Ende Mass Invis Cast</span>
+              <span className="text-muted-strong text-[10px]">{t("sinceInvisCastEnd")}</span>
             </div>
           ) : null}
         </Card>
@@ -433,8 +435,8 @@ function AttackGlyph({ type, flipped }: Readonly<{ type: AttackType; flipped?: b
     // hand-drawn glyph — the other markers approximate their attack visually,
     // but a stealth cast doesn't have one, so the game's own icon reads
     // clearer than an abstract shape would.
-    // eslint-disable-next-line @next/next/no-img-element -- fixed-size static icon, next/image is unnecessary overhead here
     return (
+      // eslint-disable-next-line @next/next/no-img-element -- fixed-size static icon, next/image is unnecessary overhead here
       <img
         src="/icons/mass-invisibility.png"
         alt=""
@@ -451,19 +453,11 @@ function AttackGlyph({ type, flipped }: Readonly<{ type: AttackType; flipped?: b
   );
 }
 
-const ATTACK_LABEL: Record<AttackType, string> = {
-  jaws: "Jaws of Destruction",
-  slam: "Lava Slam",
-  beam: "Branding Beam",
-  shockwave: "Mordremoth Shockwave",
-  scream: "Zhaitans Schrei",
-  green: "Greens (aufgelöst)",
-  spreadBait: "Spread Bait",
-  redBait: "Red Bait",
-  invis: "Mass Invisibility",
-};
+// AttackType's keys match messages/*.json's `attackLabels` namespace 1:1 —
+// components needing a label call `useTranslations("attackLabels")(type)`
+// directly rather than going through a lookup table here.
 
-// Testweise: fires much more often than the named boss casts (per-player,
+// Fires much more often than the named boss casts (per-player,
 // repeats constantly) — kept in a separate lane above so it doesn't bury
 // Jaws/Slam/Beam/Shockwave/Scream under a wall of overlapping circles.
 const HIGH_FREQUENCY_ATTACK_TYPES = new Set<AttackType>(["green", "spreadBait", "redBait"]);
@@ -511,7 +505,7 @@ function collectPhaseMechanics(
   failLabelByMechanic: Map<string, string>,
 ) {
   for (const m of phase.mechanics) {
-    if (m.mechanicName in GLOBAL_MECHANIC_LABELS) continue;
+    if (GLOBAL_MECHANIC_NAMES.has(m.mechanicName)) continue;
     const type = attackType(m.mechanicName);
     if (type) {
       if (!group.attacks.has(m.mechanicName)) group.attacks.set(m.mechanicName, type);
@@ -610,11 +604,9 @@ function buildPhaseFilterData(attempts: AttemptRow[]) {
 
 // Mechanics that can happen in any phase (not tied to boss mechanics) — kept
 // out of the per-phase groups so they don't get listed once per phase, and
-// shown once under "Weitere" instead.
-const GLOBAL_MECHANIC_LABELS: Record<string, string> = {
-  Downed: "Downstate",
-  DC: "Disconnect",
-};
+// shown once under "Other" instead. Keys only — labels are locale-dependent
+// (see messages/*.json's `globalMechanicLabels`), looked up where rendered.
+const GLOBAL_MECHANIC_NAMES = new Set(["Downed", "DC"]);
 
 // One toggle chip for a single mechanic — clicking it hides that mechanic's
 // markers from every attempt row below (keyed by the raw mechanicName, so it
@@ -632,11 +624,12 @@ function MechanicToggle({
   isHidden: boolean;
   onToggle: (mechanicName: string) => void;
 }>) {
+  const t = useTranslations("batchAttempts.timeline");
   return (
     <button
       type="button"
       onClick={() => onToggle(mechanicName)}
-      title={isHidden ? "Marker einblenden" : "Marker ausblenden"}
+      title={isHidden ? t("showMarker") : t("hideMarker")}
       className={`flex items-center gap-1.5 text-xs ${
         isHidden ? "text-muted opacity-45" : "text-muted-strong"
       }`}
@@ -665,8 +658,8 @@ function failMechanicIcon(
     return <img src="/icons/downed.png" alt="" className={size === "md" ? "h-5 w-3" : "h-4 w-2.5"} />;
   }
   if (mechanicName === "Debilitated") {
-    // eslint-disable-next-line @next/next/no-img-element -- fixed-size static icon, next/image is unnecessary overhead here
     return (
+      // eslint-disable-next-line @next/next/no-img-element -- fixed-size static icon, next/image is unnecessary overhead here
       <img
         src="/icons/debilitated.png"
         alt=""
@@ -735,11 +728,13 @@ function MechanicFilterAccordion({
   selectedPlayer: string | null;
   onSelectPlayer: (player: string | null) => void;
 }>) {
+  const t = useTranslations("batchAttempts.timeline");
+  const tAttack = useTranslations("attackLabels");
   return (
     <details className="border-line-soft group mb-3.5 border-b pb-3.5">
       <summary className="text-muted-strong flex cursor-pointer select-none list-none items-center gap-1.5 text-xs font-semibold">
         <ChevronRightIcon className="h-3.5 w-3.5 transition-transform group-open:rotate-90" />
-        Mechanik-Filter
+        {t("mechanicFilter")}
       </summary>
       <div className="mt-3 hidden flex-col gap-3 group-open:flex">
         {/* Restricts the "Mechaniken"/fail markers below to one player's own
@@ -747,7 +742,7 @@ function MechanicFilterAccordion({
             attributable mistakes) — separate axis from the mechanic-type
             toggles below, the two combine rather than replace each other. */}
         <div className="flex items-center gap-2.5">
-          <span className="text-muted-strong text-xs font-semibold">Spieler:</span>
+          <span className="text-muted-strong text-xs font-semibold">{t("player")}</span>
           <Select.Root
             value={selectedPlayer ?? ALL_PLAYERS_VALUE}
             onValueChange={(value) =>
@@ -756,7 +751,7 @@ function MechanicFilterAccordion({
           >
             <Select.Trigger variant="surface" className="min-w-[160px]" />
             <Select.Content>
-              <Select.Item value={ALL_PLAYERS_VALUE}>Alle Spieler</Select.Item>
+              <Select.Item value={ALL_PLAYERS_VALUE}>{t("allPlayers")}</Select.Item>
               {playerNames.map((name) => (
                 <Select.Item key={name} value={name}>
                   {name}
@@ -770,11 +765,11 @@ function MechanicFilterAccordion({
             <Table.Row>
               <Table.ColumnHeaderCell>Phase</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell className="border-line-soft border-l">
-                Boss-Angriffe
+                {t("bossAttacks")}
               </Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell className="border-line-soft border-l">
                 <div className="flex items-center justify-between gap-3">
-                  <span>Mechaniken</span>
+                  <span>{t("mechanics")}</span>
                   {/* These only ever touch the Mechaniken column's toggles
                       (see selectAllMechanics/deselectAllMechanics) — living
                       in this header cell instead of a separate row makes
@@ -788,7 +783,7 @@ function MechanicFilterAccordion({
                       }}
                       className="text-accent text-[11px] font-semibold hover:underline"
                     >
-                      Alle einblenden
+                      {t("showAll")}
                     </button>
                     <button
                       type="button"
@@ -798,7 +793,7 @@ function MechanicFilterAccordion({
                       }}
                       className="text-accent text-[11px] font-semibold hover:underline"
                     >
-                      Alle ausblenden
+                      {t("hideAll")}
                     </button>
                   </span>
                 </div>
@@ -823,7 +818,7 @@ function MechanicFilterAccordion({
                     <MechanicToggle
                       key={mechanicName}
                       mechanicName={mechanicName}
-                      label={ATTACK_LABEL[type]}
+                      label={tAttack(type)}
                       icon={<AttackGlyph type={type} />}
                       isHidden={hidden.has(mechanicName)}
                       onToggle={onToggle}
@@ -848,7 +843,7 @@ function MechanicFilterAccordion({
               <Table.Row>
                 <Table.Cell>
                   <span className="text-muted-strong text-xs font-semibold uppercase tracking-wide">
-                    Mehrere Phasen
+                    {t("multiplePhases")}
                   </span>
                 </Table.Cell>
                 <MechanicCell empty={multiPhaseAttacks.length === 0}>
@@ -856,7 +851,7 @@ function MechanicFilterAccordion({
                     <MechanicToggle
                       key={mechanicName}
                       mechanicName={mechanicName}
-                      label={ATTACK_LABEL[type]}
+                      label={tAttack(type)}
                       icon={<AttackGlyph type={type} />}
                       isHidden={hidden.has(mechanicName)}
                       onToggle={onToggle}
@@ -880,7 +875,7 @@ function MechanicFilterAccordion({
             <Table.Row>
               <Table.Cell>
                 <span className="text-muted-strong text-xs font-semibold uppercase tracking-wide">
-                  Weitere
+                  {t("other")}
                 </span>
               </Table.Cell>
               <MechanicCell empty>{null}</MechanicCell>
@@ -888,7 +883,7 @@ function MechanicFilterAccordion({
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
                   <span className="text-muted-strong flex items-center gap-1.5 text-xs">
                     <Cross2Icon className="text-danger h-3.5 w-3.5" />
-                    Tod
+                    {t("death")}
                   </span>
                   {otherEntries.map(([mechanicName, label]) => (
                     <MechanicToggle
@@ -925,6 +920,10 @@ export function BatchAttempts({
   batchPhaseStats: BatchPhaseStat[];
   roster: BatchRosterRow[];
 }>) {
+  const t = useTranslations("batchAttempts");
+  const tTimeline = useTranslations("batchAttempts.timeline");
+  const tGlobalMechanics = useTranslations("globalMechanicLabels");
+  const tCommon = useTranslations("common");
   const [expanded, setExpanded] = useState<number | null>(null);
   const [hiddenMechanics, setHiddenMechanics] = useState<Set<string>>(new Set());
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
@@ -1031,13 +1030,14 @@ export function BatchAttempts({
     for (const a of attempts) {
       for (const phase of a.phases) {
         for (const m of phase.mechanics) {
-          const label = GLOBAL_MECHANIC_LABELS[m.mechanicName];
-          if (label && !map.has(m.mechanicName)) map.set(m.mechanicName, label);
+          if (GLOBAL_MECHANIC_NAMES.has(m.mechanicName) && !map.has(m.mechanicName)) {
+            map.set(m.mechanicName, tGlobalMechanics(m.mechanicName));
+          }
         }
       }
     }
     return [...map.entries()].sort((a, b) => a[1].localeCompare(b[1]));
-  }, [attempts]);
+  }, [attempts, tGlobalMechanics]);
 
   const { phaseFilterGroups, multiPhaseAttacks, multiPhaseFails } = useMemo(
     () => buildPhaseFilterData(attempts),
@@ -1047,20 +1047,20 @@ export function BatchAttempts({
   return (
     <Tabs.Root defaultValue="table">
       <Tabs.List>
-        <Tabs.Trigger value="table">Übersicht</Tabs.Trigger>
-        <Tabs.Trigger value="timeline">Details</Tabs.Trigger>
-        <Tabs.Trigger value="roster">Roster</Tabs.Trigger>
+        <Tabs.Trigger value="table">{t("tabs.table")}</Tabs.Trigger>
+        <Tabs.Trigger value="timeline">{t("tabs.timeline")}</Tabs.Trigger>
+        <Tabs.Trigger value="roster">{t("tabs.roster")}</Tabs.Trigger>
       </Tabs.List>
 
       <Tabs.Content value="table" className="mt-4">
         <Table.Root variant="surface" className="border-line bg-surface border">
           <Table.Header>
             <Table.Row>
-              <Table.ColumnHeaderCell>#</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell>Ergebnis</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell>Modus</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell>Weiteste Phase</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell>Dauer</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>{t("table.number")}</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>{t("table.result")}</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>{t("table.mode")}</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>{t("table.furthestPhase")}</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>{t("table.duration")}</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
             </Table.Row>
@@ -1072,7 +1072,7 @@ export function BatchAttempts({
                 <Table.Cell
                   className={a.success ? "text-success font-semibold" : "text-danger font-semibold"}
                 >
-                  {a.success ? "Kill" : "Wipe"}
+                  {a.success ? tCommon("kill") : tCommon("wipe")}
                 </Table.Cell>
                 <Table.Cell>
                   <ModeBadge isCM={a.isCM} />
@@ -1085,7 +1085,7 @@ export function BatchAttempts({
                       order={a.furthestPhase.order}
                     />
                   ) : (
-                    "—"
+                    tCommon("dash")
                   )}
                 </Table.Cell>
                 <Table.Cell className="text-muted-strong">
@@ -1096,13 +1096,13 @@ export function BatchAttempts({
                     href={`/projects/${projectId}/batches/${batchId}/logs/${a.logFileId}`}
                     className="text-accent text-sm hover:underline"
                   >
-                    Log ansehen →
+                    {t("table.viewLog")}
                   </Link>
                 </Table.Cell>
                 <Table.Cell className="text-right">
                   <RemoveLogButton
                     logFileId={a.logFileId}
-                    confirmMessage={`Versuch #${a.n} (Log) endgültig aus diesem Batch löschen?`}
+                    confirmMessage={t("table.deleteConfirm", { n: a.n })}
                   />
                 </Table.Cell>
               </Table.Row>
@@ -1110,7 +1110,7 @@ export function BatchAttempts({
             {attempts.length === 0 ? (
               <Table.Row>
                 <Table.Cell colSpan={7} className="text-muted">
-                  Noch keine ausgewerteten Versuche.
+                  {t("table.empty")}
                 </Table.Cell>
               </Table.Row>
             ) : null}
@@ -1120,7 +1120,7 @@ export function BatchAttempts({
 
       <Tabs.Content value="timeline" className="mt-4">
         <p className="text-muted mb-3.5 text-xs">
-          Aggregiert über alle {attempts.length} Versuche des Batches
+          {tTimeline("aggregatedOver", { count: attempts.length })}
         </p>
         <div className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {batchPhaseStats.map((bp) => {
@@ -1140,7 +1140,7 @@ export function BatchAttempts({
                   {bp.name}
                 </div>
                 <div className="text-muted-strong mb-1 text-[10px]">
-                  {bp.reached} / {bp.total} erreicht
+                  {tTimeline("reached", { reached: bp.reached, total: bp.total })}
                 </div>
                 <div className="bg-line-soft mb-1.5 h-1 overflow-hidden rounded-full">
                   <div className="h-full" style={{ width: `${reachedPct}%`, background: color }} />
@@ -1149,7 +1149,7 @@ export function BatchAttempts({
                   {bp.mechanics.map((m) => (
                     <span
                       key={m.mechanicName}
-                      title={`${m.displayName}: ${m.count}x verfehlt`}
+                      title={tTimeline("missedXTimes", { name: m.displayName, count: m.count })}
                       className="bg-line-soft/40 flex items-center gap-1 rounded-sm px-1.5 py-1"
                     >
                       {failMechanicIcon(m.mechanicName)}
@@ -1159,7 +1159,7 @@ export function BatchAttempts({
                     </span>
                   ))}
                   {bp.mechanics.length === 0 ? (
-                    <span className="text-muted text-[11px]">Keine Fehler.</span>
+                    <span className="text-muted text-[11px]">{tTimeline("noFails")}</span>
                   ) : null}
                 </div>
               </Card>
@@ -1167,7 +1167,9 @@ export function BatchAttempts({
           })}
         </div>
 
-        <div className="text-muted-strong mb-2.5 text-sm font-semibold">Versuchsverlauf</div>
+        <div className="text-muted-strong mb-2.5 text-sm font-semibold">
+          {tTimeline("attemptHistory")}
+        </div>
         <MechanicFilterAccordion
           bossId={bossId}
           phaseGroups={phaseFilterGroups}
@@ -1229,7 +1231,7 @@ export function BatchAttempts({
                         : "text-danger text-xs font-semibold"
                     }
                   >
-                    {a.success ? "Kill" : "Wipe"}
+                    {a.success ? tCommon("kill") : tCommon("wipe")}
                   </span>
                   <span
                     className="flex flex-col gap-0.5 justify-self-start"
@@ -1306,7 +1308,11 @@ export function BatchAttempts({
                       {a.deaths.map((d) => (
                         <span
                           key={`${d.timeMs}-${d.player ?? ""}`}
-                          title={d.player ? `Tod — ${d.player}` : "Tod"}
+                          title={
+                            d.player
+                              ? tTimeline("deathByPlayer", { player: d.player })
+                              : tTimeline("death")
+                          }
                           className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
                           style={{ left: `${(d.timeMs / a.durationMs) * 100}%` }}
                         >
@@ -1340,15 +1346,15 @@ export function BatchAttempts({
                         now spelled out here since the phase cards below no
                         longer carry any text of their own. */}
                     <div className="border-line-soft mb-3.5 flex flex-wrap gap-x-6 gap-y-2 border-b pb-3.5">
-                      <StatItem label="Log" value={a.fileName} />
+                      <StatItem label={tTimeline("stats.log")} value={a.fileName} />
                       <StatItem
-                        label="Ergebnis"
-                        value={a.success ? "Kill" : "Wipe"}
+                        label={tTimeline("stats.result")}
+                        value={a.success ? tCommon("kill") : tCommon("wipe")}
                         valueClassName={a.success ? "text-success" : "text-danger"}
                       />
-                      <StatItem label="Modus" value={a.isCM ? "CM" : "NM"} />
+                      <StatItem label={tTimeline("stats.mode")} value={a.isCM ? "CM" : "NM"} />
                       <StatItem
-                        label="Weiteste Phase"
+                        label={tTimeline("stats.furthestPhase")}
                         value={
                           a.furthestPhase ? (
                             <PhaseBadge
@@ -1357,13 +1363,13 @@ export function BatchAttempts({
                               order={a.furthestPhase.order}
                             />
                           ) : (
-                            "—"
+                            tCommon("dash")
                           )
                         }
                       />
-                      <StatItem label="Dauer" value={formatDuration(a.durationMs)} />
+                      <StatItem label={tTimeline("stats.duration")} value={formatDuration(a.durationMs)} />
                       <StatItem
-                        label="Reveals"
+                        label={tTimeline("stats.reveals")}
                         value={String(
                           a.mechanics.filter(
                             (m) =>
@@ -1373,7 +1379,7 @@ export function BatchAttempts({
                         )}
                       />
                       <StatItem
-                        label="Downstates"
+                        label={tTimeline("stats.downstates")}
                         value={String(
                           a.mechanics.filter(
                             (m) =>
@@ -1441,7 +1447,7 @@ export function BatchAttempts({
                       href={`/projects/${projectId}/batches/${batchId}/logs/${a.logFileId}`}
                       className="text-accent mt-3 inline-block text-xs hover:underline"
                     >
-                      Vollständigen Log ansehen →
+                      {tTimeline("viewFullLog")}
                     </Link>
                   </div>
                 ) : null}
@@ -1449,7 +1455,7 @@ export function BatchAttempts({
             );
           })}
           {attempts.length === 0 ? (
-            <div className="text-muted px-4 py-3 text-sm">Noch keine ausgewerteten Versuche.</div>
+            <div className="text-muted px-4 py-3 text-sm">{tTimeline("empty")}</div>
           ) : null}
         </div>
       </Tabs.Content>
@@ -1458,16 +1464,16 @@ export function BatchAttempts({
         <Table.Root variant="surface" className="border-line bg-surface border">
           <Table.Header>
             <Table.Row>
-              {rosterHeader("account", "Spieler")}
-              {rosterHeader("role", "Rolle")}
-              {rosterHeader("encounters", "Teilnahmen")}
-              {rosterHeader("kills", "Kills")}
-              {rosterHeader("avgDps", "Ø DPS")}
-              {rosterHeader("avgDowns", "Ø Downs")}
-              {rosterHeader("failedMechanics", "Gefailte Mechaniken")}
-              {rosterHeader("shockwaveHits", "Schockwellen getroffen")}
-              {rosterHeader("debilitatedHits", "Geschwächt erhalten")}
-              {rosterHeader("revealCount", "Zu früh aufgedeckt")}
+              {rosterHeader("account", t("roster.player"))}
+              {rosterHeader("role", t("roster.role"))}
+              {rosterHeader("encounters", t("roster.participations"))}
+              {rosterHeader("kills", t("roster.kills"))}
+              {rosterHeader("avgDps", t("roster.avgDps"))}
+              {rosterHeader("avgDowns", t("roster.avgDowns"))}
+              {rosterHeader("failedMechanics", t("roster.failedMechanics"))}
+              {rosterHeader("shockwaveHits", t("roster.shockwaves"))}
+              {rosterHeader("debilitatedHits", t("roster.debilitated"))}
+              {rosterHeader("revealCount", t("roster.revealed"))}
             </Table.Row>
           </Table.Header>
           <Table.Body>
@@ -1504,7 +1510,7 @@ export function BatchAttempts({
             {roster.length === 0 ? (
               <Table.Row>
                 <Table.Cell colSpan={10} className="text-muted">
-                  Noch keine ausgewerteten Logs.
+                  {t("roster.empty")}
                 </Table.Cell>
               </Table.Row>
             ) : null}

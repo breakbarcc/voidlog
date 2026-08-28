@@ -2,7 +2,8 @@
 
 import { Button, Table, TextField } from "@radix-ui/themes";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useTranslations } from "next-intl";
 
 interface CreateBatchResponse {
   batchId: string;
@@ -35,7 +36,8 @@ function isLogFile(file: File): boolean {
   return /\.(evtc|zevtc)$/i.test(file.name);
 }
 
-export function BatchUploadForm({ projectId }: { projectId: string }) {
+export function BatchUploadForm({ projectId }: Readonly<{ projectId: string }>) {
+  const t = useTranslations("batchUploadForm");
   const [label, setLabel] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [dragOver, setDragOver] = useState(false);
@@ -55,7 +57,7 @@ export function BatchUploadForm({ projectId }: { projectId: string }) {
     setFiles(Array.from(list).filter(isLogFile));
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (files.length === 0) return;
     setError(null);
@@ -124,12 +126,14 @@ export function BatchUploadForm({ projectId }: { projectId: string }) {
         <TextField.Root
           value={label}
           onChange={(e) => setLabel(e.target.value)}
-          placeholder="Batch-Bezeichnung (z. B. Raid-Abend 2026-08-06)"
+          placeholder={t("labelPlaceholder")}
           disabled={phase !== "idle"}
         />
 
-        <div
+        <button
+          type="button"
           onClick={() => phase === "idle" && fileInputRef.current?.click()}
+          disabled={phase !== "idle"}
           onDragOver={(e) => {
             e.preventDefault();
             if (phase === "idle") setDragOver(true);
@@ -140,29 +144,25 @@ export function BatchUploadForm({ projectId }: { projectId: string }) {
             setDragOver(false);
             if (phase === "idle") addFiles(e.dataTransfer.files);
           }}
-          className={`rounded-lg border-2 border-dashed px-8 py-10 text-center ${
+          className={`w-full rounded-lg border-2 border-dashed px-8 py-10 text-center ${
             phase === "idle" ? "cursor-pointer" : "cursor-not-allowed opacity-60"
           } ${dragOver ? "border-primary bg-primary/5" : "border-line-soft"}`}
         >
           <span className="bg-primary mx-auto mb-3.5 block h-10 w-10 opacity-85 [clip-path:polygon(50%_0%,100%_25%,100%_75%,50%_100%,0%_75%,0%_25%)]" />
           <div className="text-foreground mb-1.5 text-sm font-semibold">
-            {files.length > 0
-              ? `${files.length} Datei(en) ausgewählt`
-              : ".evtc / .zevtc Dateien hier ablegen"}
+            {files.length > 0 ? t("filesSelected", { count: files.length }) : t("dropFiles")}
           </div>
-          <div className="text-muted text-xs">
-            bis zu 30 Dateien gleichzeitig · oder klicken zum Auswählen
-          </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept=".evtc,.zevtc"
-            disabled={phase !== "idle"}
-            onChange={(e) => addFiles(e.target.files)}
-            className="hidden"
-          />
-        </div>
+          <div className="text-muted text-xs">{t("dropHint")}</div>
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept=".evtc,.zevtc"
+          disabled={phase !== "idle"}
+          onChange={(e) => addFiles(e.target.files)}
+          className="hidden"
+        />
 
         <Button
           type="submit"
@@ -170,24 +170,22 @@ export function BatchUploadForm({ projectId }: { projectId: string }) {
           disabled={files.length === 0 || phase !== "idle"}
           className="self-start"
         >
-          {phase === "idle" ? `${files.length || 0} Datei(en) hochladen` : "Wird verarbeitet…"}
+          {phase === "idle" ? t("uploadButton", { count: files.length || 0 }) : t("processing")}
         </Button>
       </form>
 
       {error ? <p className="text-danger mt-4">{error}</p> : null}
 
-      {phase === "uploading" ? (
-        <p className="text-muted mt-4">Wird zum Storage hochgeladen…</p>
-      ) : null}
+      {phase === "uploading" ? <p className="text-muted mt-4">{t("uploading")}</p> : null}
 
       {phase === "processing" || phase === "complete" ? (
         <div className="mt-6">
-          <h2 className="text-muted-strong text-sm font-semibold">Fortschritt</h2>
+          <h2 className="text-muted-strong text-sm font-semibold">{t("progressTitle")}</h2>
           {snapshot ? (
             <>
               <p className="text-muted mt-1 text-sm">
-                {snapshot.done + snapshot.failed}/{snapshot.total} fertig
-                {snapshot.failed > 0 ? ` (${snapshot.failed} fehlgeschlagen)` : ""}
+                {t("progressStatus", { done: snapshot.done + snapshot.failed, total: snapshot.total })}
+                {snapshot.failed > 0 ? t("progressFailed", { count: snapshot.failed }) : ""}
               </p>
               <Table.Root variant="surface" className="border-line bg-surface mt-2 border">
                 <Table.Body>
@@ -206,7 +204,7 @@ export function BatchUploadForm({ projectId }: { projectId: string }) {
               </Table.Root>
             </>
           ) : (
-            <p className="text-muted mt-1 text-sm">Warte auf den Worker…</p>
+            <p className="text-muted mt-1 text-sm">{t("waitingForWorker")}</p>
           )}
         </div>
       ) : null}
@@ -216,7 +214,7 @@ export function BatchUploadForm({ projectId }: { projectId: string }) {
           href={`/projects/${projectId}/batches/${batchId}`}
           className="bg-primary text-primary-foreground mt-6 inline-block rounded-md px-4 py-2 font-semibold"
         >
-          Batch ansehen
+          {t("viewBatch")}
         </Link>
       ) : null}
     </div>

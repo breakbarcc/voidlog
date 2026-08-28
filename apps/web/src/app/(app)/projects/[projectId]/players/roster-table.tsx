@@ -2,7 +2,10 @@
 
 import { Table } from "@radix-ui/themes";
 import { useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { SortableColumnHeader } from "@/components/sortable-column-header";
+import type { Locale } from "@/i18n/locale";
+import { formatDate } from "@/lib/utils";
 
 export interface RosterRow {
   account: string;
@@ -76,6 +79,8 @@ function compareRows(a: RosterRow, b: RosterRow, key: SortKey): number {
 }
 
 export function RosterTable({ roster }: Readonly<{ roster: RosterRow[] }>) {
+  const t = useTranslations("roster");
+  const locale = useLocale() as Locale;
   const [sortKey, setSortKey] = useState<SortKey>("encounters");
   const [direction, setDirection] = useState<"asc" | "desc">("desc");
 
@@ -109,16 +114,16 @@ export function RosterTable({ roster }: Readonly<{ roster: RosterRow[] }>) {
     <Table.Root variant="surface" className="border-line bg-surface border">
       <Table.Header>
         <Table.Row>
-          {header("account", "Spieler")}
-          {header("role", "Rolle")}
-          {header("encounters", "Teilnahmen")}
-          {header("kills", "Kills")}
-          {header("avgDps", "Ø DPS")}
-          {header("avgDowns", "Ø Downs")}
-          {header("shockwaveHits", "Schockwellen getroffen")}
-          {header("debilitatedHits", "Geschwächt erhalten")}
-          {header("revealCount", "Zu früh aufgedeckt")}
-          {header("lastActive", "Zuletzt aktiv")}
+          {header("account", t("columns.player"))}
+          {header("role", t("columns.role"))}
+          {header("encounters", t("columns.participations"))}
+          {header("kills", t("columns.kills"))}
+          {header("avgDps", t("columns.avgDps"))}
+          {header("avgDowns", t("columns.avgDowns"))}
+          {header("shockwaveHits", t("columns.shockwaves"))}
+          {header("debilitatedHits", t("columns.debilitated"))}
+          {header("revealCount", t("columns.revealed"))}
+          {header("lastActive", t("columns.lastActive"))}
         </Table.Row>
       </Table.Header>
       <Table.Body>
@@ -157,14 +162,14 @@ export function RosterTable({ roster }: Readonly<{ roster: RosterRow[] }>) {
               </span>
             </Table.Cell>
             <Table.Cell className="text-muted text-sm">
-              {entry.lastActive.toLocaleDateString("de-DE")}
+              {formatDate(entry.lastActive, locale)}
             </Table.Cell>
           </Table.Row>
         ))}
         {sorted.length === 0 ? (
           <Table.Row>
             <Table.Cell colSpan={10} className="text-muted">
-              Noch keine ausgewerteten Logs.
+              {t("empty")}
             </Table.Cell>
           </Table.Row>
         ) : null}

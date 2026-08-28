@@ -13,5 +13,206 @@
     "history": "Verlauf & Trend",
     "roster": "Roster",
     "uploadLogs": "+ Logs hochladen"
+  },
+  "common": {
+    "dash": "—",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "saving": "Speichert…",
+    "delete": "Löschen",
+    "deleting": "Wird gelöscht…",
+    "remove": "Entfernen",
+    "removing": "Wird entfernt…",
+    "retry": "Reload",
+    "retrying": "Wird neu eingereiht…",
+    "kill": "Kill",
+    "wipe": "Wipe",
+    "noneYet": "Noch keine."
+  },
+  "dashboard": {
+    "title": "Projekte",
+    "subtitle": "Trainingsgruppen im Überblick",
+    "newProject": "+ Neues Projekt",
+    "lastUpload": "Letzter Upload",
+    "successRate": "Erfolgsquote",
+    "furthestPhase": "Weiteste Phase",
+    "empty": "Noch keine Projekte — leg oben eins an."
+  },
+  "createProjectDialog": {
+    "trigger": "+ Neues Projekt",
+    "title": "Neues Projekt",
+    "namePlaceholder": "Projektname",
+    "cancel": "Abbrechen",
+    "create": "Erstellen"
+  },
+  "project": {
+    "raidNightsTracked": "{count} Raid-Abende getrackt",
+    "uploadBatch": "+ Batch hochladen",
+    "deletePrompt": "Projekt \"{name}\" löschen? Das entfernt dauerhaft alle Batches, Logs und Ergebnisse.",
+    "avgGroupDps": "Ø Gruppen-DPS · letzte {count} Abende",
+    "greenFailRate": "Greens-Fail-Rate · letzte {count} Abende",
+    "shockwaveRate": "Schockwellen-Rate · letzte {count} Abende",
+    "raidNights": "Raid-Abende",
+    "table": {
+      "raidNight": "Raid-Abend",
+      "attempts": "Versuche",
+      "kills": "Kills",
+      "greensMissed": "Greens verfehlt",
+      "shockwavesHit": "Schockwellen getroffen",
+      "furthestPhase": "Weiteste Phase"
+    },
+    "empty": "Noch keine Batches.",
+    "delete": "Projekt löschen"
+  },
+  "deleteProject": {
+    "confirm": "Projekt \"{name}\" löschen? Das entfernt dauerhaft alle Batches, Logs und Ergebnisse.",
+    "button": "Projekt löschen"
+  },
+  "batchesNew": {
+    "breadcrumb": "Logs hochladen",
+    "title": "Logs hochladen",
+    "description": ".evtc/.zevtc-Dateien auswählen. Jede Datei geht direkt an den Storage (ADR-003), danach startet die Verarbeitung automatisch und der Fortschritt wird live unten angezeigt."
+  },
+  "batchUploadForm": {
+    "labelPlaceholder": "Batch-Bezeichnung (z. B. Raid-Abend 2026-08-06)",
+    "dropFiles": ".evtc / .zevtc Dateien hier ablegen",
+    "filesSelected": "{count} Datei(en) ausgewählt",
+    "dropHint": "bis zu 30 Dateien gleichzeitig · oder klicken zum Auswählen",
+    "uploadButton": "{count} Datei(en) hochladen",
+    "processing": "Wird verarbeitet…",
+    "uploading": "Wird zum Storage hochgeladen…",
+    "progressTitle": "Fortschritt",
+    "progressStatus": "{done}/{total} fertig",
+    "progressFailed": " ({count} fehlgeschlagen)",
+    "waitingForWorker": "Warte auf den Worker…",
+    "viewBatch": "Batch ansehen"
+  },
+  "roster": {
+    "breadcrumb": "Roster",
+    "title": "Roster",
+    "subtitle": "Alle Teilnehmer seit Projektstart",
+    "columns": {
+      "player": "Spieler",
+      "role": "Rolle",
+      "participations": "Teilnahmen",
+      "kills": "Kills",
+      "avgDps": "Ø DPS",
+      "avgDowns": "Ø Downs",
+      "shockwaves": "Schockwellen getroffen",
+      "debilitated": "Geschwächt erhalten",
+      "revealed": "Zu früh aufgedeckt",
+      "lastActive": "Zuletzt aktiv"
+    },
+    "empty": "Noch keine ausgewerteten Logs."
+  },
+  "batchLabelEditor": {
+    "rename": "Batch umbenennen"
+  },
+  "deleteBatch": {
+    "confirm": "Batch \"{label}\" löschen? Das entfernt dauerhaft dessen Logs und Ergebnisse.",
+    "button": "Batch löschen"
+  },
+  "removeLog": {
+    "defaultConfirm": "Fehlgeschlagenen Log-Upload entfernen?"
+  },
+  "batchAttempts": {
+    "tabs": {
+      "table": "Übersicht",
+      "timeline": "Details",
+      "roster": "Roster"
+    },
+    "table": {
+      "number": "#",
+      "result": "Ergebnis",
+      "mode": "Modus",
+      "furthestPhase": "Weiteste Phase",
+      "duration": "Dauer",
+      "viewLog": "Log ansehen →",
+      "empty": "Noch keine ausgewerteten Versuche.",
+      "deleteConfirm": "Versuch #{n} (Log) endgültig aus diesem Batch löschen?"
+    },
+    "timeline": {
+      "aggregatedOver": "Aggregiert über alle {count} Versuche des Batches",
+      "reached": "{reached} / {total} erreicht",
+      "noFails": "Keine Fehler.",
+      "attemptHistory": "Versuchsverlauf",
+      "viewFullLog": "Vollständigen Log ansehen →",
+      "empty": "Noch keine ausgewerteten Versuche.",
+      "sincePhaseEnd": "seit Phasenende",
+      "sinceInvisCastEnd": "seit Ende Mass Invis Cast",
+      "death": "Tod",
+      "deathByPlayer": "Tod — {player}",
+      "players": "Spieler ({count})",
+      "showMarker": "Marker einblenden",
+      "hideMarker": "Marker ausblenden",
+      "mechanicFilter": "Mechanik-Filter",
+      "player": "Spieler:",
+      "allPlayers": "Alle Spieler",
+      "bossAttacks": "Boss-Angriffe",
+      "mechanics": "Mechaniken",
+      "showAll": "Alle einblenden",
+      "hideAll": "Alle ausblenden",
+      "multiplePhases": "Mehrere Phasen",
+      "other": "Weitere",
+      "missedXTimes": "{name}: {count}x verfehlt",
+      "stats": {
+        "log": "Log",
+        "result": "Ergebnis",
+        "mode": "Modus",
+        "furthestPhase": "Weiteste Phase",
+        "duration": "Dauer",
+        "reveals": "Reveals",
+        "downstates": "Downstates"
+      }
+    },
+    "roster": {
+      "player": "Spieler",
+      "role": "Rolle",
+      "participations": "Teilnahmen",
+      "kills": "Kills",
+      "avgDps": "Ø DPS",
+      "avgDowns": "Ø Downs",
+      "failedMechanics": "Gefailte Mechaniken",
+      "shockwaves": "Schockwellen getroffen",
+      "debilitated": "Geschwächt erhalten",
+      "revealed": "Zu früh aufgedeckt",
+      "empty": "Noch keine ausgewerteten Logs."
+    }
+  },
+  "logDetail": {
+    "summary": "{result} bei {batchLabel} · Dauer {duration}s · {playerCount} Spieler",
+    "openExternalReport": "Externen Report öffnen →",
+    "completed": "Abgeschlossen",
+    "reached": "Erreicht",
+    "notReached": "Nicht erreicht",
+    "aliveAtPhaseStart": "lebend zu Phasenbeginn: {alive}/{total}"
+  },
+  "batchDetail": {
+    "totalAttempts": "Versuche gesamt",
+    "reveals": "Mit Reveal erreicht",
+    "greenMissed": "Green verfehlt",
+    "shockwavesHit": "Schockwellen getroffen",
+    "furthestPhase": "Weiteste Phase",
+    "failedUploads": "Fehlgeschlagene Uploads"
+  },
+  "trendChart": {
+    "avgGroupDps": "Ø Gruppen-DPS",
+    "greenFailRate": "Greens-Fail-Rate",
+    "shockwaveRate": "Schockwellen-Rate"
+  },
+  "attackLabels": {
+    "jaws": "Jaws of Destruction",
+    "slam": "Lava Slam",
+    "beam": "Branding Beam",
+    "shockwave": "Mordremoth Shockwave",
+    "scream": "Zhaitans Schrei",
+    "green": "Greens (aufgelöst)",
+    "spreadBait": "Spread Bait",
+    "redBait": "Red Bait",
+    "invis": "Mass Invisibility"
+  },
+  "globalMechanicLabels": {
+    "Downed": "Downstate",
+    "DC": "Disconnect"
   }
 }

@@ -3,20 +3,23 @@
 import { Button } from "@radix-ui/themes";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 export function RemoveLogButton({
   logFileId,
-  confirmMessage = "Fehlgeschlagenen Log-Upload entfernen?",
-}: {
+  confirmMessage,
+}: Readonly<{
   logFileId: string;
   confirmMessage?: string;
-}) {
+}>) {
   const router = useRouter();
+  const t = useTranslations("removeLog");
+  const tCommon = useTranslations("common");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleRemove() {
-    if (!window.confirm(confirmMessage)) {
+    if (!window.confirm(confirmMessage ?? t("defaultConfirm"))) {
       return;
     }
     setPending(true);
@@ -43,7 +46,7 @@ export function RemoveLogButton({
         onClick={handleRemove}
         disabled={pending}
       >
-        {pending ? "Wird entfernt…" : "Entfernen"}
+        {pending ? tCommon("removing") : tCommon("remove")}
       </Button>
       {error ? <p className="text-danger text-xs">{error}</p> : null}
     </div>

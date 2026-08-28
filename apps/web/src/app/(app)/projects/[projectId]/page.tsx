@@ -1,6 +1,7 @@
 import { prisma, ProjectRole } from "@voidlog/db";
 import { Card, Table } from "@radix-ui/themes";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PhaseBadge } from "@/components/phase-badge";
 import { isMainPhase } from "@/lib/main-phases";
@@ -25,6 +26,9 @@ export default async function ProjectDetailPage(
   const { projectId } = await props.params;
   const session = await requireSession();
   const membership = await requireProjectMembership(projectId, session.user.id);
+  const t = await getTranslations("project");
+  const tCommon = await getTranslations("common");
+  const tSidebar = await getTranslations("sidebar");
 
   const rawBatches = await prisma.uploadBatch.findMany({
     where: { projectId },
@@ -134,20 +138,24 @@ export default async function ProjectDetailPage(
 
   return (
     <div className="px-10 py-8">
-      <Breadcrumbs items={[{ label: "Projekte", href: "/" }, { label: membership.project.name }]} />
+      <Breadcrumbs
+        items={[{ label: tSidebar("projects"), href: "/" }, { label: membership.project.name }]}
+      />
       <div className="mb-6 flex items-end justify-between">
         <div>
           <h1 className="font-heading text-foreground-strong text-2xl font-bold">
             {membership.project.name}
           </h1>
-          <p className="text-muted mt-1 text-sm">{batches.length} Raid-Abende getrackt</p>
+          <p className="text-muted mt-1 text-sm">
+            {t("raidNightsTracked", { count: batches.length })}
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <Link
             href={`/projects/${projectId}/batches/new`}
             className="bg-primary text-primary-foreground inline-flex h-8 items-center justify-center rounded-sm px-3.5 text-sm font-semibold"
           >
-            + Batch hochladen
+            {t("uploadBatch")}
           </Link>
           {membership.role === ProjectRole.OWNER ? (
             <DeleteProjectButton projectId={projectId} projectName={membership.project.name} />
@@ -159,35 +167,35 @@ export default async function ProjectDetailPage(
         <div className="mb-6 grid grid-cols-1 gap-3.5 lg:grid-cols-3">
           <Card size="3" className="border-line bg-surface border">
             <div className="text-muted-strong mb-3.5 text-xs font-medium uppercase tracking-wide">
-              Ø Gruppen-DPS · letzte {trendPoints.length} Abende
+              {t("avgGroupDps", { count: trendPoints.length })}
             </div>
             <DpsTrendChart points={trendPoints} />
           </Card>
           <Card size="3" className="border-line bg-surface border">
             <div className="text-muted-strong mb-3.5 text-xs font-medium uppercase tracking-wide">
-              Greens-Fail-Rate · letzte {trendPoints.length} Abende
+              {t("greenFailRate", { count: trendPoints.length })}
             </div>
             <GreenFailTrendChart points={trendPoints} />
           </Card>
           <Card size="3" className="border-line bg-surface border">
             <div className="text-muted-strong mb-3.5 text-xs font-medium uppercase tracking-wide">
-              Schockwellen-Rate · letzte {trendPoints.length} Abende
+              {t("shockwaveRate", { count: trendPoints.length })}
             </div>
             <ShockwaveTrendChart points={trendPoints} />
           </Card>
         </div>
       ) : null}
 
-      <div className="text-muted-strong mb-2.5 text-sm font-semibold">Raid-Abende</div>
+      <div className="text-muted-strong mb-2.5 text-sm font-semibold">{t("raidNights")}</div>
       <Table.Root variant="surface" className="border-line bg-surface border">
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeaderCell>Raid-Abend</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Versuche</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Kills</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Greens verfehlt</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Schockwellen getroffen</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Weiteste Phase</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>{t("table.raidNight")}</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>{t("table.attempts")}</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>{t("table.kills")}</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>{t("table.greensMissed")}</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>{t("table.shockwavesHit")}</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>{t("table.furthestPhase")}</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -204,10 +212,10 @@ export default async function ProjectDetailPage(
               <Table.Cell className="text-muted-strong">{batch.attempts}</Table.Cell>
               <Table.Cell className="text-muted-strong">{batch.kills}</Table.Cell>
               <Table.Cell className="text-danger font-semibold">
-                {batch.greenFailRate === null ? "—" : `${batch.greenFailRate}%`}
+                {batch.greenFailRate === null ? tCommon("dash") : `${batch.greenFailRate}%`}
               </Table.Cell>
               <Table.Cell className="text-warning font-semibold">
-                {batch.shockwaveHitRate === null ? "—" : `${batch.shockwaveHitRate}%`}
+                {batch.shockwaveHitRate === null ? tCommon("dash") : `${batch.shockwaveHitRate}%`}
               </Table.Cell>
               <Table.Cell>
                 {batch.furthestPhase ? (
@@ -217,7 +225,7 @@ export default async function ProjectDetailPage(
                     order={batch.furthestPhase.order}
                   />
                 ) : (
-                  "—"
+                  tCommon("dash")
                 )}
               </Table.Cell>
             </Table.Row>
@@ -225,7 +233,7 @@ export default async function ProjectDetailPage(
           {batches.length === 0 ? (
             <Table.Row>
               <Table.Cell colSpan={6} className="text-muted">
-                Noch keine Batches.
+                {t("empty")}
               </Table.Cell>
             </Table.Row>
           ) : null}

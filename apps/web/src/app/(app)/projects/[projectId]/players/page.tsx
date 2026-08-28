@@ -1,4 +1,5 @@
 import { prisma } from "@voidlog/db";
+import { getTranslations } from "next-intl/server";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
@@ -18,10 +19,14 @@ interface RosterEntry {
   revealCount: number;
 }
 
-export default async function RosterPage(props: PageProps<"/projects/[projectId]/players">) {
+export default async function RosterPage(
+  props: Readonly<PageProps<"/projects/[projectId]/players">>,
+) {
   const { projectId } = await props.params;
   const session = await requireSession();
   const membership = await requireProjectMembership(projectId, session.user.id);
+  const t = await getTranslations("roster");
+  const tSidebar = await getTranslations("sidebar");
 
   const playerResults = await prisma.playerResult.findMany({
     where: { encounterResult: { logFile: { batch: { projectId } } } },
@@ -104,13 +109,13 @@ export default async function RosterPage(props: PageProps<"/projects/[projectId]
     <div className="px-10 py-8">
       <Breadcrumbs
         items={[
-          { label: "Projekte", href: "/" },
+          { label: tSidebar("projects"), href: "/" },
           { label: membership.project.name, href: `/projects/${projectId}` },
-          { label: "Roster" },
+          { label: t("breadcrumb") },
         ]}
       />
-      <h1 className="font-heading text-foreground-strong text-2xl font-bold">Roster</h1>
-      <p className="text-muted mb-6 mt-1 text-sm">Alle Teilnehmer seit Projektstart</p>
+      <h1 className="font-heading text-foreground-strong text-2xl font-bold">{t("title")}</h1>
+      <p className="text-muted mb-6 mt-1 text-sm">{t("subtitle")}</p>
 
       <RosterTable roster={roster} />
     </div>
