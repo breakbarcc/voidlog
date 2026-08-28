@@ -24,6 +24,11 @@ export function createStorageClient(): S3Client {
     region,
     forcePathStyle,
     credentials: { accessKeyId, secretAccessKey },
+    // AWS SDK v3 auto-attaches x-amz-checksum-* params to every PutObject by
+    // default (including presigned URLs) — R2 doesn't handle that checksum
+    // flavor on presigned PUTs and responds 403. Restrict checksum
+    // calculation to only when explicitly requested.
+    requestChecksumCalculation: "WHEN_REQUIRED",
   };
 
   return new S3Client(config);
