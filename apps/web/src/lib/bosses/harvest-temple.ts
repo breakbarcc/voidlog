@@ -1,3 +1,4 @@
+import type { Locale } from "@/i18n/locale";
 import type { BossCuration } from "./types";
 
 /**
@@ -51,7 +52,7 @@ const PURIFICATION_COLOR = "#2e2845";
  * in this list) are marked "(vermutlich)" — best-effort guess, not
  * verified.
  */
-const MECHANIC_NAMES: Record<string, string> = {
+const MECHANIC_NAMES_DE: Record<string, string> = {
   // Generic, cross-encounter (not from the Harvest Temple mechanic list)
   Dead: "Gestorben",
   Downed: "Downstate",
@@ -172,6 +173,122 @@ const MECHANIC_NAMES: Record<string, string> = {
 
   // Purification 4
   "GraspVoid.H": "Griff der Leere (finales Orb-Geschoss) — getroffen",
+};
+
+// English versions of the above — reconstructed from EI's own mechanic
+// descriptions where the German comments already quote them verbatim (e.g.
+// "Hit by Jormag Breath"), otherwise translated to match GW2's official
+// in-game terminology as closely as possible. Same suffix meanings as the
+// German map (see the comment above MECHANIC_NAMES_DE).
+const MECHANIC_NAMES_EN: Record<string, string> = {
+  Dead: "Dead",
+  Downed: "Downed",
+  Res: "Revived",
+  Resp: "Revive",
+  "Got up": "Got up",
+  DC: "Disconnect",
+  Lckt: "Targeted (presumed)",
+  Lnch: "Launched (presumed)",
+  "Knck.Dwn": "Knockdown",
+  "Knck.Pll": "Pulled (presumed)",
+  Debilitated: "Debilitated",
+  Infirmity: "Infirmity",
+  "Invis.Cast": "Mass Invisibility cast",
+  Revealed: "Revealed",
+
+  "Spread.B": "Spread Bait",
+  "Red.B": "Red Bait",
+  "Void.D": "Void debuff received",
+  "Void.H": "Void — hit",
+  "Red.H": "Red Hit",
+  "Spread.H": "Spread Hit",
+  "Orb Push": "Orb pushed",
+  "NopeRopes.Achiv.L": "\"Nope Ropes\" achievement missed",
+  "NopeRopes.Achiv.K": "\"Nope Ropes\" achievement kept",
+  "VoidExp.H": "Void Explosion — hit",
+  "VoidExp.Champ.H": "Void Explosion (Champion) — hit",
+  "MagicDisc.H": "Magic Discharge — hit",
+  "S.Green": "Greens — succeeded",
+  "F.Green": "Greens — missed",
+  "Green.Spawn": "Greens — resolved",
+
+  // Purification 1
+  "Light.H": "Jormag's Lightning — hit",
+  "Flame.H": "Primordus's Flame — hit",
+  "Storm.H": "Kralkatorrik's Storm Fall — hit",
+
+  // Jormag
+  "J.Breath.H": "Jormag Breath — hit",
+  "J.Grasp.H": "Jormag's Grasp — hit",
+  "J.Meteor.H": "Jormag Meteor — hit",
+
+  // Primordus
+  "Slam.H": "Lava Slam (Chin) Hit",
+  "Jaws.H": "Jaws of Destruction (Bite) Hit",
+  "Jaws.Cast": "Jaws of Destruction (Bite)",
+  "Slam.Cast": "Lava Slam (Chin)",
+
+  // Kralkatorrik
+  "Barrage.H": "Meteor Hit",
+  "Beam.H": "Branding Beam — hit",
+  "Beam.Cast": "Branding Beam",
+  "Artillery.H": "Branded Artillery — hit",
+  "K.Pool.H": "Kralkatorrik's Void Pool — hit",
+
+  // Purification 2
+  "Goop.H": "Heart Goop — hit",
+  "Bees.H": "Bees of the Heart Hit",
+  "Grav.Cru.H": "Gravity Crush — hit",
+  "NigEpoch.H": "Nightmare Epoch — hit",
+
+  // Mordremoth
+  "ShckWv.H": "Mordremoth's Shockwave — hit",
+  "ShckWv.Start": "Mordremoth's Shockwave — started",
+  "ShckWv.Cast": "Mordremoth's Shockwave — cast",
+  "M.Poison.H": "Mordremoth's Poison Roar Hit",
+  "Kick.H": "Void Skullsplitter's Kick",
+  "ChrgShot.H": "Skullsplitter's Charged Shot",
+
+  // Giants
+  "Scream.G.CC": "Giant's Death Scream — stunned",
+  "RotBile.H": "Giant's Rotten Bile — hit",
+  "Stomp.CC": "Giant's Stomp — stunned",
+
+  // Zhaitan
+  "Scream.H": "Zhaitan's Scream",
+  "Scream.Cast": "Zhaitan's Scream — cast",
+  "Z.Poison.H": "Zhaitan's Poison — hit",
+  "T.Slam.H": "Zhaitan's Tail Slam — hit",
+
+  // Purification 3
+  "Prjtile.H": "Heart Projectile (Corrupted Waters) — hit",
+  "Whrlpl.H": "Hydro Burst (Whirlpool) — hit",
+  "CallLigh.H": "Call Lightning — hit",
+  "FrozFury.H": "Frozen Fury — hit",
+  "RollFlame.H": "Rolling Flame — hit",
+  "ShatEarth.H": "Shatter Earth — hit",
+
+  // Soo-Won
+  "Tsunami.H": "Soo-Won's Tsunami — hit",
+  "Claw.H": "Soo-Won's Claw — hit",
+  "SW.Pool.H": "Soo-Won's Void Pool — hit",
+  "Tail.H": "Soo-Won's Tail — hit",
+  "Torment.H": "Torment of the Void — hit",
+  "MagHail.H": "Magic Hail — hit",
+  "Firebomb.H": "Firebomb — hit",
+  "WyvBreath.H": "Wyvern Breath — hit",
+  "Charge.H": "Destroyer's Charge — hit",
+  "Charge.CC": "Destroyer's Charge — stunned",
+  "GlaSlam.H": "Glacial Slam — hit",
+  "GlaSlam.CC": "Glacial Slam — stunned",
+
+  // Purification 4
+  "GraspVoid.H": "Grasp of the Void (final orb projectile) — hit",
+};
+
+const MECHANIC_NAMES: Record<Locale, Record<string, string>> = {
+  en: MECHANIC_NAMES_EN,
+  de: MECHANIC_NAMES_DE,
 };
 
 // Raw EI mechanic names that aren't real "boss mechanic fails" and would

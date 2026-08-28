@@ -1,6 +1,8 @@
 import { LogFileStatus, MechanicCategory, prisma } from "@voidlog/db";
 import { Card } from "@radix-ui/themes";
 import { notFound } from "next/navigation";
+import { getLocale } from "next-intl/server";
+import type { Locale } from "@/i18n/locale";
 import { BatchSwitcher } from "@/components/batch-switcher";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PhaseBadge } from "@/components/phase-badge";
@@ -55,6 +57,7 @@ export default async function BatchDetailPage(
   const { projectId, batchId } = await props.params;
   const session = await requireSession();
   const membership = await requireProjectMembership(projectId, session.user.id);
+  const locale = (await getLocale()) as Locale;
 
   const allBatches = await prisma.uploadBatch.findMany({
     where: { projectId },
@@ -188,6 +191,7 @@ export default async function BatchDetailPage(
           mechanicName: event.mechanicName,
           displayName: translateMechanicName(
             encounter.bossId,
+            locale,
             event.mechanicName,
             event.displayName,
           ),
@@ -213,7 +217,7 @@ export default async function BatchDetailPage(
         (agg.hasGreenMechanic
           ? {
               mechanicName: "F.Green",
-              displayName: translateMechanicName(batchBossId, "F.Green", "F.Green"),
+              displayName: translateMechanicName(batchBossId, locale, "F.Green", "F.Green"),
               count: 0,
             }
           : undefined);
@@ -355,7 +359,7 @@ export default async function BatchDetailPage(
           )
           .map((m) => ({
             timeMs: m.timeMs,
-            name: translateMechanicName(encounter.bossId, m.mechanicName, m.displayName),
+            name: translateMechanicName(encounter.bossId, locale, m.mechanicName, m.displayName),
             mechanicName: m.mechanicName,
             player: m.playerResult?.characterName ?? null,
             msSincePhaseEnd: readMsSincePhaseEnd(m.context),
@@ -400,7 +404,7 @@ export default async function BatchDetailPage(
             )
             .map((m) => ({
               mechanicName: m.mechanicName,
-              name: translateMechanicName(encounter.bossId, m.mechanicName, m.displayName),
+              name: translateMechanicName(encounter.bossId, locale, m.mechanicName, m.displayName),
               player: m.playerResult?.characterName ?? null,
             })),
         };

@@ -1,3 +1,4 @@
+import type { Locale } from "@/i18n/locale";
 import { getBossCuration } from "./bosses/registry";
 
 /**
@@ -8,20 +9,37 @@ import { getBossCuration } from "./bosses/registry";
  * .L/.K = achievement Lost/Kept — see lib/bosses/harvest-temple.ts for
  * how these were verified against EI's own source.
  */
-function humanizeFallback(mechanicName: string): string {
-  const parts = mechanicName.split(".");
-  const suffix = parts.at(-1);
-  const suffixLabels: Record<string, string> = {
+const SUFFIX_LABELS: Record<Locale, Record<string, string>> = {
+  en: {
+    H: "hit",
+    B: "bait",
+    D: "debuff received",
+    CC: "stunned",
+    L: "achievement missed",
+    K: "achievement kept",
+  },
+  de: {
     H: "getroffen",
     B: "Köder (Bait)",
     D: "Debuff erhalten",
     CC: "betäubt",
     L: "Erfolg verpasst",
     K: "Erfolg erhalten",
-  };
-  const label = suffix ? suffixLabels[suffix] : undefined;
+  },
+};
+
+const PRESUMED_SUFFIX: Record<Locale, string> = {
+  en: "presumed",
+  de: "vermutlich",
+};
+
+function humanizeFallback(locale: Locale, mechanicName: string): string {
+  const parts = mechanicName.split(".");
+  const suffix = parts.at(-1);
+  const label = suffix ? SUFFIX_LABELS[locale][suffix] : undefined;
   const stem = (label ? parts.slice(0, -1) : parts).join(" ");
-  return label ? `${stem} — ${label} (vermutlich)` : `${stem} (vermutlich)`;
+  const presumed = PRESUMED_SUFFIX[locale];
+  return label ? `${stem} — ${label} (${presumed})` : `${stem} (${presumed})`;
 }
 
 /**
@@ -34,11 +52,12 @@ function humanizeFallback(mechanicName: string): string {
  */
 export function translateMechanicName(
   bossId: string,
+  locale: Locale,
   mechanicName: string,
   curatedDisplayName?: string,
 ): string {
-  const curated = getBossCuration(bossId)?.mechanicNames[mechanicName];
+  const curated = getBossCuration(bossId)?.mechanicNames[locale][mechanicName];
   if (curated) return curated;
   if (curatedDisplayName && curatedDisplayName !== mechanicName) return curatedDisplayName;
-  return humanizeFallback(mechanicName);
+  return humanizeFallback(locale, mechanicName);
 }

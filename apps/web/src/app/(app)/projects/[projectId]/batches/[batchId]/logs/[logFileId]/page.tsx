@@ -1,6 +1,8 @@
 import { prisma } from "@voidlog/db";
 import { Card } from "@radix-ui/themes";
 import { notFound } from "next/navigation";
+import { getLocale } from "next-intl/server";
+import type { Locale } from "@/i18n/locale";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { phaseColor } from "@/components/phase-badge";
 import { translateMechanicName } from "@/lib/mechanic-names";
@@ -14,6 +16,7 @@ export default async function LogAnalysisPage(
   const { projectId, batchId, logFileId } = await props.params;
   const session = await requireSession();
   const membership = await requireProjectMembership(projectId, session.user.id);
+  const locale = (await getLocale()) as Locale;
 
   const logFile = await prisma.logFile.findUnique({
     where: { id: logFileId },
@@ -169,6 +172,7 @@ export default async function LogAnalysisPage(
                         <span className="text-muted-strong">
                           {translateMechanicName(
                             encounter.bossId,
+                            locale,
                             event.mechanicName,
                             event.displayName,
                           )}

@@ -1,5 +1,7 @@
 import { Card, Text } from "@radix-ui/themes";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { auth } from "@/auth";
 import { SignInButton } from "./sign-in-button";
 
@@ -8,6 +10,7 @@ export default async function LoginPage() {
   if (session?.user) {
     redirect("/");
   }
+  const t = await getTranslations("login");
 
   return (
     <main className="void-gradient-bg relative flex min-h-screen items-center justify-center overflow-hidden">
@@ -25,12 +28,14 @@ export default async function LoginPage() {
           </span>
         </div>
         <Text as="p" size="2" className="text-muted !mb-8 max-w-[280px]">
-          Harvest Tempel CM Log-Analyse Seite. Verfolge, wie sich dein Trupp
-          im Training verbessert und überprüfe Spielmechaniken und
-          Ausrutscher.
+          {t("tagline")}
         </Text>
 
         <SignInButton />
+
+        <div className="mt-8">
+          <LanguageSwitcher />
+        </div>
       </Card>
     </main>
   );
