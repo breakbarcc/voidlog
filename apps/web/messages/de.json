@@ -5,5 +5,13 @@
   "login": {
     "tagline": "Harvest Tempel CM Log-Analyse Seite. Verfolge, wie sich dein Trupp im Training verbessert und überprüfe Spielmechaniken und Ausrutscher.",
     "signIn": "Mit Discord anmelden"
+  },
+  "sidebar": {
+    "overview": "Übersicht",
+    "projects": "Projekte",
+    "currentProject": "Aktuelles Projekt",
+    "history": "Verlauf & Trend",
+    "roster": "Roster",
+    "uploadLogs": "+ Logs hochladen"
   }
 }

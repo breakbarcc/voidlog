@@ -5,5 +5,13 @@
   "login": {
     "tagline": "Harvest Temple CM log analysis platform. Track how your squad improves over training sessions and review mechanics and mistakes.",
     "signIn": "Sign in with Discord"
+  },
+  "sidebar": {
+    "overview": "Overview",
+    "projects": "Projects",
+    "currentProject": "Current Project",
+    "history": "History & Trend",
+    "roster": "Roster",
+    "uploadLogs": "+ Upload logs"
   }
 }

@@ -1,7 +1,6 @@
 import { Card, Text } from "@radix-ui/themes";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { LanguageSwitcher } from "@/components/language-switcher";
 import { auth } from "@/auth";
 import { SignInButton } from "./sign-in-button";
 
@@ -32,10 +31,6 @@ export default async function LoginPage() {
         </Text>
 
         <SignInButton />
-
-        <div className="mt-8">
-          <LanguageSwitcher />
-        </div>
       </Card>
     </main>
   );

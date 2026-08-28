@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 interface SidebarProps {
   userName: string;
@@ -17,11 +19,11 @@ function NavLink({
   href,
   active,
   children,
-}: {
+}: Readonly<{
   href: string;
   active: boolean;
   children: ReactNode;
-}) {
+}>) {
   return (
     <Link
       href={href}
@@ -34,14 +36,19 @@ function NavLink({
   );
 }
 
-function NavDot({ shape = "square" }: { shape?: "square" | "circle" | "diamond" }) {
-  const radius =
-    shape === "circle" ? "rounded-full" : shape === "diamond" ? "rotate-45" : "rounded-[2px]";
-  return <span className={`h-2 w-2 shrink-0 bg-current opacity-70 ${radius}`} />;
+const NAV_DOT_RADIUS: Record<"square" | "circle" | "diamond", string> = {
+  square: "rounded-[2px]",
+  circle: "rounded-full",
+  diamond: "rotate-45",
+};
+
+function NavDot({ shape = "square" }: Readonly<{ shape?: "square" | "circle" | "diamond" }>) {
+  return <span className={`h-2 w-2 shrink-0 bg-current opacity-70 ${NAV_DOT_RADIUS[shape]}`} />;
 }
 
-export function Sidebar({ userName, currentProject }: SidebarProps) {
+export function Sidebar({ userName, currentProject }: Readonly<SidebarProps>) {
   const pathname = usePathname();
+  const t = useTranslations("sidebar");
 
   return (
     <aside className="bg-surface-2 border-line-soft flex h-full w-[232px] shrink-0 flex-col overflow-y-auto border-r px-3.5 py-5">
@@ -51,17 +58,17 @@ export function Sidebar({ userName, currentProject }: SidebarProps) {
       </Link>
 
       <div className="text-muted mb-2 px-2 text-[11px] font-medium uppercase tracking-wide">
-        Übersicht
+        {t("overview")}
       </div>
       <NavLink href="/" active={pathname === "/"}>
         <NavDot />
-        Projekte
+        {t("projects")}
       </NavLink>
 
       {currentProject ? (
         <>
           <div className="text-muted mb-2 mt-5 px-2 text-[11px] font-medium uppercase tracking-wide">
-            Aktuelles Projekt
+            {t("currentProject")}
           </div>
           <div className="border-line bg-surface mb-3.5 rounded-sm border px-3 py-2.5">
             <div className="text-foreground truncate text-[12.5px] font-semibold">
@@ -73,25 +80,29 @@ export function Sidebar({ userName, currentProject }: SidebarProps) {
             active={pathname === `/projects/${currentProject.id}`}
           >
             <NavDot shape="diamond" />
-            Verlauf &amp; Trend
+            {t("history")}
           </NavLink>
           <NavLink
             href={`/projects/${currentProject.id}/players`}
             active={pathname === `/projects/${currentProject.id}/players`}
           >
             <NavDot shape="circle" />
-            Roster
+            {t("roster")}
           </NavLink>
           <Link
             href={`/projects/${currentProject.id}/batches/new`}
             className="bg-primary/10 text-primary hover:bg-primary/15 mt-3.5 flex items-center justify-center gap-2 rounded-sm px-2.5 py-2 text-sm font-semibold"
           >
-            + Logs hochladen
+            {t("uploadLogs")}
           </Link>
         </>
       ) : null}
 
       <div className="flex-1" />
+
+      <div className="mb-2 px-2">
+        <LanguageSwitcher />
+      </div>
 
       <button
         type="button"
