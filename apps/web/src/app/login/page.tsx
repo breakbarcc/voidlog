@@ -16,23 +16,21 @@ export default async function LoginPage() {
 
       <Card
         size="4"
-        className="border-line bg-surface/85 relative z-10 w-[420px] border backdrop-blur-sm"
+        className="border-line bg-surface/85 relative z-10 !flex w-[420px] !flex-col !items-center border px-8 py-12 !text-center backdrop-blur-sm"
       >
-        <div className="mb-1.5 flex items-center gap-2.5">
-          <span className="bg-primary h-[22px] w-[22px] [clip-path:polygon(50%_0%,100%_25%,100%_75%,50%_100%,0%_75%,0%_25%)]" />
-          <span className="font-heading text-foreground-strong text-xl font-bold tracking-wide">
+        <div className="mb-2 flex flex-col items-center gap-3">
+          <span className="bg-primary h-[36px] w-[36px] [clip-path:polygon(50%_0%,100%_25%,100%_75%,50%_100%,0%_75%,0%_25%)]" />
+          <span className="font-heading text-foreground-strong text-2xl font-bold tracking-wide">
             VOIDLOG
           </span>
         </div>
-        <Text as="p" size="2" className="text-muted mb-8">
-          GW2 Kampflog-Analyse für Trainingsgruppen
+        <Text as="p" size="2" className="text-muted !mb-8 max-w-[280px]">
+          Harvest Tempel CM Log-Analyse Seite. Verfolge, wie sich dein Trupp
+          im Training verbessert und überprüfe Spielmechaniken und
+          Ausrutscher.
         </Text>
 
         <SignInButton />
-
-        <Text as="p" size="1" className="text-muted mt-7 text-center">
-          Zugang nur für eingeladene Trainingsgruppen
-        </Text>
       </Card>
     </main>
   );
