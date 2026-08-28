@@ -56,4 +56,15 @@ jobs:
             chmod 600 .env
 
             docker compose -f docker-compose.prod.yml up -d --build
-            docker compose -f docker-compose.prod.yml exec -T web pnpm --filter @voidlog/db run migrate:deploy
+
+            # Run against the worker container, not web — web's Dockerfile
+            # produces only Next.js's standalone runtime output (no
+            # packages/db, no prisma CLI, no monorepo structure), while
+            # worker's image keeps the full repo checkout. Call `prisma
+            # migrate deploy` directly rather than the `migrate:deploy` npm
+            # script — that script wraps it in `dotenv -e ../../.env`, but
+            # .env is deliberately excluded from the build context
+            # (.dockerignore) and isn't present inside the container; the
+            # container already has DATABASE_URL etc. from compose's
+            # `env_file: .env`, so no dotenv step is needed.
+            docker compose -f docker-compose.prod.yml exec -T worker pnpm --filter @voidlog/db exec prisma migrate deploy
