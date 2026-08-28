@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Chakra_Petch, Inter } from "next/font/google";
 import { Theme } from "@radix-ui/themes";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale } from "next-intl/server";
 import "./globals.css";
 
 const inter = Inter({
@@ -19,24 +21,28 @@ export const metadata: Metadata = {
   description: "GW2 log analysis platform",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const locale = await getLocale();
+
   return (
     <html
-      lang="en"
+      lang={locale}
       className={`${inter.variable} ${chakraPetch.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="flex h-full min-h-screen flex-col">
-        <Theme
-          appearance="dark"
-          accentColor="purple"
-          grayColor="mauve"
-          radius="small"
-          panelBackground="solid"
-          className="flex min-h-screen flex-1 flex-col"
-        >
-          {children}
-        </Theme>
+        <NextIntlClientProvider>
+          <Theme
+            appearance="dark"
+            accentColor="purple"
+            grayColor="mauve"
+            radius="small"
+            panelBackground="solid"
+            className="flex min-h-screen flex-1 flex-col"
+          >
+            {children}
+          </Theme>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

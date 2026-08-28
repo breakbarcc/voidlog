@@ -1,3 +1,5 @@
+import type { Locale } from "@/i18n/locale";
+
 /**
  * Everything hand-curated about a single boss encounter, in one place.
  * One file per boss (see harvest-temple.ts) instead of one file per
@@ -26,8 +28,8 @@ export interface BossCuration {
    * undefined to fall through to the generic order-cycled palette.
    */
   phaseColor?: (order: number, phaseName: string) => string | undefined;
-  /** Raw EI mechanic short code -> curated German display name. */
-  mechanicNames: Record<string, string>;
+  /** Raw EI mechanic short code -> curated display name, per locale. */
+  mechanicNames: Record<Locale, Record<string, string>>;
   /** Raw EI mechanic short codes that are noise (achievement/res spam), not real fails. */
   noiseMechanicNames: Set<string>;
   /** Synthetic "*.Cast" markers (see worker cast-markers.ts) individually curated with their own timeline icon in the UI. */
