@@ -1,0 +1,58 @@
+name: Deploy
+
+# Only push to prod, deliberately not pull_request — this repo is public,
+# and pull_request(_target) runs against fork code with secrets available
+# would let an outside PR exfiltrate our VPS_SSH_KEY etc. Only code that's
+# already been merged (i.e. reviewed) and promoted to prod ever gets this
+# workflow's secrets.
+on:
+  push:
+    branches: [prod]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ vars.VPS_HOST }}
+          username: deploy
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            REPO_DIR=~/apps/voidlog
+
+            if [ ! -d "$REPO_DIR" ]; then
+              git clone --branch prod https://github.com/boongw/voidlog.git "$REPO_DIR"
+            fi
+            cd "$REPO_DIR"
+            git fetch origin prod
+            git reset --hard origin/prod
+
+            cat > .env << EOF
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            DATABASE_URL=postgresql://voidlog:${{ secrets.POSTGRES_PASSWORD }}@postgres:5432/voidlog?schema=public
+            REDIS_URL=redis://redis:6379
+
+            AUTH_SECRET=${{ secrets.AUTH_SECRET }}
+            AUTH_DISCORD_ID=${{ vars.AUTH_DISCORD_ID }}
+            AUTH_DISCORD_SECRET=${{ secrets.AUTH_DISCORD_SECRET }}
+            AUTH_URL=${{ vars.AUTH_URL }}
+
+            STORAGE_ENDPOINT=${{ secrets.STORAGE_ENDPOINT }}
+            STORAGE_REGION=${{ vars.STORAGE_REGION }}
+            STORAGE_BUCKET=${{ vars.STORAGE_BUCKET }}
+            STORAGE_ACCESS_KEY_ID=${{ secrets.STORAGE_ACCESS_KEY_ID }}
+            STORAGE_SECRET_ACCESS_KEY=${{ secrets.STORAGE_SECRET_ACCESS_KEY }}
+            STORAGE_FORCE_PATH_STYLE=${{ vars.STORAGE_FORCE_PATH_STYLE }}
+
+            LOG_PARSER=${{ vars.LOG_PARSER }}
+            DPS_REPORT_BASE_URL=${{ vars.DPS_REPORT_BASE_URL }}
+            DPS_REPORT_UPLOAD_PATH=${{ vars.DPS_REPORT_UPLOAD_PATH }}
+            DPS_REPORT_JSON_PATH=${{ vars.DPS_REPORT_JSON_PATH }}
+            EOF
+            chmod 600 .env
+
+            docker compose -f docker-compose.prod.yml up -d --build
+            docker compose -f docker-compose.prod.yml exec -T web pnpm --filter @voidlog/db run migrate:deploy
