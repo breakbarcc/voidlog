@@ -32,7 +32,8 @@ export function LanguageSwitcher() {
   }
 
   return (
-    <div className="flex items-center gap-1" role="group" aria-label={t("label")}>
+    <fieldset className="flex items-center gap-1 border-0 p-0 m-0">
+      <legend className="sr-only">{t("label")}</legend>
       {locales.map((option) => (
         <button
           key={option}
@@ -49,6 +50,6 @@ export function LanguageSwitcher() {
           {option}
         </button>
       ))}
-    </div>
+    </fieldset>
   );
 }
