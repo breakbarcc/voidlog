@@ -25,7 +25,7 @@ jobs:
             REPO_DIR=~/apps/voidlog
 
             if [ ! -d "$REPO_DIR" ]; then
-              git clone --branch prod https://github.com/boongw/voidlog.git "$REPO_DIR">
+              git clone --branch prod https://github.com/boongw/voidlog.git "$REPO_DIR"
             fi
             cd "$REPO_DIR"
             git fetch origin prod
