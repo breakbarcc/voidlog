@@ -25,7 +25,7 @@ jobs:
             REPO_DIR=~/apps/voidlog
 
             if [ ! -d "$REPO_DIR" ]; then
-              git clone --branch prod https://github.com/boongw/voidlog.git "$REPO_DIR"
+              git clone --branch prod https://github.com/boongw/voidlog.git "$REPO_DIR">
             fi
             cd "$REPO_DIR"
             git fetch origin prod
@@ -41,7 +41,7 @@ jobs:
             AUTH_DISCORD_SECRET=${{ secrets.AUTH_DISCORD_SECRET }}
             AUTH_URL=${{ vars.AUTH_URL }}
 
-            STORAGE_ENDPOINT=${{ secrets.STORAGE_ENDPOINT }}
+            STORAGE_ENDPOINT=${{ vars.STORAGE_ENDPOINT }}
             STORAGE_REGION=${{ vars.STORAGE_REGION }}
             STORAGE_BUCKET=${{ vars.STORAGE_BUCKET }}
             STORAGE_ACCESS_KEY_ID=${{ secrets.STORAGE_ACCESS_KEY_ID }}
