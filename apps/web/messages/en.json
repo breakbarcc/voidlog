@@ -27,7 +27,12 @@
     "retrying": "Retrying…",
     "kill": "Kill",
     "wipe": "Wipe",
-    "noneYet": "None yet."
+    "noneYet": "None yet.",
+    "account": "Account"
+  },
+  "metadata": {
+    "title": "voidlog",
+    "description": "GW2 combat log analysis platform"
   },
   "dashboard": {
     "title": "Projects",
@@ -66,7 +71,8 @@
   },
   "deleteProject": {
     "confirm": "Delete project \"{name}\"? This permanently removes all its batches, logs, and results.",
-    "button": "Delete project"
+    "button": "Delete project",
+    "errorDelete": "Could not delete project ({status})"
   },
   "batchesNew": {
     "breadcrumb": "Upload logs",
@@ -75,6 +81,7 @@
   },
   "batchUploadForm": {
     "labelPlaceholder": "Batch label (e.g. Raid Night 2026-08-06)",
+    "defaultLabel": "Batch {date}",
     "dropFiles": ".evtc / .zevtc files here",
     "filesSelected": "{count} file(s) selected",
     "dropHint": "up to 30 files at once · or click to browse",
@@ -85,7 +92,10 @@
     "progressStatus": "{done}/{total} done",
     "progressFailed": " ({count} failed)",
     "waitingForWorker": "Waiting for the worker…",
-    "viewBatch": "View batch"
+    "viewBatch": "View batch",
+    "errorCreateBatch": "Could not create batch ({status})",
+    "errorUploadFile": "Upload failed for {fileName} ({status})",
+    "errorEnqueue": "Could not start processing ({status})"
   },
   "roster": {
     "breadcrumb": "Roster",
@@ -106,14 +116,20 @@
     "empty": "No evaluated logs yet."
   },
   "batchLabelEditor": {
-    "rename": "Rename batch"
+    "rename": "Rename batch",
+    "errorRename": "Could not rename batch ({status})"
   },
   "deleteBatch": {
     "confirm": "Delete batch \"{label}\"? This permanently removes its logs and results.",
-    "button": "Delete batch"
+    "button": "Delete batch",
+    "errorDelete": "Could not delete batch ({status})"
   },
   "removeLog": {
-    "defaultConfirm": "Remove this failed log upload?"
+    "defaultConfirm": "Remove this failed log upload?",
+    "errorRemove": "Could not remove log ({status})"
+  },
+  "retryLog": {
+    "errorRetry": "Could not retry ({status})"
   },
   "batchAttempts": {
     "tabs": {
@@ -145,6 +161,7 @@
       "players": "Players ({count})",
       "showMarker": "Show marker",
       "hideMarker": "Hide marker",
+      "phase": "Phase",
       "mechanicFilter": "Mechanic filter",
       "player": "Player:",
       "allPlayers": "All players",

@@ -763,7 +763,7 @@ function MechanicFilterAccordion({
         <Table.Root variant="surface" className="border-line bg-surface-2 border">
           <Table.Header>
             <Table.Row>
-              <Table.ColumnHeaderCell>Phase</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>{t("phase")}</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell className="border-line-soft border-l">
                 {t("bossAttacks")}
               </Table.ColumnHeaderCell>

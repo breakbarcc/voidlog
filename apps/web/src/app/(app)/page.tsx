@@ -15,6 +15,7 @@ export default async function DashboardPage() {
   const session = await requireSession();
   const t = await getTranslations("dashboard");
   const tCommon = await getTranslations("common");
+  const accountFallback = tCommon("account");
   const locale = (await getLocale()) as Locale;
 
   const projects = await prisma.project.findMany({
@@ -93,7 +94,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar userName={session.user.name ?? "Account"} />
+      <Sidebar userName={session.user.name ?? accountFallback} />
       <div className="min-w-0 flex-1 overflow-y-auto px-10 py-8">
         <div className="mb-6 flex items-end justify-between">
           <div>

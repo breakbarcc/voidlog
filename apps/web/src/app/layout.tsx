@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Chakra_Petch, Inter } from "next/font/google";
 import { Theme } from "@radix-ui/themes";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import "./globals.css";
 
 const inter = Inter({
@@ -16,10 +16,13 @@ const chakraPetch = Chakra_Petch({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "voidlog",
-  description: "GW2 log analysis platform",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("metadata");
+  return {
+    title: t("title"),
+    description: t("description"),
+  };
+}
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getLocale();

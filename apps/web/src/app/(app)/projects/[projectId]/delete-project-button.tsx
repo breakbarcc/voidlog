@@ -27,7 +27,7 @@ export function DeleteProjectButton({
     try {
       const response = await fetch(`/api/projects/${projectId}`, { method: "DELETE" });
       if (!response.ok) {
-        throw new Error(`Could not delete project (${response.status})`);
+        throw new Error(t("errorDelete", { status: response.status }));
       }
       router.push("/");
       router.refresh();

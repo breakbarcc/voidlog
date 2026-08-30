@@ -27,7 +27,12 @@
     "retrying": "Wird neu eingereiht…",
     "kill": "Kill",
     "wipe": "Wipe",
-    "noneYet": "Noch keine."
+    "noneYet": "Noch keine.",
+    "account": "Account"
+  },
+  "metadata": {
+    "title": "voidlog",
+    "description": "GW2 Kampf-Log-Analyse Plattform"
   },
   "dashboard": {
     "title": "Projekte",
@@ -66,7 +71,8 @@
   },
   "deleteProject": {
     "confirm": "Projekt \"{name}\" löschen? Das entfernt dauerhaft alle Batches, Logs und Ergebnisse.",
-    "button": "Projekt löschen"
+    "button": "Projekt löschen",
+    "errorDelete": "Projekt konnte nicht gelöscht werden ({status})"
   },
   "batchesNew": {
     "breadcrumb": "Logs hochladen",
@@ -75,6 +81,7 @@
   },
   "batchUploadForm": {
     "labelPlaceholder": "Batch-Bezeichnung (z. B. Raid-Abend 2026-08-06)",
+    "defaultLabel": "Batch {date}",
     "dropFiles": ".evtc / .zevtc Dateien hier ablegen",
     "filesSelected": "{count} Datei(en) ausgewählt",
     "dropHint": "bis zu 30 Dateien gleichzeitig · oder klicken zum Auswählen",
@@ -85,7 +92,10 @@
     "progressStatus": "{done}/{total} fertig",
     "progressFailed": " ({count} fehlgeschlagen)",
     "waitingForWorker": "Warte auf den Worker…",
-    "viewBatch": "Batch ansehen"
+    "viewBatch": "Batch ansehen",
+    "errorCreateBatch": "Batch konnte nicht erstellt werden ({status})",
+    "errorUploadFile": "Upload für {fileName} fehlgeschlagen ({status})",
+    "errorEnqueue": "Verarbeitung konnte nicht gestartet werden ({status})"
   },
   "roster": {
     "breadcrumb": "Roster",
@@ -106,14 +116,20 @@
     "empty": "Noch keine ausgewerteten Logs."
   },
   "batchLabelEditor": {
-    "rename": "Batch umbenennen"
+    "rename": "Batch umbenennen",
+    "errorRename": "Batch konnte nicht umbenannt werden ({status})"
   },
   "deleteBatch": {
     "confirm": "Batch \"{label}\" löschen? Das entfernt dauerhaft dessen Logs und Ergebnisse.",
-    "button": "Batch löschen"
+    "button": "Batch löschen",
+    "errorDelete": "Batch konnte nicht gelöscht werden ({status})"
   },
   "removeLog": {
-    "defaultConfirm": "Fehlgeschlagenen Log-Upload entfernen?"
+    "defaultConfirm": "Fehlgeschlagenen Log-Upload entfernen?",
+    "errorRemove": "Log konnte nicht entfernt werden ({status})"
+  },
+  "retryLog": {
+    "errorRetry": "Konnte nicht erneut versucht werden ({status})"
   },
   "batchAttempts": {
     "tabs": {
@@ -145,6 +161,7 @@
       "players": "Spieler ({count})",
       "showMarker": "Marker einblenden",
       "hideMarker": "Marker ausblenden",
+      "phase": "Phase",
       "mechanicFilter": "Mechanik-Filter",
       "player": "Spieler:",
       "allPlayers": "Alle Spieler",

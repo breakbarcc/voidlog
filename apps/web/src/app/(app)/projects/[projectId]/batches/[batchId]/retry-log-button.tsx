@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 
 export function RetryLogButton({ logFileId }: Readonly<{ logFileId: string }>) {
   const router = useRouter();
+  const t = useTranslations("retryLog");
   const tCommon = useTranslations("common");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +18,7 @@ export function RetryLogButton({ logFileId }: Readonly<{ logFileId: string }>) {
     try {
       const response = await fetch(`/api/log-files/${logFileId}/retry`, { method: "POST" });
       if (!response.ok) {
-        throw new Error(`Could not retry (${response.status})`);
+        throw new Error(t("errorRetry", { status: response.status }));
       }
       router.refresh();
     } catch (err) {

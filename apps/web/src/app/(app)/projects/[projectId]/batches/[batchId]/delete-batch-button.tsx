@@ -29,7 +29,7 @@ export function DeleteBatchButton({
     try {
       const response = await fetch(`/api/batches/${batchId}`, { method: "DELETE" });
       if (!response.ok) {
-        throw new Error(`Could not delete batch (${response.status})`);
+        throw new Error(t("errorDelete", { status: response.status }));
       }
       router.push(`/projects/${projectId}`);
       router.refresh();

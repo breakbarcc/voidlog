@@ -44,7 +44,7 @@ export function BatchLabelEditor({
         body: JSON.stringify({ label: trimmed }),
       });
       if (!response.ok) {
-        throw new Error(`Could not rename batch (${response.status})`);
+        throw new Error(t("errorRename", { status: response.status }));
       }
       setEditing(false);
       router.refresh();

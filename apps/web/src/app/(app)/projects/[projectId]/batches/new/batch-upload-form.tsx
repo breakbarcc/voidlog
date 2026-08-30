@@ -68,12 +68,12 @@ export function BatchUploadForm({ projectId }: Readonly<{ projectId: string }>) 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          label: label.trim() || `Batch ${new Date().toLocaleString()}`,
+          label: label.trim() || t("defaultLabel", { date: new Date().toLocaleString() }),
           files: files.map((f) => ({ fileName: f.name })),
         }),
       });
       if (!createResponse.ok) {
-        throw new Error(`Could not create batch (${createResponse.status})`);
+        throw new Error(t("errorCreateBatch", { status: createResponse.status }));
       }
       const created = (await createResponse.json()) as CreateBatchResponse;
       setBatchId(created.batchId);
@@ -86,7 +86,10 @@ export function BatchUploadForm({ projectId }: Readonly<{ projectId: string }>) 
             body: files[i],
             headers: { "Content-Type": "application/octet-stream" },
           }).then((res) => {
-            if (!res.ok) throw new Error(`Upload failed for ${files[i]?.name} (${res.status})`);
+            if (!res.ok)
+              throw new Error(
+                t("errorUploadFile", { fileName: files[i]?.name ?? "", status: res.status }),
+              );
           }),
         ),
       );
@@ -97,7 +100,7 @@ export function BatchUploadForm({ projectId }: Readonly<{ projectId: string }>) 
         method: "POST",
       });
       if (!enqueueResponse.ok) {
-        throw new Error(`Could not start processing (${enqueueResponse.status})`);
+        throw new Error(t("errorEnqueue", { status: enqueueResponse.status }));
       }
 
       const source = new EventSource(`/api/batches/${created.batchId}/events`);

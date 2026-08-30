@@ -27,7 +27,7 @@ export function RemoveLogButton({
     try {
       const response = await fetch(`/api/log-files/${logFileId}`, { method: "DELETE" });
       if (!response.ok) {
-        throw new Error(`Konnte Log nicht entfernen (${response.status})`);
+        throw new Error(t("errorRemove", { status: response.status }));
       }
       router.refresh();
     } catch (err) {
