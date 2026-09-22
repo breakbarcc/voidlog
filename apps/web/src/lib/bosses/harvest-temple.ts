@@ -7,6 +7,18 @@ import type { BossCuration } from "./types";
  * hand-curated code rather than an editable DB table.
  */
 
+// Soo-Won is the only dragon whose fight is itself split by an
+// intermission: EI persists "Soo-Won" as an outer wrapper phase (order ~20)
+// spanning the whole final segment, plus two sub-phases "Soo-Won 1"
+// (100%-50%) and "Soo-Won 2" (below 50%, after "Purification 4" — unlike
+// Purification 1-3, "Purification 4" is nested *inside* the "Soo-Won"
+// wrapper's time range, not a separate transition window). The two
+// sub-phases are listed here instead of the wrapper so the furthest-phase
+// badge can distinguish "died before the intermission" from "made it past
+// it" (order 21 vs. 27 — both still rank above "Purification 4"'s order 22
+// for anyone who reaches "Soo-Won 2", verified against real BIG-project
+// logs), and so they get their own phase card instead of one redundant
+// wrapper card duplicating both.
 const MAIN_PHASE_NAMES = [
   "Jormag",
   "Primordus",
@@ -14,7 +26,8 @@ const MAIN_PHASE_NAMES = [
   "Mordremoth",
   "Giants",
   "Zhaitan",
-  "Soo-Won",
+  "Soo-Won 1",
+  "Soo-Won 2",
 ];
 
 // Elder Dragon phases get their design-matched color instead of the
@@ -25,7 +38,7 @@ const DRAGON_COLORS: Record<string, string> = {
   Kralkatorrik: "#A98FDB", // crystal
   Mordremoth: "#4CA64C", // toxic growth
   Zhaitan: "#6B4C8A", // undead plague
-  "Soo-Won": "#3DBFA6", // pearlescent water
+  "Soo-Won": "#3DBFA6", // pearlescent water — also covers "Soo-Won 1"/"Soo-Won 2"
 };
 
 // Intermission phases between dragons — shown in the timeline but not
@@ -338,6 +351,9 @@ export const harvestTemple: BossCuration = {
     // "Giants" is an intermission like Purification (not itself a dragon),
     // so it gets the same neutral treatment rather than a dragon color.
     if (phaseName.startsWith("Purification") || phaseName === "Giants") return PURIFICATION_COLOR;
+    // "Soo-Won 1"/"Soo-Won 2" (see MAIN_PHASE_NAMES above) share the
+    // wrapper's color — same dragon, just split by an intermission.
+    if (phaseName.startsWith("Soo-Won")) return DRAGON_COLORS["Soo-Won"];
     return DRAGON_COLORS[phaseName];
   },
   mechanicNames: MECHANIC_NAMES,
