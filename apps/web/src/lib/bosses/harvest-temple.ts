@@ -322,7 +322,8 @@ const NOISE_MECHANIC_NAMES = new Set([
   "NopeRopes.Achiv.L",
   "NopeRopes.Achiv.K",
   "S.Green",
-  "NigEpoch.H" // Orb Aura
+  "NigEpoch.H", // Orb Aura
+  "Scream.H" // Zhaitan's Scream — unavoidable, always hits all 10 players
 ]);
 
 // The handful of boss-cast markers (see cast-markers.ts on the worker)
