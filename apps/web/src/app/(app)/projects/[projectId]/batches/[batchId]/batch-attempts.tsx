@@ -9,10 +9,12 @@ import {
 import { Card, HoverCard, Select, Tabs, Table } from "@radix-ui/themes";
 import Link from "next/link";
 import { useMemo, useState, type ReactNode } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { PhaseBadge, phaseColor, readableHeadingColor } from "@/components/phase-badge";
 import { SortableColumnHeader } from "@/components/sortable-column-header";
+import type { Locale } from "@/i18n/locale";
 import { isVisibleCastMarker } from "@/lib/mechanics";
+import { formatDateTime } from "@/lib/utils";
 import { RemoveLogButton } from "./remove-log-button";
 
 export interface AttemptRow {
@@ -24,6 +26,8 @@ export interface AttemptRow {
   success: boolean;
   furthestPhase: { name: string; order: number } | null;
   durationMs: number;
+  /** When the attempt actually happened in-game — falls back to when the log row was persisted, see page.tsx. */
+  recordedAt: Date;
   segments: { name: string; order: number; leftPct: number; widthPct: number }[];
   deaths: { timeMs: number; player: string | null }[];
   mechanics: {
@@ -1019,6 +1023,7 @@ export function BatchAttempts({
   const tTimeline = useTranslations("batchAttempts.timeline");
   const tGlobalMechanics = useTranslations("globalMechanicLabels");
   const tCommon = useTranslations("common");
+  const locale = useLocale() as Locale;
   const [expanded, setExpanded] = useState<number | null>(null);
   const [hiddenMechanics, setHiddenMechanics] = useState<Set<string>>(new Set());
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
@@ -1452,6 +1457,13 @@ export function BatchAttempts({
                         longer carry any text of their own. */}
                     <div className="border-line-soft mb-3.5 flex flex-wrap gap-x-6 gap-y-2 border-b pb-3.5">
                       <StatItem label={tTimeline("stats.log")} value={a.fileName} />
+                      <StatItem
+                        label={tTimeline("stats.recordedAt")}
+                        value={formatDateTime(a.recordedAt, locale, {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}
+                      />
                       <StatItem
                         label={tTimeline("stats.result")}
                         value={a.success ? tCommon("kill") : tCommon("wipe")}

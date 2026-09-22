@@ -174,6 +174,7 @@
       "missedXTimes": "{name}: missed {count}x",
       "stats": {
         "log": "Log",
+        "recordedAt": "Date & time",
         "result": "Result",
         "mode": "Mode",
         "furthestPhase": "Furthest phase",

@@ -80,6 +80,10 @@ interface EncounterLike {
   success: boolean;
   isCM: boolean;
   durationMs: number;
+  /** When the fight actually happened in-game (EI's timeStartStd) — null for encounters parsed before this field existed, see `createdAt` fallback below. */
+  recordedAt: Date | null;
+  /** Fallback for `recordedAt` — when this row was persisted, not when the fight happened. */
+  createdAt: Date;
   playerResults: {
     account: string;
     characterName: string;
@@ -351,6 +355,7 @@ function buildAttemptRow(
     success: encounter.success,
     furthestPhase: furthest ? { name: furthest.name, order: furthest.order } : null,
     durationMs: encounter.durationMs,
+    recordedAt: encounter.recordedAt ?? encounter.createdAt,
     segments: reachedMainPhases.map((p) => ({
       name: p.name,
       order: p.order,

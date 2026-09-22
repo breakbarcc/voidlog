@@ -16,6 +16,19 @@ export function formatDate(date: Date, locale: Locale, options?: Intl.DateTimeFo
   return date.toLocaleDateString(BCP47_TAG[locale], options);
 }
 
+/**
+ * Locale-aware date *and* time formatting. `toLocaleDateString` (formatDate
+ * above) throws on a `timeStyle` option — it's date-only by design — so a
+ * combined date+time needs `toLocaleString` instead.
+ */
+export function formatDateTime(
+  date: Date,
+  locale: Locale,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  return date.toLocaleString(BCP47_TAG[locale], options);
+}
+
 /** Locale-aware number formatting (thousands separators etc.). */
 export function formatNumber(value: number, locale: Locale): string {
   return value.toLocaleString(BCP47_TAG[locale]);
