@@ -23,7 +23,7 @@ import { RemoveLogButton } from "./remove-log-button";
 import { RetryLogButton } from "./retry-log-button";
 
 // Reads MechanicEvent.context.phaseEnd.msSincePhaseEnd (see stealth-phases.ts
-// on the worker) without assuming the JSON shape — context is untyped Json?
+// on the worker) without assuming the JSON shape — context is untyped JSON?
 // in the schema, and only the stealth-phase events (currently just
 // "Invis.Cast") populate this key at all.
 function readMsSincePhaseEnd(context: unknown): number | undefined {
@@ -493,7 +493,7 @@ export default async function BatchDetailPage(
       },
     },
   });
-  if (!batch || batch.projectId !== projectId) {
+  if (batch?.projectId !== projectId) {
     notFound();
   }
 
