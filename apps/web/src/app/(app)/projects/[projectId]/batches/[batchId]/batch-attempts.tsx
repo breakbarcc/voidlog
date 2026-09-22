@@ -142,7 +142,7 @@ function StatItem({
   );
 }
 
-const MARKER_CLUSTER_GAP_MS = 500;
+const MARKER_CLUSTER_GAP_MS = 1000;
 
 interface MarkerCluster {
   timeMs: number;
@@ -1240,8 +1240,8 @@ export function BatchAttempts({
                     {/* Lane 0 (test): Greens/baits fire far more often than the
                         named boss casts below and were crowding/overlapping
                         that lane — split into their own row above it. Markers
-                        of the same mechanic within 500ms collapse into one
-                        (tooltip shows the count) since these still pile up
+                        of the same mechanic within MARKER_CLUSTER_GAP_MS
+                        collapse into one (tooltip shows the count) since these still pile up
                         heavily per player even in their own lane. */}
                     <span className="relative h-4 w-full">
                       {highFreqClusters.map((c) => {
