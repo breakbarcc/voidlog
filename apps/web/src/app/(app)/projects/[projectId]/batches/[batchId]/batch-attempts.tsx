@@ -215,6 +215,35 @@ function clusterMarkers(
   return clusters;
 }
 
+interface MechanicMarkerGroup {
+  timeMs: number;
+  clusters: MarkerCluster[];
+}
+
+// clusterMarkers only ever merges same-mechanic markers (different
+// mechanics landing at the same instant are a real, distinct thing — e.g. a
+// boss hit that auto-applies a debuff a moment later — so they shouldn't
+// silently collapse into each other's counts). But rendered as separate,
+// fully-overlapping icons, only the topmost one is hoverable — the other(s)
+// are inaccessible. This second pass groups *different* mechanics' clusters
+// that land within MARKER_CLUSTER_GAP_MS of each other so they can share
+// one hoverable marker (see MultiMechanicHoverCard) instead.
+function groupClustersByTime(clusters: MarkerCluster[]): MechanicMarkerGroup[] {
+  const sorted = [...clusters].sort((a, b) => a.timeMs - b.timeMs);
+  const groups: MechanicMarkerGroup[] = [];
+  let current: MarkerCluster[] = [];
+  for (const c of sorted) {
+    const last = current.at(-1);
+    if (last && c.timeMs - last.timeMs > MARKER_CLUSTER_GAP_MS) {
+      groups.push({ timeMs: current[0]!.timeMs, clusters: current });
+      current = [];
+    }
+    current.push(c);
+  }
+  if (current.length > 0) groups.push({ timeMs: current[0]!.timeMs, clusters: current });
+  return groups;
+}
+
 // Unlike clusterMarkers (time-windowed, for the timeline lanes), this
 // collapses every occurrence of a mechanic in a phase into one icon
 // regardless of when it happened — the phase-summary cards below show one
@@ -241,45 +270,95 @@ function groupFailMechanics(
 // Rich replacement for a native `title` tooltip on a timeline marker: a small
 // Card showing which mechanic fired and, in its own row, which players it
 // hit — the plain-text `title` couldn't lay those out as separate lines.
+// One mechanic's worth of hover-card content (icon/name, its players, and
+// any timing sub-fields) — shared by MechanicHoverCard (one mechanic) and
+// MultiMechanicHoverCard (several, one section each) below.
+function MechanicSummary({
+  cluster,
+  icon,
+}: Readonly<{ cluster: MarkerCluster; icon: ReactNode }>) {
+  const t = useTranslations("batchAttempts.timeline");
+  return (
+    <>
+      <div className="flex items-center gap-1.5">
+        {icon}
+        <span className="text-foreground-strong text-xs font-semibold">{cluster.name}</span>
+      </div>
+      {cluster.players.length > 0 ? (
+        <div className="mt-1.5">
+          <div className="text-muted text-[10px] font-semibold uppercase tracking-wide">
+            {t("players", { count: cluster.players.length })}
+          </div>
+          <div className="text-foreground mt-0.5 text-[11px]">{cluster.players.join(", ")}</div>
+        </div>
+      ) : null}
+      {cluster.msSincePhaseEnd !== undefined ? (
+        <div className="mt-1.5 flex items-baseline gap-1">
+          <span className="text-foreground text-[11px] font-semibold">
+            {(cluster.msSincePhaseEnd / 1000).toFixed(1)}s
+          </span>
+          <span className="text-muted-strong text-[10px]">{t("sincePhaseEnd")}</span>
+        </div>
+      ) : null}
+      {cluster.msSinceInvisCast !== undefined ? (
+        <div className="mt-1 flex items-baseline gap-1">
+          <span className="text-foreground text-[11px] font-semibold">
+            {(cluster.msSinceInvisCast / 1000).toFixed(1)}s
+          </span>
+          <span className="text-muted-strong text-[10px]">{t("sinceInvisCastEnd")}</span>
+        </div>
+      ) : null}
+    </>
+  );
+}
+
 function MechanicHoverCard({
   cluster,
   icon,
   children,
 }: Readonly<{ cluster: MarkerCluster; icon: ReactNode; children: ReactNode }>) {
-  const t = useTranslations("batchAttempts.timeline");
   return (
     <HoverCard.Root openDelay={150} closeDelay={80}>
       <HoverCard.Trigger>{children}</HoverCard.Trigger>
       <HoverCard.Content size="1" sideOffset={6} className="!border-none !bg-transparent !p-0">
         <Card size="1" className="border-line bg-surface-2 min-w-[170px] border shadow-lg">
-          <div className="flex items-center gap-1.5">
-            {icon}
-            <span className="text-foreground-strong text-xs font-semibold">{cluster.name}</span>
-          </div>
-          {cluster.players.length > 0 ? (
-            <div className="border-line-soft mt-1.5 border-t pt-1.5">
-              <div className="text-muted text-[10px] font-semibold uppercase tracking-wide">
-                {t("players", { count: cluster.players.length })}
+          <MechanicSummary cluster={cluster} icon={icon} />
+        </Card>
+      </HoverCard.Content>
+    </HoverCard.Root>
+  );
+}
+
+// Same trigger/positioning as MechanicHoverCard, but for a group of
+// *different* mechanics that landed within MARKER_CLUSTER_GAP_MS of each
+// other (see groupClustersByTime) and now share one marker. Each mechanic
+// gets its own bordered, lighter-toned box (bg-surface against the popover's
+// bg-surface-2) instead of a thin divider — a divider read the same as the
+// one MechanicSummary already draws between a mechanic's title and its own
+// player list, so entry-vs-entry and title-vs-players were easy to confuse;
+// boxing each entry makes the two kinds of grouping visually distinct.
+function MultiMechanicHoverCard({
+  clusters,
+  children,
+}: Readonly<{ clusters: MarkerCluster[]; children: ReactNode }>) {
+  return (
+    <HoverCard.Root openDelay={150} closeDelay={80}>
+      <HoverCard.Trigger>{children}</HoverCard.Trigger>
+      <HoverCard.Content size="1" sideOffset={6} className="!border-none !bg-transparent !p-0">
+        <Card size="1" className="border-line bg-surface-2 min-w-[170px] border !p-1 shadow-lg">
+          <div className="flex flex-col gap-1">
+            {clusters.map((cluster) => (
+              <div
+                key={cluster.mechanicName}
+                className="border-line bg-surface rounded-sm border px-3 py-2.5"
+              >
+                <MechanicSummary
+                  cluster={cluster}
+                  icon={failMechanicIcon(cluster.mechanicName, { distinguishGreen: false })}
+                />
               </div>
-              <div className="text-foreground mt-0.5 text-[11px]">{cluster.players.join(", ")}</div>
-            </div>
-          ) : null}
-          {cluster.msSincePhaseEnd !== undefined ? (
-            <div className="mt-1.5 flex items-baseline gap-1">
-              <span className="text-foreground text-[11px] font-semibold">
-                {(cluster.msSincePhaseEnd / 1000).toFixed(1)}s
-              </span>
-              <span className="text-muted-strong text-[10px]">{t("sincePhaseEnd")}</span>
-            </div>
-          ) : null}
-          {cluster.msSinceInvisCast !== undefined ? (
-            <div className="mt-1 flex items-baseline gap-1">
-              <span className="text-foreground text-[11px] font-semibold">
-                {(cluster.msSinceInvisCast / 1000).toFixed(1)}s
-              </span>
-              <span className="text-muted-strong text-[10px]">{t("sinceInvisCastEnd")}</span>
-            </div>
-          ) : null}
+            ))}
+          </div>
         </Card>
       </HoverCard.Content>
     </HoverCard.Root>
@@ -1212,6 +1291,12 @@ export function BatchAttempts({
                   (selectedPlayer === null || m.player === selectedPlayer),
               ),
             );
+            // Different mechanics landing at nearly the same moment (e.g. a
+            // boss hit that auto-applies a debuff right after) would
+            // otherwise render as fully-overlapping icons with only the
+            // topmost hoverable — group them under one marker instead (see
+            // groupClustersByTime/MultiMechanicHoverCard).
+            const failGroups = groupClustersByTime(failClusters);
             return (
               <div key={a.logFileId}>
                 <button
@@ -1319,20 +1404,24 @@ export function BatchAttempts({
                           <Cross2Icon className="text-danger h-3.5 w-3.5" />
                         </span>
                       ))}
-                      {failClusters.map((c) => (
-                        <MechanicHoverCard
-                          key={`${c.mechanicName}-${c.timeMs}`}
-                          cluster={c}
-                          icon={failMechanicIcon(c.mechanicName, { distinguishGreen: false })}
-                        >
-                          <span
-                            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
-                            style={{ left: `${(c.timeMs / a.durationMs) * 100}%` }}
+                      {failGroups.map((group) => {
+                        const representative = group.clusters[0]!;
+                        return (
+                          <MultiMechanicHoverCard
+                            key={`${representative.mechanicName}-${group.timeMs}`}
+                            clusters={group.clusters}
                           >
-                            {failMechanicIcon(c.mechanicName, { distinguishGreen: false })}
-                          </span>
-                        </MechanicHoverCard>
-                      ))}
+                            <span
+                              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
+                              style={{ left: `${(group.timeMs / a.durationMs) * 100}%` }}
+                            >
+                              {failMechanicIcon(representative.mechanicName, {
+                                distinguishGreen: false,
+                              })}
+                            </span>
+                          </MultiMechanicHoverCard>
+                        );
+                      })}
                     </span>
                   </span>
                   <span className="text-muted-strong text-right text-xs">
