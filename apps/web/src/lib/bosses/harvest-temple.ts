@@ -344,6 +344,18 @@ const VISIBLE_CAST_MARKERS = new Set([
   "Invis.Cast",
 ]);
 
+// Zhaitan's Scream ("Scream.H") auto-applies "Infirmity" to every hit
+// player a moment later — unavoidable, unlike "Scream.H" itself isn't
+// unconditionally noise everywhere (see mechanic list above), because
+// "Infirmity" is a generic cross-phase debuff also applied by other,
+// genuinely avoidable sources elsewhere in the fight (see the "General"
+// section of the mechanic-name lists above). Verified against real logs:
+// every "Infirmity" event immediately following a "Scream.H" lands within
+// 0-2ms of it (same combat tick), while genuinely separate "Infirmity"
+// occurrences are tens of seconds from the nearest "Scream.H" — so a
+// generous few-second window can't accidentally swallow those.
+const ZHAITAN_SCREAM_INFIRMITY_WINDOW_MS = 3000;
+
 export const harvestTemple: BossCuration = {
   bossId: "43488",
   isMainPhase: (phaseName) =>
@@ -360,4 +372,12 @@ export const harvestTemple: BossCuration = {
   mechanicNames: MECHANIC_NAMES,
   noiseMechanicNames: NOISE_MECHANIC_NAMES,
   visibleCastMarkers: VISIBLE_CAST_MARKERS,
+  isContextualNoise: (event, allEvents) => {
+    if (event.mechanicName !== "Infirmity") return false;
+    return allEvents.some(
+      (e) =>
+        e.mechanicName === "Scream.H" &&
+        Math.abs(e.timeMs - event.timeMs) <= ZHAITAN_SCREAM_INFIRMITY_WINDOW_MS,
+    );
+  },
 };

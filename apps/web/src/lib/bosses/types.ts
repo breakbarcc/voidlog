@@ -34,4 +34,17 @@ export interface BossCuration {
   noiseMechanicNames: Set<string>;
   /** Synthetic "*.Cast" markers (see worker cast-markers.ts) individually curated with their own timeline icon in the UI. */
   visibleCastMarkers: Set<string>;
+  /**
+   * Whether `event` is noise given the *surrounding* mechanic events of the
+   * same encounter — for a mechanic that's only unconditionally unavoidable
+   * near a specific other mechanic (e.g. a debuff auto-applied a moment
+   * after a specific boss cast), but should still count as a genuine fail
+   * everywhere else it occurs. Checked in *addition* to `noiseMechanicNames`,
+   * not instead of it — that set stays for mechanics that are always noise
+   * regardless of context.
+   */
+  isContextualNoise?: (
+    event: { mechanicName: string; timeMs: number },
+    allEvents: { mechanicName: string; timeMs: number }[],
+  ) => boolean;
 }

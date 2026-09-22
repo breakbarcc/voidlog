@@ -6,7 +6,7 @@ import type { Locale } from "@/i18n/locale";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { phaseColor } from "@/components/phase-badge";
 import { translateMechanicName } from "@/lib/mechanic-names";
-import { isNoiseMechanic } from "@/lib/mechanics";
+import { isContextualNoiseMechanic, isNoiseMechanic } from "@/lib/mechanics";
 import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 
@@ -174,11 +174,17 @@ export default async function LogAnalysisPage(
               </div>
 
               {phase.mechanicEvents.some(
-                (e) => !isNoiseMechanic(encounter.bossId, e.mechanicName),
+                (e) =>
+                  !isNoiseMechanic(encounter.bossId, e.mechanicName) &&
+                  !isContextualNoiseMechanic(encounter.bossId, e, phase.mechanicEvents),
               ) ? (
                 <div className="border-line-soft mt-3 flex flex-wrap gap-2 border-t pt-3">
                   {phase.mechanicEvents
-                    .filter((event) => !isNoiseMechanic(encounter.bossId, event.mechanicName))
+                    .filter(
+                      (event) =>
+                        !isNoiseMechanic(encounter.bossId, event.mechanicName) &&
+                        !isContextualNoiseMechanic(encounter.bossId, event, phase.mechanicEvents),
+                    )
                     .map((event) => (
                       <span
                         key={event.id}

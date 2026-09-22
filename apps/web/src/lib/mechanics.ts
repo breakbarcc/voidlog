@@ -17,3 +17,17 @@ export function isNoiseMechanic(bossId: string, mechanicName: string): boolean {
 export function isVisibleCastMarker(bossId: string, mechanicName: string): boolean {
   return getBossCuration(bossId)?.visibleCastMarkers.has(mechanicName) ?? false;
 }
+
+/**
+ * Whether `event` is noise *given the other mechanic events around it* —
+ * see `BossCuration.isContextualNoise`. Always false for bosses without
+ * that hook (or without any events implicated), same fail-open default as
+ * `isNoiseMechanic`. Call alongside `isNoiseMechanic`, not instead of it.
+ */
+export function isContextualNoiseMechanic(
+  bossId: string,
+  event: { mechanicName: string; timeMs: number },
+  allEvents: { mechanicName: string; timeMs: number }[],
+): boolean {
+  return getBossCuration(bossId)?.isContextualNoise?.(event, allEvents) ?? false;
+}

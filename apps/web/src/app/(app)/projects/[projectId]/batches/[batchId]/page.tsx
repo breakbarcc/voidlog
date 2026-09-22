@@ -8,7 +8,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PhaseBadge } from "@/components/phase-badge";
 import { isMainPhase } from "@/lib/main-phases";
 import { translateMechanicName } from "@/lib/mechanic-names";
-import { isNoiseMechanic, isVisibleCastMarker } from "@/lib/mechanics";
+import { isContextualNoiseMechanic, isNoiseMechanic, isVisibleCastMarker } from "@/lib/mechanics";
 import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import {
@@ -185,7 +185,8 @@ function accumulatePhaseMechanics(
     if (
       event.mechanicName === "Dead" ||
       isVisibleCastMarker(bossId, event.mechanicName) ||
-      isNoiseMechanic(bossId, event.mechanicName)
+      isNoiseMechanic(bossId, event.mechanicName) ||
+      isContextualNoiseMechanic(bossId, event, mechanicEvents)
     )
       continue;
     const entry = agg.mechanics.get(event.mechanicName) ?? {
@@ -257,7 +258,8 @@ function accumulateRosterFails(rosterByAccount: Map<string, RosterAccumulator>, 
       if (
         event.mechanicName === "Dead" ||
         isVisibleCastMarker(encounter.bossId, event.mechanicName) ||
-        isNoiseMechanic(encounter.bossId, event.mechanicName)
+        isNoiseMechanic(encounter.bossId, event.mechanicName) ||
+        isContextualNoiseMechanic(encounter.bossId, event, phase.mechanicEvents)
       )
         continue;
       const entry = rosterByAccount.get(event.playerResult.account);
@@ -367,7 +369,10 @@ function buildAttemptRow(
     mechanics: encounter.phaseResults.flatMap((p) =>
       p.mechanicEvents
         .filter(
-          (m) => m.mechanicName !== "Dead" && !isNoiseMechanic(encounter.bossId, m.mechanicName),
+          (m) =>
+            m.mechanicName !== "Dead" &&
+            !isNoiseMechanic(encounter.bossId, m.mechanicName) &&
+            !isContextualNoiseMechanic(encounter.bossId, m, p.mechanicEvents),
         )
         .map((m) => ({
           timeMs: m.timeMs,
@@ -419,7 +424,12 @@ function buildAttemptPhase(
     // per-phase attack filter groups. isVisibleCastMarker is applied
     // client-side only when rendering the plain-text mechanic list.
     mechanics: eventsInRange
-      .filter((m) => m.mechanicName !== "Dead" && !isNoiseMechanic(encounter.bossId, m.mechanicName))
+      .filter(
+        (m) =>
+          m.mechanicName !== "Dead" &&
+          !isNoiseMechanic(encounter.bossId, m.mechanicName) &&
+          !isContextualNoiseMechanic(encounter.bossId, m, eventsInRange),
+      )
       .map((m) => ({
         mechanicName: m.mechanicName,
         name: translateMechanicName(encounter.bossId, locale, m.mechanicName, m.displayName),
