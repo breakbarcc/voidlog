@@ -144,13 +144,18 @@ function StatItem({
 
 const MARKER_CLUSTER_GAP_MS = 1000;
 
+interface PlayerHitCount {
+  player: string;
+  count: number;
+}
+
 interface MarkerCluster {
   timeMs: number;
   mechanicName: string;
   name: string;
   count: number;
-  /** Deduped, first-seen order — empty for mechanics with no attributable player (e.g. boss casts). */
-  players: string[];
+  /** Per-player hit count within this cluster, first-seen order — empty for mechanics with no attributable player (e.g. boss casts). A mechanic that fires more than once per player in the same cluster (e.g. multiple casts hitting the same target) shows up here as count > 1. */
+  players: PlayerHitCount[];
   /** Taken from the cluster's first event, like `name`/`timeMs` above — see AttemptRow.mechanics. */
   msSincePhaseEnd?: number;
   /** Taken from the cluster's first event — see AttemptRow.mechanics. */
@@ -183,16 +188,16 @@ function clusterMarkers(
   }
 
   function pushCluster(clusters: MarkerCluster[], mechanicName: string, group: typeof events) {
-    const players: string[] = [];
+    const counts = new Map<string, number>();
     for (const e of group) {
-      if (e.player && !players.includes(e.player)) players.push(e.player);
+      if (e.player) counts.set(e.player, (counts.get(e.player) ?? 0) + 1);
     }
     clusters.push({
       timeMs: group[0]!.timeMs,
       mechanicName,
       name: group[0]!.name,
       count: group.length,
-      players,
+      players: [...counts.entries()].map(([player, count]) => ({ player, count })),
       msSincePhaseEnd: group[0]!.msSincePhaseEnd,
       msSinceInvisCast: group[0]!.msSinceInvisCast,
     });
@@ -251,11 +256,18 @@ function groupClustersByTime(clusters: MarkerCluster[]): MechanicMarkerGroup[] {
 function groupFailMechanics(
   events: { mechanicName: string; name: string; player: string | null }[],
 ): MarkerCluster[] {
-  const byMechanic = new Map<string, { name: string; players: string[]; count: number }>();
+  const byMechanic = new Map<
+    string,
+    { name: string; playerCounts: Map<string, number>; count: number }
+  >();
   for (const e of events) {
-    const entry = byMechanic.get(e.mechanicName) ?? { name: e.name, players: [], count: 0 };
+    const entry = byMechanic.get(e.mechanicName) ?? {
+      name: e.name,
+      playerCounts: new Map<string, number>(),
+      count: 0,
+    };
     entry.count += 1;
-    if (e.player && !entry.players.includes(e.player)) entry.players.push(e.player);
+    if (e.player) entry.playerCounts.set(e.player, (entry.playerCounts.get(e.player) ?? 0) + 1);
     byMechanic.set(e.mechanicName, entry);
   }
   return [...byMechanic.entries()].map(([mechanicName, v]) => ({
@@ -263,7 +275,7 @@ function groupFailMechanics(
     mechanicName,
     name: v.name,
     count: v.count,
-    players: v.players,
+    players: [...v.playerCounts.entries()].map(([player, count]) => ({ player, count })),
   }));
 }
 
@@ -289,7 +301,11 @@ function MechanicSummary({
           <div className="text-muted text-[10px] font-semibold uppercase tracking-wide">
             {t("players", { count: cluster.players.length })}
           </div>
-          <div className="text-foreground mt-0.5 text-[11px]">{cluster.players.join(", ")}</div>
+          <div className="text-foreground mt-0.5 text-[11px]">
+            {cluster.players
+              .map((p) => (p.count > 1 ? `${p.player} ×${p.count}` : p.player))
+              .join(", ")}
+          </div>
         </div>
       ) : null}
       {cluster.msSincePhaseEnd !== undefined ? (
