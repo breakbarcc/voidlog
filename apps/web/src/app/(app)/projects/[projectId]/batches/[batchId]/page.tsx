@@ -102,11 +102,23 @@ interface LogFileLike {
 
 type Encounters = { logFile: LogFileLike; encounter: EncounterLike }[];
 
-/** Every LogFile that actually parsed into an EncounterResult, paired up for convenience. */
+/**
+ * Every LogFile that actually parsed into an EncounterResult, paired up for
+ * convenience and sorted by when the attempt actually happened in-game (not
+ * upload order — files can finish parsing, or even get uploaded, out of
+ * order, e.g. when several are dropped in at once). Same `recordedAt` ??
+ * `createdAt` fallback as the project overview page's batch-level sort.
+ */
 function collectEncounters(logFiles: readonly LogFileLike[]): Encounters {
-  return logFiles.flatMap((logFile) =>
-    logFile.encounterResult ? [{ logFile, encounter: logFile.encounterResult }] : [],
-  );
+  return logFiles
+    .flatMap((logFile) =>
+      logFile.encounterResult ? [{ logFile, encounter: logFile.encounterResult }] : [],
+    )
+    .sort(
+      (a, b) =>
+        (a.encounter.recordedAt ?? a.encounter.createdAt).getTime() -
+        (b.encounter.recordedAt ?? b.encounter.createdAt).getTime(),
+    );
 }
 
 /** Narrowest-reached main phase across every attempt in the batch — used for the "furthest phase" stat card. */
