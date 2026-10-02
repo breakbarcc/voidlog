@@ -86,7 +86,7 @@ export default async function DashboardPage() {
       data: {
         name,
         ownerId: currentSession.user.id,
-        members: { create: { userId: currentSession.user.id, role: ProjectRole.OWNER } },
+        members: { create: { userId: currentSession.user.id, role: ProjectRole.ADMIN } },
       },
     });
     redirect(`/projects/${project.id}`);
@@ -112,7 +112,8 @@ export default async function DashboardPage() {
                   {p.name}
                 </div>
                 <div className="text-muted mb-4 text-xs">
-                  {t("lastUpload")}: {p.lastBatchAt ? formatDate(p.lastBatchAt, locale) : tCommon("dash")}
+                  {t("lastUpload")}:{" "}
+                  {p.lastBatchAt ? formatDate(p.lastBatchAt, locale) : tCommon("dash")}
                 </div>
                 <div className="flex flex-col gap-3.5">
                   <div>
@@ -141,9 +142,7 @@ export default async function DashboardPage() {
               </Card>
             </Link>
           ))}
-          {summaries.length === 0 ? (
-            <p className="text-muted col-span-full">{t("empty")}</p>
-          ) : null}
+          {summaries.length === 0 ? <p className="text-muted col-span-full">{t("empty")}</p> : null}
         </div>
       </div>
     </div>

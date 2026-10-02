@@ -1,5 +1,8 @@
-import { LogFileStatus, prisma } from "@voidlog/db";
+import { LogFileStatus, ProjectRole, prisma } from "@voidlog/db";
 import { createLogParsingQueueEvents } from "@voidlog/shared";
+import { NextResponse } from "next/server";
+import { checkProjectRole } from "@/lib/projects";
+import { requireSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +15,17 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: Request, { params }: { params: Promise<{ batchId: string }> }) {
   const { batchId } = await params;
+  const session = await requireSession();
+
+  const batch = await prisma.uploadBatch.findUnique({
+    where: { id: batchId },
+    select: { projectId: true },
+  });
+  if (!batch) {
+    return NextResponse.json({ error: "Batch not found" }, { status: 404 });
+  }
+  const access = await checkProjectRole(batch.projectId, session.user.id, ProjectRole.VIEWER);
+  if (!access.ok) return access.response;
 
   const encoder = new TextEncoder();
   let closed = false;

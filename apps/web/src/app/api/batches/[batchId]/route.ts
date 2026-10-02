@@ -1,7 +1,7 @@
-import { prisma } from "@voidlog/db";
+import { ProjectRole, prisma } from "@voidlog/db";
 import { createStorageClient, deleteObjects } from "@voidlog/shared";
 import { NextResponse } from "next/server";
-import { requireProjectMembership } from "@/lib/projects";
+import { checkProjectRole } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 
 /** Renames a batch's label. */
@@ -16,7 +16,8 @@ export async function PATCH(
   if (!batch) {
     return NextResponse.json({ error: "Batch not found" }, { status: 404 });
   }
-  await requireProjectMembership(batch.projectId, session.user.id);
+  const access = await checkProjectRole(batch.projectId, session.user.id, ProjectRole.CONTRIBUTOR);
+  if (!access.ok) return access.response;
 
   const body = await request.json().catch(() => null);
   const label = typeof body?.label === "string" ? body.label.trim() : "";
@@ -51,7 +52,8 @@ export async function DELETE(
   if (!batch) {
     return NextResponse.json({ error: "Batch not found" }, { status: 404 });
   }
-  await requireProjectMembership(batch.projectId, session.user.id);
+  const access = await checkProjectRole(batch.projectId, session.user.id, ProjectRole.CONTRIBUTOR);
+  if (!access.ok) return access.response;
 
   const logFiles = await prisma.logFile.findMany({
     where: { batchId },

@@ -70,7 +70,7 @@ try {
     data: {
       name: "E2E Test Project",
       ownerId: owner.id,
-      members: { create: { userId: owner.id, role: "OWNER" } },
+      members: { create: { userId: owner.id, role: "ADMIN" } },
     },
   });
 

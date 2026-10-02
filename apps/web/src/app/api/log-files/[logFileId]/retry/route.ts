@@ -1,7 +1,7 @@
-import { LogFileStatus, prisma } from "@voidlog/db";
+import { LogFileStatus, ProjectRole, prisma } from "@voidlog/db";
 import { createLogParsingQueue } from "@voidlog/shared";
 import { NextResponse } from "next/server";
-import { requireProjectMembership } from "@/lib/projects";
+import { checkProjectRole } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 
 /**
@@ -23,7 +23,12 @@ export async function POST(
   if (!logFile) {
     return NextResponse.json({ error: "Log file not found" }, { status: 404 });
   }
-  await requireProjectMembership(logFile.batch.projectId, session.user.id);
+  const access = await checkProjectRole(
+    logFile.batch.projectId,
+    session.user.id,
+    ProjectRole.CONTRIBUTOR,
+  );
+  if (!access.ok) return access.response;
 
   if (logFile.status !== LogFileStatus.FAILED) {
     return NextResponse.json({ error: "Only failed log files can be retried" }, { status: 400 });

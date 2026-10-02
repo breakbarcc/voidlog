@@ -14,6 +14,8 @@ interface SidebarProps {
   currentProject?: {
     id: string;
     name: string;
+    /** Whether the current user may upload logs here (CONTRIBUTOR or above). */
+    canUpload: boolean;
   };
 }
 
@@ -91,12 +93,14 @@ export function Sidebar({ userName, userImage, currentProject }: Readonly<Sideba
             <NavDot shape="circle" />
             {t("roster")}
           </NavLink>
-          <Link
-            href={`/projects/${currentProject.id}/batches/new`}
-            className="bg-primary/10 text-primary hover:bg-primary/15 mt-3.5 flex items-center justify-center gap-2 rounded-sm px-2.5 py-2 text-sm font-semibold"
-          >
-            {t("uploadLogs")}
-          </Link>
+          {currentProject.canUpload ? (
+            <Link
+              href={`/projects/${currentProject.id}/batches/new`}
+              className="bg-primary/10 text-primary hover:bg-primary/15 mt-3.5 flex items-center justify-center gap-2 rounded-sm px-2.5 py-2 text-sm font-semibold"
+            >
+              {t("uploadLogs")}
+            </Link>
+          ) : null}
         </>
       ) : null}
 

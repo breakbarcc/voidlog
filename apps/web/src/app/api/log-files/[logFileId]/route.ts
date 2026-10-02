@@ -1,7 +1,7 @@
-import { prisma } from "@voidlog/db";
+import { ProjectRole, prisma } from "@voidlog/db";
 import { createStorageClient, deleteObjects } from "@voidlog/shared";
 import { NextResponse } from "next/server";
-import { requireProjectMembership } from "@/lib/projects";
+import { checkProjectRole } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 
 /**
@@ -24,7 +24,12 @@ export async function DELETE(
   if (!logFile) {
     return NextResponse.json({ error: "Log file not found" }, { status: 404 });
   }
-  await requireProjectMembership(logFile.batch.projectId, session.user.id);
+  const access = await checkProjectRole(
+    logFile.batch.projectId,
+    session.user.id,
+    ProjectRole.CONTRIBUTOR,
+  );
+  if (!access.ok) return access.response;
 
   const storageKeys = [logFile.storageKeyRaw, logFile.storageKeyJson].filter((key): key is string =>
     Boolean(key),

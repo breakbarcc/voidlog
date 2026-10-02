@@ -1,4 +1,4 @@
-import { LogFileStatus, MechanicCategory, prisma } from "@voidlog/db";
+import { LogFileStatus, MechanicCategory, ProjectRole, prisma } from "@voidlog/db";
 import { Card } from "@radix-ui/themes";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -9,7 +9,7 @@ import { PhaseBadge } from "@/components/phase-badge";
 import { isMainPhase } from "@/lib/main-phases";
 import { translateMechanicName } from "@/lib/mechanic-names";
 import { isContextualNoiseMechanic, isNoiseMechanic, isVisibleCastMarker } from "@/lib/mechanics";
-import { requireProjectMembership } from "@/lib/projects";
+import { hasRole, requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import {
   BatchAttempts,
@@ -232,7 +232,8 @@ function computeBatchPhaseStats(
       // every attempt in this batch resolved them successfully, still show
       // a 0-count chip rather than silently omitting Greens.
       const sorted = [...agg.mechanics.values()].sort((a, b) => b.count - a.count);
-      const green = sorted.find((m) => m.mechanicName === "F.Green") ??
+      const green =
+        sorted.find((m) => m.mechanicName === "F.Green") ??
         (agg.hasGreenMechanic
           ? {
               mechanicName: "F.Green",
@@ -267,7 +268,10 @@ interface RosterAccumulator {
 
 // Same fail definition as the phase-aggregation stats above: everything
 // except deaths, curated cast markers, and noise mechanics.
-function accumulateRosterFails(rosterByAccount: Map<string, RosterAccumulator>, encounter: Encounters[number]["encounter"]) {
+function accumulateRosterFails(
+  rosterByAccount: Map<string, RosterAccumulator>,
+  encounter: Encounters[number]["encounter"],
+) {
   for (const phase of encounter.phaseResults) {
     for (const event of phase.mechanicEvents) {
       if (!event.playerResult) continue;
@@ -400,9 +404,7 @@ function buildAttemptRow(
           msSinceInvisCast: readMsSinceInvisCast(m.context),
         })),
     ),
-    phases: mainPhases.map((p) =>
-      buildAttemptPhase(p, mainPhasesByStart, encounter, locale),
-    ),
+    phases: mainPhases.map((p) => buildAttemptPhase(p, mainPhasesByStart, encounter, locale)),
   };
 }
 
@@ -461,6 +463,7 @@ export default async function BatchDetailPage(
   const { projectId, batchId } = await props.params;
   const session = await requireSession();
   const membership = await requireProjectMembership(projectId, session.user.id);
+  const canEdit = hasRole(membership.role, ProjectRole.CONTRIBUTOR);
   const locale = (await getLocale()) as Locale;
   const t = await getTranslations("batchDetail");
   const tCommon = await getTranslations("common");
@@ -530,9 +533,7 @@ export default async function BatchDetailPage(
   const furthestPhase = computeFurthestPhase(encounters);
   const batchPhaseStats = computeBatchPhaseStats(encounters, batchBossId, attempts, locale);
   const batchRoster = computeBatchRoster(encounters);
-  const attemptRows: AttemptRow[] = encounters.map((entry, i) =>
-    buildAttemptRow(entry, i, locale),
-  );
+  const attemptRows: AttemptRow[] = encounters.map((entry, i) => buildAttemptRow(entry, i, locale));
 
   return (
     <div className="px-10 py-8">
@@ -545,12 +546,14 @@ export default async function BatchDetailPage(
       />
       <div className="mb-6 flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <BatchLabelEditor batchId={batchId} label={batch.label} />
+          <BatchLabelEditor batchId={batchId} label={batch.label} canEdit={canEdit} />
           {allBatches.length > 1 ? (
             <BatchSwitcher projectId={projectId} batches={allBatches} currentBatchId={batchId} />
           ) : null}
         </div>
-        <DeleteBatchButton projectId={projectId} batchId={batchId} batchLabel={batch.label} />
+        {canEdit ? (
+          <DeleteBatchButton projectId={projectId} batchId={batchId} batchLabel={batch.label} />
+        ) : null}
       </div>
 
       <div className="mb-6 grid grid-cols-2 gap-3.5 lg:grid-cols-5">
@@ -611,9 +614,7 @@ export default async function BatchDetailPage(
 
       {failedLogFiles.length > 0 ? (
         <div className="mb-6">
-          <div className="text-muted-strong mb-2.5 text-sm font-semibold">
-            {t("failedUploads")}
-          </div>
+          <div className="text-muted-strong mb-2.5 text-sm font-semibold">{t("failedUploads")}</div>
           <div className="border-line bg-surface divide-line-soft flex flex-col divide-y rounded-sm border">
             {failedLogFiles.map((logFile) => (
               <div key={logFile.id} className="flex items-center justify-between gap-4 px-4 py-3">
@@ -625,10 +626,12 @@ export default async function BatchDetailPage(
                     <div className="text-danger mt-1 truncate text-xs">{logFile.errorMessage}</div>
                   ) : null}
                 </div>
-                <div className="flex items-start gap-2">
-                  <RetryLogButton logFileId={logFile.id} />
-                  <RemoveLogButton logFileId={logFile.id} />
-                </div>
+                {canEdit ? (
+                  <div className="flex items-start gap-2">
+                    <RetryLogButton logFileId={logFile.id} />
+                    <RemoveLogButton logFileId={logFile.id} />
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
@@ -638,6 +641,7 @@ export default async function BatchDetailPage(
       <BatchAttempts
         projectId={projectId}
         batchId={batchId}
+        canEdit={canEdit}
         bossId={batchBossId}
         attempts={attemptRows}
         batchPhaseStats={batchPhaseStats}

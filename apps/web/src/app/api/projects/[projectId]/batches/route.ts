@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
-import { prisma } from "@voidlog/db";
+import { ProjectRole, prisma } from "@voidlog/db";
 import { createPresignedUploadUrl, createStorageClient } from "@voidlog/shared";
 import { NextResponse } from "next/server";
-import { requireProjectMembership } from "@/lib/projects";
+import { checkProjectRole } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 
 interface CreateBatchBody {
@@ -23,7 +23,8 @@ export async function POST(
 ) {
   const { projectId } = await params;
   const session = await requireSession();
-  await requireProjectMembership(projectId, session.user.id);
+  const access = await checkProjectRole(projectId, session.user.id, ProjectRole.CONTRIBUTOR);
+  if (!access.ok) return access.response;
 
   const body = (await request.json()) as CreateBatchBody;
   if (!body.label?.trim() || !Array.isArray(body.files) || body.files.length === 0) {
@@ -43,7 +44,7 @@ export async function POST(
     body.files.map(async (file) => {
       const storageKeyRaw = `raw/${batch.id}/${randomUUID()}-${sanitizeFileName(file.fileName)}`;
       const logFile = await prisma.logFile.create({
-        data: { batchId: batch.id, storageKeyRaw },
+        data: { batchId: batch.id, storageKeyRaw, uploadedById: session.user.id },
       });
       const uploadUrl = await createPresignedUploadUrl(storageClient, storageKeyRaw, {
         contentType: "application/octet-stream",

@@ -289,10 +289,7 @@ function groupFailMechanics(
 // One mechanic's worth of hover-card content (icon/name, its players, and
 // any timing sub-fields) — shared by MechanicHoverCard (one mechanic) and
 // MultiMechanicHoverCard (several, one section each) below.
-function MechanicSummary({
-  cluster,
-  icon,
-}: Readonly<{ cluster: MarkerCluster; icon: ReactNode }>) {
+function MechanicSummary({ cluster, icon }: Readonly<{ cluster: MarkerCluster; icon: ReactNode }>) {
   const t = useTranslations("batchAttempts.timeline");
   return (
     <>
@@ -401,15 +398,7 @@ function ModeBadge({ isCM }: Readonly<{ isCM: boolean }>) {
 }
 
 type AttackType =
-  | "jaws"
-  | "slam"
-  | "beam"
-  | "shockwave"
-  | "scream"
-  | "green"
-  | "spreadBait"
-  | "redBait"
-  | "invis";
+  "jaws" | "slam" | "beam" | "shockwave" | "scream" | "green" | "spreadBait" | "redBait" | "invis";
 
 // The glyphs below (attackType/ATTACK_LABEL too) are inherently specific
 // to Harvest Temple CM's curated cast markers (see cast-markers.ts on the
@@ -754,7 +743,9 @@ function failMechanicIcon(
   const size = options?.size ?? "sm";
   if (mechanicName === "Downed") {
     // eslint-disable-next-line @next/next/no-img-element -- fixed-size static icon, next/image is unnecessary overhead here
-    return <img src="/icons/downed.png" alt="" className={size === "md" ? "h-5 w-3" : "h-4 w-2.5"} />;
+    return (
+      <img src="/icons/downed.png" alt="" className={size === "md" ? "h-5 w-3" : "h-4 w-2.5"} />
+    );
   }
   if (mechanicName === "Debilitated") {
     return (
@@ -776,7 +767,9 @@ function failMechanicIcon(
     return <AttackGlyph type="green" />;
   }
   return (
-    <ExclamationTriangleIcon className={`text-warning ${size === "md" ? "h-4 w-4" : "h-3.5 w-3.5"}`} />
+    <ExclamationTriangleIcon
+      className={`text-warning ${size === "md" ? "h-4 w-4" : "h-3.5 w-3.5"}`}
+    />
   );
 }
 
@@ -844,9 +837,7 @@ function MechanicFilterAccordion({
           <span className="text-muted-strong text-xs font-semibold">{t("player")}</span>
           <Select.Root
             value={selectedPlayer ?? ALL_PLAYERS_VALUE}
-            onValueChange={(value) =>
-              onSelectPlayer(value === ALL_PLAYERS_VALUE ? null : value)
-            }
+            onValueChange={(value) => onSelectPlayer(value === ALL_PLAYERS_VALUE ? null : value)}
           >
             <Select.Trigger variant="surface" className="min-w-[160px]" />
             <Select.Content>
@@ -1011,9 +1002,12 @@ export function BatchAttempts({
   attempts,
   batchPhaseStats,
   roster,
+  canEdit,
 }: Readonly<{
   projectId: string;
   batchId: string;
+  /** Contributors and admins may delete logs; viewers only read. */
+  canEdit: boolean;
   bossId: string;
   attempts: AttemptRow[];
   batchPhaseStats: BatchPhaseStat[];
@@ -1200,10 +1194,12 @@ export function BatchAttempts({
                   </Link>
                 </Table.Cell>
                 <Table.Cell className="text-right">
-                  <RemoveLogButton
-                    logFileId={a.logFileId}
-                    confirmMessage={t("table.deleteConfirm", { n: a.n })}
-                  />
+                  {canEdit ? (
+                    <RemoveLogButton
+                      logFileId={a.logFileId}
+                      confirmMessage={t("table.deleteConfirm", { n: a.n })}
+                    />
+                  ) : null}
                 </Table.Cell>
               </Table.Row>
             ))}
@@ -1484,7 +1480,10 @@ export function BatchAttempts({
                           )
                         }
                       />
-                      <StatItem label={tTimeline("stats.duration")} value={formatDuration(a.durationMs)} />
+                      <StatItem
+                        label={tTimeline("stats.duration")}
+                        value={formatDuration(a.durationMs)}
+                      />
                       <StatItem
                         label={tTimeline("stats.reveals")}
                         value={String(
@@ -1619,9 +1618,7 @@ export function BatchAttempts({
                 <Table.Cell className="text-warning font-semibold">
                   {entry.debilitatedHits}
                 </Table.Cell>
-                <Table.Cell className="text-warning font-semibold">
-                  {entry.revealCount}
-                </Table.Cell>
+                <Table.Cell className="text-warning font-semibold">{entry.revealCount}</Table.Cell>
               </Table.Row>
             ))}
             {roster.length === 0 ? (

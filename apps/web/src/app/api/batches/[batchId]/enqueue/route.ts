@@ -1,6 +1,8 @@
-import { LogFileStatus, prisma } from "@voidlog/db";
+import { LogFileStatus, ProjectRole, prisma } from "@voidlog/db";
 import { createLogParsingQueue } from "@voidlog/shared";
 import { NextResponse } from "next/server";
+import { checkProjectRole } from "@/lib/projects";
+import { requireSession } from "@/lib/session";
 
 /**
  * Enqueues one log-parsing job per pending LogFile in the batch (ADR-004).
@@ -12,6 +14,17 @@ export async function POST(
   { params }: { params: Promise<{ batchId: string }> },
 ) {
   const { batchId } = await params;
+  const session = await requireSession();
+
+  const batch = await prisma.uploadBatch.findUnique({
+    where: { id: batchId },
+    select: { projectId: true },
+  });
+  if (!batch) {
+    return NextResponse.json({ error: "Batch not found" }, { status: 404 });
+  }
+  const access = await checkProjectRole(batch.projectId, session.user.id, ProjectRole.CONTRIBUTOR);
+  if (!access.ok) return access.response;
 
   const pendingLogFiles = await prisma.logFile.findMany({
     where: { batchId, status: LogFileStatus.PENDING },

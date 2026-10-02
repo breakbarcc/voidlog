@@ -9,7 +9,8 @@ import { useTranslations } from "next-intl";
 export function BatchLabelEditor({
   batchId,
   label,
-}: Readonly<{ batchId: string; label: string }>) {
+  canEdit,
+}: Readonly<{ batchId: string; label: string; canEdit: boolean }>) {
   const router = useRouter();
   const t = useTranslations("batchLabelEditor");
   const tCommon = useTranslations("common");
@@ -59,14 +60,16 @@ export function BatchLabelEditor({
     return (
       <div className="flex items-center gap-2">
         <h1 className="font-heading text-foreground-strong text-2xl font-bold">{label}</h1>
-        <button
-          type="button"
-          onClick={startEditing}
-          title={t("rename")}
-          className="text-muted hover:text-foreground"
-        >
-          <Pencil1Icon className="h-4 w-4" />
-        </button>
+        {canEdit ? (
+          <button
+            type="button"
+            onClick={startEditing}
+            title={t("rename")}
+            className="text-muted hover:text-foreground"
+          >
+            <Pencil1Icon className="h-4 w-4" />
+          </button>
+        ) : null}
       </div>
     );
   }

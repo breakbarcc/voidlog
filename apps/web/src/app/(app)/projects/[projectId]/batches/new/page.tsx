@@ -1,6 +1,7 @@
+import { ProjectRole } from "@voidlog/db";
 import { getTranslations } from "next-intl/server";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { requireProjectMembership } from "@/lib/projects";
+import { requireProjectRole } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import { BatchUploadForm } from "./batch-upload-form";
 
@@ -9,7 +10,7 @@ export default async function NewBatchPage(
 ) {
   const { projectId } = await props.params;
   const session = await requireSession();
-  const membership = await requireProjectMembership(projectId, session.user.id);
+  const membership = await requireProjectRole(projectId, session.user.id, ProjectRole.CONTRIBUTOR);
   const t = await getTranslations("batchesNew");
   const tSidebar = await getTranslations("sidebar");
 

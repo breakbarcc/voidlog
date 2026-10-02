@@ -1,7 +1,7 @@
-import { prisma } from "@voidlog/db";
+import { ProjectRole, prisma } from "@voidlog/db";
 import { createStorageClient, deleteObjects } from "@voidlog/shared";
 import { NextResponse } from "next/server";
-import { requireProjectOwnership } from "@/lib/projects";
+import { checkProjectRole } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 
 /**
@@ -18,7 +18,8 @@ export async function DELETE(
 ) {
   const { projectId } = await params;
   const session = await requireSession();
-  await requireProjectOwnership(projectId, session.user.id);
+  const access = await checkProjectRole(projectId, session.user.id, ProjectRole.ADMIN);
+  if (!access.ok) return access.response;
 
   const logFiles = await prisma.logFile.findMany({
     where: { batch: { projectId } },

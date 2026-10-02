@@ -29,6 +29,7 @@ model User {
   sessions      Session[]
   ownedProjects Project[]       @relation("ProjectOwner")
   memberships   ProjectMember[]
+  uploadedLogs  LogFile[]
 
   @@map("users")
 }
@@ -86,16 +87,18 @@ model Project {
   @@map("projects")
 }
 
+/// Linear hierarchy: VIEWER < CONTRIBUTOR < ADMIN (see apps/web/src/lib/projects.ts).
 enum ProjectRole {
-  OWNER
-  MEMBER
+  ADMIN
+  CONTRIBUTOR
+  VIEWER
 }
 
 model ProjectMember {
   id        String      @id @default(cuid())
   projectId String
   userId    String
-  role      ProjectRole @default(MEMBER)
+  role      ProjectRole @default(VIEWER)
   createdAt DateTime    @default(now())
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -132,10 +135,13 @@ model LogFile {
   storageKeyJson    String?
   externalReportUrl String?
   errorMessage      String?
+  /// Null for logs uploaded before attribution existed, or once the uploader's account is gone.
+  uploadedById      String?
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
   batch           UploadBatch      @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  uploadedBy      User?            @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
   encounterResult EncounterResult?
 
   @@map("log_files")

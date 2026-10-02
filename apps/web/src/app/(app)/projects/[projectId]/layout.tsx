@@ -1,6 +1,7 @@
+import { ProjectRole } from "@voidlog/db";
 import { getTranslations } from "next-intl/server";
 import { Sidebar } from "@/components/sidebar";
-import { requireProjectMembership } from "@/lib/projects";
+import { hasRole, requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 
 export default async function ProjectLayout(props: LayoutProps<"/projects/[projectId]">) {
@@ -14,7 +15,11 @@ export default async function ProjectLayout(props: LayoutProps<"/projects/[proje
       <Sidebar
         userName={session.user.name ?? tCommon("account")}
         userImage={session.user.image}
-        currentProject={{ id: projectId, name: membership.project.name }}
+        currentProject={{
+          id: projectId,
+          name: membership.project.name,
+          canUpload: hasRole(membership.role, ProjectRole.CONTRIBUTOR),
+        }}
       />
       <div className="min-w-0 flex-1 overflow-y-auto">{props.children}</div>
     </div>

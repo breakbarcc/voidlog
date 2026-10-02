@@ -5,7 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PhaseBadge } from "@/components/phase-badge";
 import { isMainPhase } from "@/lib/main-phases";
-import { requireProjectMembership } from "@/lib/projects";
+import { hasRole, requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import { DeleteProjectButton } from "./delete-project-button";
 import { DpsTrendChart, GreenFailTrendChart, ShockwaveTrendChart } from "./trend-chart";
@@ -151,13 +151,15 @@ export default async function ProjectDetailPage(
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Link
-            href={`/projects/${projectId}/batches/new`}
-            className="bg-primary text-primary-foreground inline-flex h-8 items-center justify-center rounded-sm px-3.5 text-sm font-semibold"
-          >
-            {t("uploadBatch")}
-          </Link>
-          {membership.role === ProjectRole.OWNER ? (
+          {hasRole(membership.role, ProjectRole.CONTRIBUTOR) ? (
+            <Link
+              href={`/projects/${projectId}/batches/new`}
+              className="bg-primary text-primary-foreground inline-flex h-8 items-center justify-center rounded-sm px-3.5 text-sm font-semibold"
+            >
+              {t("uploadBatch")}
+            </Link>
+          ) : null}
+          {membership.role === ProjectRole.ADMIN ? (
             <DeleteProjectButton projectId={projectId} projectName={membership.project.name} />
           ) : null}
         </div>
