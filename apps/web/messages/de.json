@@ -40,7 +40,36 @@
     "currentProject": "Aktuelles Projekt",
     "history": "Verlauf & Trend",
     "roster": "Roster",
-    "uploadLogs": "+ Logs hochladen"
+    "uploadLogs": "+ Logs hochladen",
+    "account": "Account",
+    "logout": "Abmelden"
+  },
+  "account": {
+    "title": "Account",
+    "memberSince": "Mitglied seit {date}",
+    "via": "Angemeldet über Discord",
+    "stats": {
+      "title": "Statistiken",
+      "logs": "Logs",
+      "parsed": "Ausgewertet",
+      "ownedProjects": "Eigene Projekte",
+      "memberships": "Mitgliedschaften",
+      "note": "Logs und Auswertungen zählen alle Projekte, deren Eigentümer du bist."
+    },
+    "danger": {
+      "title": "Danger Zone",
+      "error": "Aktion fehlgeschlagen ({status})",
+      "logsTitle": "Alle Logs löschen",
+      "logsDescription": "Entfernt alle Logs, Batches und Auswertungen aus deinen eigenen Projekten. Die Projekte selbst bleiben bestehen.",
+      "logsButton": "Alle Logs löschen",
+      "logsConfirmTitle": "Alle Logs löschen?",
+      "logsConfirm": "{count, plural, one {# Log} other {# Logs}} und alle zugehörigen Auswertungen werden dauerhaft gelöscht. Das betrifft auch Mitglieder deiner Projekte und kann nicht rückgängig gemacht werden.",
+      "accountTitle": "Account löschen",
+      "accountDescription": "Löscht deinen Account samt aller eigenen Projekte, Logs und Auswertungen.",
+      "accountButton": "Account löschen",
+      "accountConfirmTitle": "Account wirklich löschen?",
+      "accountConfirm": "Dein Account, alle deine Projekte (auch für andere Mitglieder) und alle zugehörigen Logs werden dauerhaft gelöscht. Das kann nicht rückgängig gemacht werden."
+    }
   },
   "common": {
     "dash": "—",

@@ -40,7 +40,36 @@
     "currentProject": "Current Project",
     "history": "History & Trend",
     "roster": "Roster",
-    "uploadLogs": "+ Upload logs"
+    "uploadLogs": "+ Upload logs",
+    "account": "Account",
+    "logout": "Log out"
+  },
+  "account": {
+    "title": "Account",
+    "memberSince": "Member since {date}",
+    "via": "Signed in with Discord",
+    "stats": {
+      "title": "Statistics",
+      "logs": "Logs",
+      "parsed": "Parsed",
+      "ownedProjects": "Owned projects",
+      "memberships": "Memberships",
+      "note": "Logs and parsed results count all projects you own."
+    },
+    "danger": {
+      "title": "Danger zone",
+      "error": "Action failed ({status})",
+      "logsTitle": "Delete all logs",
+      "logsDescription": "Removes all logs, batches and results from the projects you own. The projects themselves stay.",
+      "logsButton": "Delete all logs",
+      "logsConfirmTitle": "Delete all logs?",
+      "logsConfirm": "{count, plural, one {# log} other {# logs}} and all related results will be permanently deleted. This also affects members of your projects and cannot be undone.",
+      "accountTitle": "Delete account",
+      "accountDescription": "Deletes your account along with all projects, logs and results you own.",
+      "accountButton": "Delete account",
+      "accountConfirmTitle": "Really delete your account?",
+      "accountConfirm": "Your account, all your projects (also for other members) and all related logs will be permanently deleted. This cannot be undone."
+    }
   },
   "common": {
     "dash": "—",

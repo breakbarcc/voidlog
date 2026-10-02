@@ -1,5 +1,6 @@
 "use client";
 
+import { Avatar, DropdownMenu } from "@radix-ui/themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -9,6 +10,7 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 
 interface SidebarProps {
   userName: string;
+  userImage?: string | null;
   currentProject?: {
     id: string;
     name: string;
@@ -46,7 +48,7 @@ function NavDot({ shape = "square" }: Readonly<{ shape?: "square" | "circle" | "
   return <span className={`h-2 w-2 shrink-0 bg-current opacity-70 ${NAV_DOT_RADIUS[shape]}`} />;
 }
 
-export function Sidebar({ userName, currentProject }: Readonly<SidebarProps>) {
+export function Sidebar({ userName, userImage, currentProject }: Readonly<SidebarProps>) {
   const pathname = usePathname();
   const t = useTranslations("sidebar");
 
@@ -104,14 +106,31 @@ export function Sidebar({ userName, currentProject }: Readonly<SidebarProps>) {
         <LanguageSwitcher />
       </div>
 
-      <button
-        type="button"
-        onClick={() => signOut({ redirectTo: "/login" })}
-        className="text-muted hover:text-foreground flex items-center gap-2.5 rounded-sm px-2.5 py-2 text-left text-[12.5px]"
-      >
-        <span className="bg-line h-[22px] w-[22px] shrink-0 rounded-full" />
-        <span className="truncate">{userName}</span>
-      </button>
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger>
+          <button
+            type="button"
+            className="text-muted hover:text-foreground flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-left text-[12.5px]"
+          >
+            <Avatar
+              size="1"
+              radius="full"
+              src={userImage ?? undefined}
+              fallback={userName.charAt(0).toUpperCase()}
+            />
+            <span className="truncate">{userName}</span>
+          </button>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content side="top" align="start">
+          <DropdownMenu.Item asChild>
+            <Link href="/account">{t("account")}</Link>
+          </DropdownMenu.Item>
+          <DropdownMenu.Separator />
+          <DropdownMenu.Item onSelect={() => signOut({ redirectTo: "/login" })}>
+            {t("logout")}
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
     </aside>
   );
 }

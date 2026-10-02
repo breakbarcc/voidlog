@@ -94,7 +94,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar userName={session.user.name ?? accountFallback} />
+      <Sidebar userName={session.user.name ?? accountFallback} userImage={session.user.image} />
       <div className="min-w-0 flex-1 overflow-y-auto px-10 py-8">
         <div className="mb-6 flex items-end justify-between">
           <div>
