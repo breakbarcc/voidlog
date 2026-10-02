@@ -19,6 +19,11 @@ export interface TrendPoint {
   shockwaveHitRate: number | null;
 }
 
+function formatCompactNumber(v: number): string {
+  if (Math.abs(v) < 1000) return String(Math.round(v));
+  return `${parseFloat((v / 1000).toFixed(1))}k`;
+}
+
 function formatAxisDate(date: Date, locale: Locale): string {
   return formatDate(date, locale, { day: "2-digit", month: "2-digit" });
 }
@@ -30,6 +35,7 @@ function SingleLineChart({
   color,
   label,
   formatValue,
+  formatTick = formatValue,
 }: Readonly<{
   points: TrendPoint[];
   dataKey: string;
@@ -37,6 +43,7 @@ function SingleLineChart({
   color: string;
   label: string;
   formatValue: (v: number) => string;
+  formatTick?: (v: number) => string;
 }>) {
   const locale = useLocale() as Locale;
   const data = points.map((p) => ({
@@ -64,7 +71,7 @@ function SingleLineChart({
           tickLine={false}
           axisLine={false}
           width={44}
-          tickFormatter={(v: number) => formatValue(v)}
+          tickFormatter={(v: number) => formatTick(v)}
         />
         <ChartTooltip
           content={<ChartTooltipContent formatter={(value) => formatValue(Number(value))} />}
@@ -92,6 +99,7 @@ export function DpsTrendChart({ points }: Readonly<{ points: TrendPoint[] }>) {
       color="var(--primary)"
       label={t("avgGroupDps")}
       formatValue={(v) => formatNumber(Math.round(v), locale)}
+      formatTick={formatCompactNumber}
     />
   );
 }
