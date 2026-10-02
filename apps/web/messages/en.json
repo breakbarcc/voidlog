@@ -32,7 +32,7 @@
     ],
     "bossNote": "Harvest Temple CM (The Dragon Void) is fully curated today, with translated mechanics and phase colors. Other bosses are already parsed without any extra setup.",
     "whyDiscordTitle": "Why sign in with Discord?",
-    "whyDiscord": "Training groups organize themselves on Discord. Signing in lets voidlog recognize you, tie projects and logs to your account and keep them from outside access. You need no extra password and no separate registration. voidlog only reads your Discord profile (name, avatar and email address) and never posts on your behalf."
+    "whyDiscord": "Signing in lets voidlog recognize you, tie projects and logs to your account and keep them from outside access. You need no extra password and no separate registration. voidlog only reads your Discord profile (name, avatar and email address) and never posts on your behalf."
   },
   "sidebar": {
     "overview": "Overview",
