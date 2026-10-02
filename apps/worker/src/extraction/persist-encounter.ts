@@ -394,7 +394,7 @@ export async function persistExtractedEncounter(
         }
         invisCasts.sort((a, b) => a.timeMs - b.timeMs);
 
-        for (const invisCast of invisCasts) {
+        for (const [invisCastIndex, invisCast] of invisCasts.entries()) {
           // Anchors both this event and its reveals to the same "previous
           // phase ended" reference the comparison tool uses, so a value like
           // "msSincePhaseEnd" lines up 1:1 with what that tool shows —
@@ -416,27 +416,46 @@ export async function persistExtractedEncounter(
             },
           });
 
-          // Bounded by the buff's own duration from when the channel
-          // actually finishes (cast start + its own duration), not from
-          // cast start — see stealthDurationMs doc.
-          const stealthExpiresAt =
-            invisCast.timeMs + invisCast.durationMs + config.stealthDurationMs;
+          // Candidates are gathered up to the NEXT invis cast, wider than
+          // `stealthDurationMs` below — a reaction-chain burst can run a
+          // player's reveal past the point the squad's own stealth would
+          // have naturally expired (confirmed on a real log: a 3-player call
+          // whose 3rd reveal landed 178ms past `stealthExpiresAt`, which used
+          // to split one real call into a wrongly-persisted chain of 2).
+          // `chainCluster` below decides where a burst actually ends, via
+          // consecutive-gap distance — this wide collection just has to not
+          // cut a real chain short before that check runs. Whether a
+          // post-`stealthExpiresAt` reveal is actually *kept* is decided
+          // afterward, per cluster (see `isolatedReveals` below).
+          const windowEnd = invisCasts[invisCastIndex + 1]?.timeMs ?? Infinity;
           const revealsInWindow: { time: number; playerName: string }[] = [];
           for (const player of players) {
             const buffEntry = player.buffUptimesActive?.find((b) => b.id === config.revealBuffId);
             const revealTime = (buffEntry?.states ?? []).find(
-              ([time, presence]) =>
-                presence === 1 && time >= invisCast.timeMs && time <= stealthExpiresAt,
+              ([time, presence]) => presence === 1 && time >= invisCast.timeMs && time < windowEnd,
             )?.[0];
             if (revealTime === undefined) continue;
             revealsInWindow.push({ time: revealTime, playerName: player.name });
           }
           revealsInWindow.sort((a, b) => a.time - b.time);
 
-          const isolatedReveals = chainCluster(
-            revealsInWindow,
-            config.groupRevealClusterGapMs,
-          ).filter((cluster) => cluster.length < config.groupRevealMinSize);
+          // Bounded by the buff's own duration from when the channel
+          // actually finishes (cast start + its own duration), not from
+          // cast start — see stealthDurationMs doc.
+          const stealthExpiresAt =
+            invisCast.timeMs + invisCast.durationMs + config.stealthDurationMs;
+
+          const isolatedReveals = chainCluster(revealsInWindow, config.groupRevealClusterGapMs)
+            .filter((cluster) => cluster.length < config.groupRevealMinSize)
+            // A cluster below group-call size only persists its members
+            // that are within the actual stealth window — a chain member
+            // used purely to let the cluster "complete" and prove it's too
+            // small to be a call is not, on its own, a late mistake; a
+            // reveal that only happens after `stealthExpiresAt` and never
+            // joins a within-window chain shouldn't count as an early
+            // reveal at all (see stealthDurationMs doc).
+            .map((cluster) => cluster.filter((reveal) => reveal.time <= stealthExpiresAt))
+            .filter((cluster) => cluster.length > 0);
 
           for (const { time: revealTime, playerName } of isolatedReveals.flat()) {
             const player = players.find((p) => p.name === playerName)!;
@@ -454,11 +473,9 @@ export async function persistExtractedEncounter(
             // How long stealth actually held before this player broke it —
             // distinct from `phaseEnd.msSincePhaseEnd` above (which measures
             // against the dragon phase's end, not the cast itself). Measured
-            // from the cast's *end* (channel finish), matching
-            // `stealthExpiresAt` above — from cast *start* this could read
-            // above the 6s `stealthDurationMs` cap by the channel's own
-            // length (~1-1.5s observed), which reads as "outlasting the buff"
-            // when the reveal is actually well within it.
+            // from the cast's *end* (channel finish), not cast *start* — the
+            // channel itself (~1-1.5s observed) would otherwise be counted
+            // against the buff's uptime even though it hasn't started yet.
             const msSinceInvisCast = Math.round(
               revealTime - (invisCast.timeMs + invisCast.durationMs),
             );

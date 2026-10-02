@@ -57,8 +57,9 @@ export interface StealthPhaseConfig {
    * Deliberately trimmed below the buff's actual ~6000ms duration: a
    * "reveal" landing in that last half-second is unreliable — close enough
    * to the buff's own natural expiry that it's not clearly the player's
-   * fault rather than the stealth simply running out, so it's excluded
-   * rather than counted as a mistake.
+   * fault rather than the stealth simply running out, so a reveal that only
+   * surfaces after this cutoff — and never joins a chain that started within
+   * it (see `groupRevealClusterGapMs`) — isn't counted as a mistake.
    */
   stealthDurationMs: number;
   /**
@@ -72,14 +73,33 @@ export interface StealthPhaseConfig {
    * created) — this mechanic exists to catch individual early attacks, not
    * to flag the intended way the mechanic is supposed to end.
    *
-   * Both constants are calibrated against two real logs: the one genuine
-   * full-squad call observed had 7 players with every consecutive gap
-   * ≤159ms; every genuine *isolated* mistake (4 separate cases, all only 1-2
-   * players) had gaps of 287ms-5363ms. `groupRevealClusterGapMs` sits
-   * between those (loose enough to always catch a real call, tight enough to
-   * never merge unrelated isolated reveals into a false "burst");
-   * `groupRevealMinSize` sits between the largest confirmed isolated case
-   * (2) and the confirmed real call (7).
+   * `groupRevealClusterGapMs` models the reaction chain after a call, not a
+   * single instant: one player calls it, everyone else reacts to *that*
+   * (and to each other starting to act) — confirmed against a real case
+   * (log 20260927-220817.zevtc, Primordus→Kralkatorrik window) where a
+   * genuine 3-player call had a 450ms gap between the first and second
+   * reveal, which the former 250ms threshold chained-split into a size-1 +
+   * size-2 cluster (both under `groupRevealMinSize`, so all 3 wrongly
+   * persisted as individual mistakes instead of one excluded call). 1000ms
+   * covers the observed 750ms-1s human call-and-react delay with margin.
+   * `groupRevealMinSize` sits between the largest confirmed isolated
+   * mistake (2 players) and a confirmed real call (7 players, every gap
+   * ≤159ms — comfortably inside this threshold too).
+   *
+   * The candidate reveals fed into this clustering are gathered wider than
+   * `stealthDurationMs` (see persist-encounter.ts) so a chain that started
+   * within the stealth window can still pick up a later member past it — a
+   * chain's later members can land after the buff would have naturally
+   * expired (confirmed on the same -220817 log: a 3rd call member revealed
+   * 178ms past `stealthDurationMs`, which used to cut the real 3-player call
+   * back down to a wrongly-split chain of 2). Only `groupRevealClusterGapMs`
+   * decides where a burst actually ends; `stealthDurationMs` is then
+   * reapplied per-member afterward to decide what actually gets persisted
+   * (see `isolatedReveals` in persist-encounter.ts) — a cluster that reaches
+   * `groupRevealMinSize` is excluded in full regardless of timing, but a
+   * cluster that stays below it only persists the members still inside
+   * `stealthDurationMs`; a lone member only reachable past that cutoff isn't
+   * a mistake on its own.
    */
   groupRevealClusterGapMs: number;
   groupRevealMinSize: number;
@@ -116,7 +136,7 @@ export const STEALTH_PHASES_BY_BOSS: Record<string, StealthPhaseConfig[]> = {
       revealMechanicName: "Revealed",
       revealDisplayName: "Aufgedeckt (Revealed)",
       stealthDurationMs: 5_500,
-      groupRevealClusterGapMs: 250,
+      groupRevealClusterGapMs: 1_000,
       groupRevealMinSize: 3,
       causingSkillToleranceMs: 500,
     },
