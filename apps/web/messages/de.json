@@ -4,7 +4,35 @@
   },
   "login": {
     "tagline": "Harvest Tempel CM Log-Analyse Seite. Verfolge, wie sich dein Trupp im Training verbessert und überprüfe Spielmechaniken und Ausrutscher.",
-    "signIn": "Mit Discord anmelden"
+    "signIn": "Mit Discord anmelden",
+    "metaTitle": "voidlog – Guild Wars 2 Log-Analyse für Trainingsgruppen",
+    "metaDescription": "Analysiere und vergleiche deine Guild Wars 2 EVTC-Logs: Phasen, Mechaniken und Trainingsfortschritt für Harvest Tempel CM. Anmeldung mit Discord.",
+    "topbar": "Harvest Tempel CM · Log-Analyse",
+    "cardTitle": "Anmelden",
+    "cardText": "Melde dich mit deinem Discord-Konto an, um auf die Projekte deiner Trainingsgruppe zuzugreifen.",
+    "headline": "Guild Wars 2 Logs analysieren, vergleichen und Fortschritt sichtbar machen",
+    "featuresTitle": "Was voidlog kann",
+    "features": [
+      {
+        "title": "Logs hochladen",
+        "text": "Lade .evtc- und .zevtc-Dateien direkt im Browser hoch, auch mehrere auf einmal. Die Auswertung startet automatisch und zeigt den Fortschritt live."
+      },
+      {
+        "title": "Phasen und Mechaniken",
+        "text": "Jeder Versuch wird in Phasen zerlegt. Mechaniken, Treffer und Boss-Casts sind auf einer Zeitleiste sichtbar, auch Angriffe, denen alle ausgewichen sind."
+      },
+      {
+        "title": "Fortschritt über Wochen",
+        "text": "Organisiere dein Training in Projekten und vergleiche Versuche und Spieler über Wochen und Monate, ohne Logs erneut auszuwerten."
+      },
+      {
+        "title": "Für Trainingsgruppen",
+        "text": "Teile ein Projekt mit deinem Trupp. Nur Mitglieder sehen die Logs und Auswertungen der Gruppe."
+      }
+    ],
+    "bossNote": "Aktuell ist der Harvest Tempel CM (Die Drachenleere) vollständig aufbereitet, mit übersetzten Mechaniken und eigenen Phasenfarben. Weitere Bosse werden bereits ohne Anpassung ausgewertet.",
+    "whyDiscordTitle": "Warum Discord-Login?",
+    "whyDiscord": "Trainingsgruppen organisieren sich auf Discord. Mit dem Login erkennt voidlog dich, ordnet Projekte und Logs deinem Konto zu und schützt sie vor fremdem Zugriff. Du brauchst kein weiteres Passwort und keine eigene Registrierung. voidlog liest nur dein Discord-Profil (Name, Avatar und E-Mail-Adresse) und schreibt nie in deinem Namen."
   },
   "sidebar": {
     "overview": "Übersicht",

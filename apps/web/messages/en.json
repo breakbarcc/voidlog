@@ -4,7 +4,35 @@
   },
   "login": {
     "tagline": "Harvest Temple CM log analysis platform. Track how your squad improves over training sessions and review mechanics and mistakes.",
-    "signIn": "Sign in with Discord"
+    "signIn": "Sign in with Discord",
+    "metaTitle": "voidlog – Guild Wars 2 log analysis for training groups",
+    "metaDescription": "Analyze and compare your Guild Wars 2 EVTC logs: phases, mechanics and training progress for Harvest Temple CM. Sign in with Discord.",
+    "topbar": "Harvest Temple CM · Log analysis",
+    "cardTitle": "Sign in",
+    "cardText": "Sign in with your Discord account to access your training group's projects.",
+    "headline": "Analyze and compare Guild Wars 2 logs and make progress visible",
+    "featuresTitle": "What voidlog does",
+    "features": [
+      {
+        "title": "Upload logs",
+        "text": "Upload .evtc and .zevtc files straight from your browser, several at once. Parsing starts automatically and shows live progress."
+      },
+      {
+        "title": "Phases and mechanics",
+        "text": "Every attempt is split into phases. Mechanics, hits and boss casts appear on a timeline, including attacks everyone dodged."
+      },
+      {
+        "title": "Progress over weeks",
+        "text": "Organize your training in projects and compare attempts and players over weeks and months, without re-parsing logs."
+      },
+      {
+        "title": "Built for training groups",
+        "text": "Share a project with your squad. Only members can see the group's logs and analyses."
+      }
+    ],
+    "bossNote": "Harvest Temple CM (The Dragon Void) is fully curated today, with translated mechanics and phase colors. Other bosses are already parsed without any extra setup.",
+    "whyDiscordTitle": "Why sign in with Discord?",
+    "whyDiscord": "Training groups organize themselves on Discord. Signing in lets voidlog recognize you, tie projects and logs to your account and keep them from outside access. You need no extra password and no separate registration. voidlog only reads your Discord profile (name, avatar and email address) and never posts on your behalf."
   },
   "sidebar": {
     "overview": "Overview",
