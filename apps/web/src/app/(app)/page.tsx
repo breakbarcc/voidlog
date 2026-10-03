@@ -115,7 +115,7 @@ export default async function DashboardPage() {
                   <div className="font-heading text-foreground truncate text-base font-semibold">
                     {p.name}
                   </div>
-                  <Badge color={p.role === ProjectRole.ADMIN ? "red" : "gray"} className="shrink-0">
+                  <Badge color="gray" className="shrink-0">
                     {tRoles(`${p.role}.name`)}
                   </Badge>
                 </div>
