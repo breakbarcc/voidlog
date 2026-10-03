@@ -40,6 +40,7 @@
     "currentProject": "Aktuelles Projekt",
     "history": "Verlauf & Trend",
     "roster": "Roster",
+    "members": "Mitglieder",
     "uploadLogs": "+ Logs hochladen",
     "account": "Account",
     "logout": "Abmelden"
@@ -125,6 +126,38 @@
     },
     "empty": "Noch keine Batches.",
     "delete": "Projekt löschen"
+  },
+  "members": {
+    "breadcrumb": "Mitglieder",
+    "title": "Mitglieder",
+    "subtitle": "{count, plural, one {# Person hat} other {# Personen haben}} Zugriff auf dieses Projekt",
+    "you": "Du",
+    "owner": "Gründer",
+    "joined": "Beigetreten am {date}",
+    "leave": "Verlassen",
+    "leaveConfirmTitle": "Projekt verlassen?",
+    "leaveConfirm": "Du verlierst den Zugriff auf dieses Projekt und alle Logs. Ein Admin muss dich erneut hinzufügen, damit du wieder hineinkommst.",
+    "remove": "Entfernen",
+    "removeConfirmTitle": "{name} entfernen?",
+    "removeConfirm": "{name} verliert den Zugriff auf dieses Projekt und seine Logs.",
+    "errorLastAdmin": "Ein Projekt braucht mindestens einen Admin. Ernenne zuerst jemand anderen zum Admin.",
+    "errorGeneric": "Aktion fehlgeschlagen ({status})",
+    "rolesTitle": "Rollen",
+    "soleAdminNote": "Du bist der einzige Admin: Deine Rolle lässt sich nicht ändern und du kannst das Projekt nicht verlassen, bis ein weiteres Mitglied Admin ist.",
+    "roles": {
+      "ADMIN": {
+        "name": "Administrator",
+        "description": "Darf alles, auch Mitglieder verwalten und das Projekt löschen."
+      },
+      "CONTRIBUTOR": {
+        "name": "Contributor",
+        "description": "Darf das Projekt ansehen, Logs hochladen und Logs und Batches löschen."
+      },
+      "VIEWER": {
+        "name": "Viewer",
+        "description": "Darf das Projekt, seine Logs und Auswertungen ansehen."
+      }
+    }
   },
   "deleteProject": {
     "confirm": "Projekt \"{name}\" löschen? Das entfernt dauerhaft alle Batches, Logs und Ergebnisse.",

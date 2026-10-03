@@ -93,6 +93,13 @@ export function Sidebar({ userName, userImage, currentProject }: Readonly<Sideba
             <NavDot shape="circle" />
             {t("roster")}
           </NavLink>
+          <NavLink
+            href={`/projects/${currentProject.id}/members`}
+            active={pathname === `/projects/${currentProject.id}/members`}
+          >
+            <NavDot />
+            {t("members")}
+          </NavLink>
           {currentProject.canUpload ? (
             <Link
               href={`/projects/${currentProject.id}/batches/new`}

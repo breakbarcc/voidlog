@@ -40,6 +40,7 @@
     "currentProject": "Current Project",
     "history": "History & Trend",
     "roster": "Roster",
+    "members": "Members",
     "uploadLogs": "+ Upload logs",
     "account": "Account",
     "logout": "Log out"
@@ -125,6 +126,38 @@
     },
     "empty": "No batches yet.",
     "delete": "Delete project"
+  },
+  "members": {
+    "breadcrumb": "Members",
+    "title": "Members",
+    "subtitle": "{count, plural, one {# person has} other {# people have}} access to this project",
+    "you": "You",
+    "owner": "Founder",
+    "joined": "Joined {date}",
+    "leave": "Leave",
+    "leaveConfirmTitle": "Leave this project?",
+    "leaveConfirm": "You will lose access to this project and all of its logs. An admin has to add you again to get back in.",
+    "remove": "Remove",
+    "removeConfirmTitle": "Remove {name}?",
+    "removeConfirm": "{name} will lose access to this project and its logs.",
+    "errorLastAdmin": "A project needs at least one admin. Promote someone else to admin first.",
+    "errorGeneric": "Action failed ({status})",
+    "rolesTitle": "Roles",
+    "soleAdminNote": "You are the only admin, so your role can't be changed and you can't leave until another member is an admin.",
+    "roles": {
+      "ADMIN": {
+        "name": "Admin",
+        "description": "Can do everything, including managing members and deleting the project."
+      },
+      "CONTRIBUTOR": {
+        "name": "Contributor",
+        "description": "Can view the project, upload logs and delete logs and batches."
+      },
+      "VIEWER": {
+        "name": "Viewer",
+        "description": "Can view the project, its logs and analyses."
+      }
+    }
   },
   "deleteProject": {
     "confirm": "Delete project \"{name}\"? This permanently removes all its batches, logs, and results.",
