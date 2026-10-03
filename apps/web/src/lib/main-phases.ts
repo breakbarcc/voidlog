@@ -20,3 +20,12 @@ export function isMainPhase(bossId: string, phaseName: string): boolean {
   if (!curation) return true;
   return curation.isMainPhase(phaseName);
 }
+
+/**
+ * Whether the remaining boss health stored for an attempt that ended in
+ * `phaseName` should be shown — see `BossCuration.showsBossHealth`. Bosses
+ * without curation always show it.
+ */
+export function showsBossHealth(bossId: string, phaseName: string): boolean {
+  return getBossCuration(bossId)?.showsBossHealth?.(phaseName) ?? true;
+}

@@ -6,7 +6,7 @@ import type { Locale } from "@/i18n/locale";
 import { BatchSwitcher } from "@/components/batch-switcher";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PhaseBadge } from "@/components/phase-badge";
-import { isMainPhase } from "@/lib/main-phases";
+import { isMainPhase, showsBossHealth } from "@/lib/main-phases";
 import { translateMechanicName } from "@/lib/mechanic-names";
 import { isContextualNoiseMechanic, isNoiseMechanic, isVisibleCastMarker } from "@/lib/mechanics";
 import { hasRole, requireProjectMembership } from "@/lib/projects";
@@ -371,8 +371,12 @@ function buildAttemptRow(
     isCM: encounter.isCM,
     n: index + 1,
     success: encounter.success,
-    // Only meaningful for a wipe — a kill always ends with the boss at 0%.
-    bossHealthPercent: encounter.success ? null : (encounter.finalBossHealthPercent ?? null),
+    // Only meaningful for a wipe (a kill always ends with the boss at 0%) that
+    // ended in a phase whose enemy actually has a health bar worth reporting.
+    bossHealthPercent:
+      encounter.success || !furthest || !showsBossHealth(encounter.bossId, furthest.name)
+        ? null
+        : (encounter.finalBossHealthPercent ?? null),
     furthestPhase: furthest ? { name: furthest.name, order: furthest.order } : null,
     durationMs: encounter.durationMs,
     recordedAt: encounter.recordedAt ?? encounter.createdAt,

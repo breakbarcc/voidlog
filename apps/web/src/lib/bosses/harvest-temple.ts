@@ -369,6 +369,14 @@ export const harvestTemple: BossCuration = {
     if (phaseName.startsWith("Soo-Won")) return DRAGON_COLORS["Soo-Won"];
     return DRAGON_COLORS[phaseName];
   },
+  // Only dragon phases (incl. Soo-Won 1/2) have a boss HP worth showing. In
+  // the intermissions the target is an invulnerable orb at a constant 100%
+  // (Purification 1-3) or a group of adds ("Giants"), so the stored value
+  // would just be the dragon killed a moment ago. The exception is
+  // "Purification 4", where the orb really is killed.
+  showsBossHealth: (phaseName) =>
+    phaseName === "Purification 4" ||
+    !(phaseName.startsWith("Purification") || phaseName === "Giants"),
   mechanicNames: MECHANIC_NAMES,
   noiseMechanicNames: NOISE_MECHANIC_NAMES,
   visibleCastMarkers: VISIBLE_CAST_MARKERS,

@@ -24,6 +24,15 @@ export interface BossCuration {
    */
   isMainPhase: (phaseName: string) => boolean;
   /**
+   * Whether the remaining boss health recorded for an attempt that ended in
+   * `phaseName` is worth showing. The worker stores the health of the last
+   * enemy that had any, which only describes the fight when that enemy is
+   * what the group was actually fighting — not during an intermission whose
+   * target is invulnerable, where it is merely the previous boss's leftover.
+   * Omitted = always show.
+   */
+  showsBossHealth?: (phaseName: string) => boolean;
+  /**
    * Bespoke color for a phase by name (e.g. one hex per dragon) — return
    * undefined to fall through to the generic order-cycled palette.
    */
