@@ -48,28 +48,31 @@
   "account": {
     "title": "Account",
     "memberSince": "Mitglied seit {date}",
-    "via": "Angemeldet über Discord",
+    "via": "Angemeldet mit Discord",
     "stats": {
       "title": "Statistiken",
       "logs": "Logs",
       "parsed": "Ausgewertet",
-      "ownedProjects": "Eigene Projekte",
-      "memberships": "Mitgliedschaften",
-      "note": "Logs und Auswertungen zählen alle Projekte, deren Eigentümer du bist."
+      "projects": "Projekte",
+      "adminProjects": "Als Admin",
+      "note": "Logs und Auswertungen zählen die Logs, die du in all deinen Projekten hochgeladen hast."
     },
     "danger": {
       "title": "Danger Zone",
       "error": "Aktion fehlgeschlagen ({status})",
-      "logsTitle": "Alle Logs löschen",
-      "logsDescription": "Entfernt alle Logs, Batches und Auswertungen aus deinen eigenen Projekten. Die Projekte selbst bleiben bestehen.",
-      "logsButton": "Alle Logs löschen",
-      "logsConfirmTitle": "Alle Logs löschen?",
-      "logsConfirm": "{count, plural, one {# Log} other {# Logs}} und alle zugehörigen Auswertungen werden dauerhaft gelöscht. Das betrifft auch Mitglieder deiner Projekte und kann nicht rückgängig gemacht werden.",
+      "logsTitle": "Alle meine Logs löschen",
+      "logsDescription": "Entfernt alle Logs, die du hochgeladen hast, in allen Projekten, auch geteilten. Die Projekte und die Logs anderer bleiben bestehen.",
+      "logsButton": "Meine Logs löschen",
+      "logsConfirmTitle": "Alle deine Logs löschen?",
+      "logsConfirm": "{count, plural, one {# Log} other {# Logs}} aus {projects, plural, one {# Projekt} other {# Projekten}} und alle zugehörigen Auswertungen werden dauerhaft gelöscht. Andere Mitglieder dieser Projekte sehen sie dann nicht mehr. Das lässt sich nicht rückgängig machen.",
       "accountTitle": "Account löschen",
-      "accountDescription": "Löscht deinen Account samt aller eigenen Projekte, Logs und Auswertungen.",
+      "accountDescription": "Löscht deinen Account. Projekte, in denen du der einzige Admin bist, werden mit allen Logs gelöscht; Projekte mit einem weiteren Admin laufen unter diesem weiter.",
       "accountButton": "Account löschen",
       "accountConfirmTitle": "Account wirklich löschen?",
-      "accountConfirm": "Dein Account, alle deine Projekte (auch für andere Mitglieder) und alle zugehörigen Logs werden dauerhaft gelöscht. Das kann nicht rückgängig gemacht werden."
+      "accountConfirm": "Dein Account wird dauerhaft gelöscht. Logs, die du in weiterbestehende Projekte hochgeladen hast, bleiben dort ohne deinen Namen erhalten – lösche sie vorher, wenn sie weg sollen. Das lässt sich nicht rückgängig machen.",
+      "accountDeletedProjects": "Diese Projekte werden vollständig gelöscht:",
+      "accountOtherMembers": "{count, plural, one {# weiteres Mitglied verliert} other {# weitere Mitglieder verlieren}} den Zugriff",
+      "accountTransferredProjects": "Diese Projekte laufen unter einem anderen Admin weiter:"
     }
   },
   "common": {

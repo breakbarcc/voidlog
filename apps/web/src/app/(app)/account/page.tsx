@@ -1,8 +1,9 @@
-import { prisma } from "@voidlog/db";
+import { ProjectRole, prisma } from "@voidlog/db";
 import { Avatar } from "@radix-ui/themes";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Sidebar } from "@/components/sidebar";
 import type { Locale } from "@/i18n/locale";
+import { planAccountDeletion } from "@/lib/account";
 import { requireSession } from "@/lib/session";
 import { formatDate, formatNumber } from "@/lib/utils";
 import { DangerZone } from "./danger-zone";
@@ -14,25 +15,28 @@ export default async function AccountPage() {
   const tCommon = await getTranslations("common");
   const locale = (await getLocale()) as Locale;
 
-  const [user, ownedProjects, memberships, logCount, parsedCount] = await Promise.all([
-    prisma.user.findUniqueOrThrow({
-      where: { id: userId },
-      select: { name: true, email: true, image: true, createdAt: true },
-    }),
-    prisma.project.count({ where: { ownerId: userId } }),
-    prisma.projectMember.count({ where: { userId } }),
-    prisma.logFile.count({ where: { batch: { project: { ownerId: userId } } } }),
-    prisma.encounterResult.count({
-      where: { logFile: { batch: { project: { ownerId: userId } } } },
-    }),
-  ]);
+  const [user, projectCount, adminCount, logCount, parsedCount, logProjectCount, plan] =
+    await Promise.all([
+      prisma.user.findUniqueOrThrow({
+        where: { id: userId },
+        select: { name: true, email: true, image: true, createdAt: true },
+      }),
+      prisma.projectMember.count({ where: { userId } }),
+      prisma.projectMember.count({ where: { userId, role: ProjectRole.ADMIN } }),
+      prisma.logFile.count({ where: { uploadedById: userId } }),
+      prisma.encounterResult.count({ where: { logFile: { uploadedById: userId } } }),
+      prisma.project.count({
+        where: { uploadBatches: { some: { logFiles: { some: { uploadedById: userId } } } } },
+      }),
+      planAccountDeletion(prisma, userId),
+    ]);
 
   const displayName = user.name ?? tCommon("account");
   const stats = [
     { label: t("stats.logs"), value: formatNumber(logCount, locale) },
     { label: t("stats.parsed"), value: formatNumber(parsedCount, locale) },
-    { label: t("stats.ownedProjects"), value: formatNumber(ownedProjects, locale) },
-    { label: t("stats.memberships"), value: formatNumber(memberships, locale) },
+    { label: t("stats.projects"), value: formatNumber(projectCount, locale) },
+    { label: t("stats.adminProjects"), value: formatNumber(adminCount, locale) },
   ];
 
   return (
@@ -84,7 +88,15 @@ export default async function AccountPage() {
             <p className="text-muted text-xs">{t("stats.note")}</p>
           </section>
 
-          <DangerZone logCount={logCount} />
+          <DangerZone
+            logCount={logCount}
+            logProjectCount={logProjectCount}
+            deletedProjects={plan.deleted.map((p) => ({
+              name: p.name,
+              otherMembers: p.otherMembers,
+            }))}
+            transferredProjects={plan.transferred.map((p) => p.name)}
+          />
         </div>
       </div>
     </div>

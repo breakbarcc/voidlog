@@ -53,23 +53,26 @@
       "title": "Statistics",
       "logs": "Logs",
       "parsed": "Parsed",
-      "ownedProjects": "Owned projects",
-      "memberships": "Memberships",
-      "note": "Logs and parsed results count all projects you own."
+      "projects": "Projects",
+      "adminProjects": "As admin",
+      "note": "Logs and parsed results count the logs you uploaded, in all your projects."
     },
     "danger": {
       "title": "Danger zone",
       "error": "Action failed ({status})",
-      "logsTitle": "Delete all logs",
-      "logsDescription": "Removes all logs, batches and results from the projects you own. The projects themselves stay.",
-      "logsButton": "Delete all logs",
-      "logsConfirmTitle": "Delete all logs?",
-      "logsConfirm": "{count, plural, one {# log} other {# logs}} and all related results will be permanently deleted. This also affects members of your projects and cannot be undone.",
+      "logsTitle": "Delete all my logs",
+      "logsDescription": "Removes every log you uploaded, in all projects, including shared ones. The projects and other people's logs stay.",
+      "logsButton": "Delete my logs",
+      "logsConfirmTitle": "Delete all your logs?",
+      "logsConfirm": "{count, plural, one {# log} other {# logs}} you uploaded to {projects, plural, one {# project} other {# projects}} and all related results will be permanently deleted. Other members of those projects will no longer see them. This cannot be undone.",
       "accountTitle": "Delete account",
-      "accountDescription": "Deletes your account along with all projects, logs and results you own.",
+      "accountDescription": "Deletes your account. Projects where you are the only admin are deleted with all their logs; projects with another admin carry on under that admin.",
       "accountButton": "Delete account",
       "accountConfirmTitle": "Really delete your account?",
-      "accountConfirm": "Your account, all your projects (also for other members) and all related logs will be permanently deleted. This cannot be undone."
+      "accountConfirm": "Your account will be permanently deleted. Logs you uploaded to projects that carry on stay there, without your name — delete them first if you want them gone. This cannot be undone.",
+      "accountDeletedProjects": "These projects will be deleted completely:",
+      "accountOtherMembers": "{count, plural, one {# other member loses} other {# other members lose}} access",
+      "accountTransferredProjects": "These projects carry on under another admin:"
     }
   },
   "common": {

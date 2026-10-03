@@ -1,5 +1,5 @@
 import { ProjectRole, prisma } from "@voidlog/db";
-import { Card } from "@radix-ui/themes";
+import { Badge, Card } from "@radix-ui/themes";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -15,12 +15,14 @@ export default async function DashboardPage() {
   const session = await requireSession();
   const t = await getTranslations("dashboard");
   const tCommon = await getTranslations("common");
+  const tRoles = await getTranslations("members.roles");
   const accountFallback = tCommon("account");
   const locale = (await getLocale()) as Locale;
 
   const projects = await prisma.project.findMany({
     where: { members: { some: { userId: session.user.id } } },
     include: {
+      members: { where: { userId: session.user.id }, select: { role: true } },
       uploadBatches: {
         orderBy: { createdAt: "desc" },
         select: {
@@ -69,6 +71,7 @@ export default async function DashboardPage() {
     return {
       id: project.id,
       name: project.name,
+      role: project.members[0]?.role ?? ProjectRole.VIEWER,
       lastBatchAt: project.uploadBatches[0]?.createdAt ?? null,
       successRate,
       furthestPhase,
@@ -108,8 +111,13 @@ export default async function DashboardPage() {
           {summaries.map((p) => (
             <Link key={p.id} href={`/projects/${p.id}`} className="min-w-0">
               <Card size="3" className="border-line bg-surface h-full border">
-                <div className="font-heading text-foreground truncate text-base font-semibold">
-                  {p.name}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="font-heading text-foreground truncate text-base font-semibold">
+                    {p.name}
+                  </div>
+                  <Badge color={p.role === ProjectRole.ADMIN ? "red" : "gray"} className="shrink-0">
+                    {tRoles(`${p.role}.name`)}
+                  </Badge>
                 </div>
                 <div className="text-muted mb-4 text-xs">
                   {t("lastUpload")}:{" "}

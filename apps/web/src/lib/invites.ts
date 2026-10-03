@@ -39,13 +39,22 @@ export type AcceptResult =
  * particular, their role is never changed (an invite can't downgrade an
  * admin, nor silently upgrade anyone).
  *
- * The invite row is locked for the duration so `maxUses` can't be exceeded
- * by concurrent redemptions.
+ * The project row is locked for the duration — the same lock member
+ * changes and account deletion take — so `maxUses` can't be exceeded by
+ * concurrent redemptions and nobody joins a project mid-deletion. The
+ * invite is re-read under that lock.
  */
 export async function acceptInvite(token: string, userId: string): Promise<AcceptResult> {
   const tokenHash = hashInviteToken(token);
   return prisma.$transaction(async (tx) => {
-    await tx.$queryRaw`SELECT id FROM project_invites WHERE "tokenHash" = ${tokenHash} FOR UPDATE`;
+    const lookup = await tx.projectInvite.findUnique({
+      where: { tokenHash },
+      select: { projectId: true },
+    });
+    if (!lookup) {
+      return { ok: false, state: "not_found" } as const;
+    }
+    await tx.$queryRaw`SELECT id FROM projects WHERE id = ${lookup.projectId} FOR UPDATE`;
     const invite = await tx.projectInvite.findUnique({ where: { tokenHash } });
 
     const existing = invite

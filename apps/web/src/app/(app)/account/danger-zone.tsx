@@ -2,7 +2,7 @@
 
 import { AlertDialog, Button } from "@radix-ui/themes";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
@@ -14,6 +14,7 @@ function DangerRow({
   buttonLabel,
   confirmTitle,
   confirmDescription,
+  details,
   pending,
   onConfirm,
 }: Readonly<{
@@ -22,6 +23,8 @@ function DangerRow({
   buttonLabel: string;
   confirmTitle: string;
   confirmDescription: string;
+  /** Extra content under the description, e.g. a list of affected projects. */
+  details?: ReactNode;
   pending: boolean;
   onConfirm: () => void;
 }>) {
@@ -41,6 +44,7 @@ function DangerRow({
         <AlertDialog.Content maxWidth="440px">
           <AlertDialog.Title>{confirmTitle}</AlertDialog.Title>
           <AlertDialog.Description size="2">{confirmDescription}</AlertDialog.Description>
+          {details}
           <div className="mt-4 flex justify-end gap-3">
             <AlertDialog.Cancel>
               <Button type="button" variant="soft" color="gray">
@@ -59,7 +63,19 @@ function DangerRow({
   );
 }
 
-export function DangerZone({ logCount }: Readonly<{ logCount: number }>) {
+export function DangerZone({
+  logCount,
+  logProjectCount,
+  deletedProjects,
+  transferredProjects,
+}: Readonly<{
+  logCount: number;
+  logProjectCount: number;
+  /** Projects that vanish with the account: the user is their only admin. */
+  deletedProjects: { name: string; otherMembers: number }[];
+  /** Projects that continue under another admin. */
+  transferredProjects: string[];
+}>) {
   const router = useRouter();
   const t = useTranslations("account.danger");
   const [pending, setPending] = useState<Action | null>(null);
@@ -97,7 +113,7 @@ export function DangerZone({ logCount }: Readonly<{ logCount: number }>) {
           description={t("logsDescription")}
           buttonLabel={t("logsButton")}
           confirmTitle={t("logsConfirmTitle")}
-          confirmDescription={t("logsConfirm", { count: logCount })}
+          confirmDescription={t("logsConfirm", { count: logCount, projects: logProjectCount })}
           pending={pending === "logs"}
           onConfirm={() => run("logs")}
         />
@@ -107,6 +123,37 @@ export function DangerZone({ logCount }: Readonly<{ logCount: number }>) {
           buttonLabel={t("accountButton")}
           confirmTitle={t("accountConfirmTitle")}
           confirmDescription={t("accountConfirm")}
+          details={
+            <div className="text-muted-strong mt-3 flex flex-col gap-3 text-sm">
+              {deletedProjects.length > 0 ? (
+                <div>
+                  <div className="text-danger font-semibold">{t("accountDeletedProjects")}</div>
+                  <ul className="mt-1 list-disc pl-5">
+                    {deletedProjects.map((p) => (
+                      <li key={p.name}>
+                        {p.name}
+                        {p.otherMembers > 0
+                          ? ` (${t("accountOtherMembers", { count: p.otherMembers })})`
+                          : ""}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              {transferredProjects.length > 0 ? (
+                <div>
+                  <div className="text-foreground-strong font-semibold">
+                    {t("accountTransferredProjects")}
+                  </div>
+                  <ul className="mt-1 list-disc pl-5">
+                    {transferredProjects.map((name) => (
+                      <li key={name}>{name}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
+          }
           pending={pending === "account"}
           onConfirm={() => run("account")}
         />
