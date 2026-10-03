@@ -1404,7 +1404,11 @@ export function BatchAttempts({
                       {a.segments.map((seg) => (
                         <span
                           key={seg.order}
-                          title={seg.name}
+                          title={
+                            a.bossHealthPercent !== null && seg.order === a.furthestPhase?.order
+                              ? `${seg.name} · ${formatPercent(a.bossHealthPercent, locale)}`
+                              : seg.name
+                          }
                           className="absolute top-0 h-2 rounded-[1px]"
                           style={{
                             left: `${seg.leftPct}%`,
