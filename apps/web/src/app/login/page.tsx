@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { safeRedirectPath } from "@/lib/redirect";
 import { SignInButton } from "./sign-in-button";
 
 type Feature = { title: string; text: string };
@@ -25,10 +26,13 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function LoginPage() {
+export default async function LoginPage(props: Readonly<PageProps<"/login">>) {
+  // The proxy sends unauthenticated visitors here with the page they wanted
+  // (e.g. an invite link) as `callbackUrl`, so they land there after signing in.
+  const redirectTo = safeRedirectPath((await props.searchParams).callbackUrl);
   const session = await auth();
   if (session?.user) {
-    redirect("/");
+    redirect(redirectTo);
   }
   const t = await getTranslations("login");
   const features = t.raw("features") as Feature[];
@@ -118,7 +122,7 @@ export default async function LoginPage() {
             </div>
 
             <div className="[&>button]:w-full [&>button]:justify-center">
-              <SignInButton />
+              <SignInButton redirectTo={redirectTo} />
             </div>
 
             <section

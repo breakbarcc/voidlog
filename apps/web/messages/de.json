@@ -144,6 +144,30 @@
     "errorGeneric": "Aktion fehlgeschlagen ({status})",
     "rolesTitle": "Rollen",
     "soleAdminNote": "Du bist der einzige Admin: Deine Rolle lässt sich nicht ändern und du kannst das Projekt nicht verlassen, bis ein weiteres Mitglied Admin ist.",
+    "invites": {
+      "title": "Einladungslinks",
+      "description": "Teile einen Link, zum Beispiel in Discord. Wer ihn öffnet und sich anmeldet, tritt mit der gewählten Rolle bei.",
+      "role": "Rolle",
+      "expires": "Gültig für",
+      "days": "{count, plural, one {# Tag} other {# Tage}}",
+      "maxUses": "Max. Nutzungen",
+      "unlimited": "Unbegrenzt",
+      "create": "Link erstellen",
+      "creating": "Wird erstellt…",
+      "adminWarning": "Wer diesen Link nutzt, wird Admin und kann Mitglieder verwalten und das Projekt löschen.",
+      "linkLabel": "Einladungslink",
+      "copy": "Kopieren",
+      "copied": "Kopiert",
+      "linkOnce": "Dieser Link wird nur jetzt angezeigt. Geht er verloren, widerrufe ihn und erstelle einen neuen.",
+      "empty": "Keine aktiven Einladungslinks.",
+      "validUntil": "Gültig bis {date}",
+      "uses": "{used} von {max} genutzt",
+      "usesUnlimited": "{used} genutzt",
+      "createdBy": "von {name}",
+      "revoke": "Widerrufen",
+      "errorTooMany": "Zu viele aktive Links. Widerrufe zuerst einen.",
+      "errorGeneric": "Aktion fehlgeschlagen ({status})"
+    },
     "roles": {
       "ADMIN": {
         "name": "Administrator",
@@ -156,6 +180,35 @@
       "VIEWER": {
         "name": "Viewer",
         "description": "Darf das Projekt, seine Logs und Auswertungen ansehen."
+      }
+    }
+  },
+  "invite": {
+    "title": "\"{project}\" beitreten",
+    "text": "{inviter} hat dich als {role} in dieses Projekt eingeladen.",
+    "unknownInviter": "Jemand",
+    "roles": { "ADMIN": "Administrator", "CONTRIBUTOR": "Contributor", "VIEWER": "Viewer" },
+    "roleHints": {
+      "ADMIN": "Du darfst alles, auch Mitglieder verwalten und das Projekt löschen.",
+      "CONTRIBUTOR": "Du darfst das Projekt ansehen, Logs hochladen und Logs und Batches löschen.",
+      "VIEWER": "Du darfst das Projekt, seine Logs und Auswertungen ansehen."
+    },
+    "join": "Projekt beitreten",
+    "joining": "Tritt bei…",
+    "toProjects": "Zu meinen Projekten",
+    "errorGeneric": "Beitritt fehlgeschlagen ({status})",
+    "invalid": {
+      "not_found": {
+        "title": "Einladung nicht gefunden",
+        "text": "Dieser Einladungslink existiert nicht oder wurde widerrufen. Frag einen Admin des Projekts nach einem neuen."
+      },
+      "expired": {
+        "title": "Einladung abgelaufen",
+        "text": "Dieser Einladungslink ist abgelaufen. Frag einen Admin des Projekts nach einem neuen."
+      },
+      "exhausted": {
+        "title": "Einladung aufgebraucht",
+        "text": "Dieser Einladungslink wurde bereits so oft genutzt, wie erlaubt war. Frag einen Admin des Projekts nach einem neuen."
       }
     }
   },

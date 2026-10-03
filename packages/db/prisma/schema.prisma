@@ -25,11 +25,12 @@ model User {
   image         String?
   createdAt     DateTime  @default(now())
 
-  accounts      Account[]
-  sessions      Session[]
-  ownedProjects Project[]       @relation("ProjectOwner")
-  memberships   ProjectMember[]
-  uploadedLogs  LogFile[]
+  accounts       Account[]
+  sessions       Session[]
+  ownedProjects  Project[]       @relation("ProjectOwner")
+  memberships    ProjectMember[]
+  uploadedLogs   LogFile[]
+  createdInvites ProjectInvite[]
 
   @@map("users")
 }
@@ -82,6 +83,7 @@ model Project {
 
   owner         User            @relation("ProjectOwner", fields: [ownerId], references: [id])
   members       ProjectMember[]
+  invites       ProjectInvite[]
   uploadBatches UploadBatch[]
 
   @@map("projects")
@@ -106,6 +108,28 @@ model ProjectMember {
 
   @@unique([projectId, userId])
   @@map("project_members")
+}
+
+/// Shareable invite link (/invite/<token>). Only the SHA-256 of the token is
+/// stored; the plain link is shown once, when an admin creates it. Revoking
+/// an invite deletes the row.
+model ProjectInvite {
+  id          String      @id @default(cuid())
+  projectId   String
+  tokenHash   String      @unique
+  role        ProjectRole
+  createdById String?
+  expiresAt   DateTime
+  /// Null = unlimited uses until expiry.
+  maxUses     Int?
+  useCount    Int         @default(0)
+  createdAt   DateTime    @default(now())
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@map("project_invites")
 }
 
 model UploadBatch {
@@ -154,7 +178,7 @@ model EncounterResult {
   bossName   String
   /// EI's `isCM` flag — Normal Mode and Challenge Mode share the same
   /// bossId, so this is the only signal distinguishing them.
-  isCM       Boolean @default(false)
+  isCM       Boolean   @default(false)
   success    Boolean
   durationMs Int
   /// When the fight actually happened in-game (EI's timeStartStd), not when
@@ -196,7 +220,7 @@ enum MechanicCategory {
 }
 
 model MechanicEvent {
-  id             String            @id @default(cuid())
+  id             String           @id @default(cuid())
   phaseResultId  String
   playerResultId String?
   mechanicName   String

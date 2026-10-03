@@ -4,7 +4,8 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import type { Locale } from "@/i18n/locale";
 import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatDateTime } from "@/lib/utils";
+import { InvitesSection, type InviteRow } from "./invites-section";
 import { MembersList, type MemberRow } from "./members-list";
 
 const ROLE_ORDER: Record<ProjectRole, number> = {
@@ -44,6 +45,27 @@ export default async function MembersPage(
     isOwner: m.userId === membership.project.ownerId,
   }));
 
+  const isAdmin = membership.role === ProjectRole.ADMIN;
+  const inviteRows: InviteRow[] = isAdmin
+    ? (
+        await prisma.projectInvite.findMany({
+          where: { projectId, expiresAt: { gt: new Date() } },
+          include: { createdBy: { select: { name: true } } },
+          orderBy: { createdAt: "desc" },
+        })
+      )
+        // Prisma can't compare two columns; drop fully used-up links here.
+        .filter((i) => i.maxUses === null || i.useCount < i.maxUses)
+        .map((i) => ({
+          id: i.id,
+          role: i.role,
+          expires: formatDateTime(i.expiresAt, locale),
+          maxUses: i.maxUses,
+          useCount: i.useCount,
+          createdBy: i.createdBy?.name ?? null,
+        }))
+    : [];
+
   return (
     <div className="max-w-3xl px-10 py-8">
       <Breadcrumbs
@@ -56,11 +78,13 @@ export default async function MembersPage(
       <h1 className="font-heading text-foreground-strong text-2xl font-bold">{t("title")}</h1>
       <p className="text-muted mt-1 text-sm">{t("subtitle", { count: rows.length })}</p>
 
-      <MembersList
-        projectId={projectId}
-        members={rows}
-        canManage={membership.role === ProjectRole.ADMIN}
-      />
+      <MembersList projectId={projectId} members={rows} canManage={isAdmin} />
+
+      {isAdmin ? (
+        <div className="mt-8">
+          <InvitesSection projectId={projectId} invites={inviteRows} />
+        </div>
+      ) : null}
     </div>
   );
 }

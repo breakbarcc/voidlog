@@ -144,6 +144,30 @@
     "errorGeneric": "Action failed ({status})",
     "rolesTitle": "Roles",
     "soleAdminNote": "You are the only admin, so your role can't be changed and you can't leave until another member is an admin.",
+    "invites": {
+      "title": "Invite links",
+      "description": "Share a link, for example in Discord. Everyone who opens it and signs in joins with the role you pick.",
+      "role": "Role",
+      "expires": "Valid for",
+      "days": "{count, plural, one {# day} other {# days}}",
+      "maxUses": "Max. uses",
+      "unlimited": "Unlimited",
+      "create": "Create link",
+      "creating": "Creating…",
+      "adminWarning": "Anyone with this link becomes an admin and can manage members and delete the project.",
+      "linkLabel": "Invite link",
+      "copy": "Copy",
+      "copied": "Copied",
+      "linkOnce": "This link is only shown now. If you lose it, revoke it and create a new one.",
+      "empty": "No active invite links.",
+      "validUntil": "Valid until {date}",
+      "uses": "{used} of {max} used",
+      "usesUnlimited": "{used} used",
+      "createdBy": "by {name}",
+      "revoke": "Revoke",
+      "errorTooMany": "Too many active links. Revoke one first.",
+      "errorGeneric": "Action failed ({status})"
+    },
     "roles": {
       "ADMIN": {
         "name": "Admin",
@@ -156,6 +180,35 @@
       "VIEWER": {
         "name": "Viewer",
         "description": "Can view the project, its logs and analyses."
+      }
+    }
+  },
+  "invite": {
+    "title": "Join \"{project}\"",
+    "text": "{inviter} invited you to this project as {role}.",
+    "unknownInviter": "Someone",
+    "roles": { "ADMIN": "administrator", "CONTRIBUTOR": "contributor", "VIEWER": "viewer" },
+    "roleHints": {
+      "ADMIN": "You will be able to do everything, including managing members and deleting the project.",
+      "CONTRIBUTOR": "You will be able to view the project, upload logs and delete logs and batches.",
+      "VIEWER": "You will be able to view the project, its logs and analyses."
+    },
+    "join": "Join project",
+    "joining": "Joining…",
+    "toProjects": "Go to my projects",
+    "errorGeneric": "Could not join ({status})",
+    "invalid": {
+      "not_found": {
+        "title": "Invite not found",
+        "text": "This invite link doesn't exist or was revoked. Ask an admin of the project for a new one."
+      },
+      "expired": {
+        "title": "Invite expired",
+        "text": "This invite link has expired. Ask an admin of the project for a new one."
+      },
+      "exhausted": {
+        "title": "Invite used up",
+        "text": "This invite link has reached its maximum number of uses. Ask an admin of the project for a new one."
       }
     }
   },
