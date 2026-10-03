@@ -104,8 +104,8 @@ export interface EiTarget {
   /** Absolute health at the end of the fight and at full; both -1 if the target never had health. */
   finalHealth?: number;
   totalHealth?: number;
-  /** When the target first became active, in ms from fight start. */
-  firstAware?: number;
+  /** When the target was last active, in ms from fight start — its death, or the fight's end if it survived. */
+  lastAware?: number;
 }
 
 export interface EiSkillMapEntry {

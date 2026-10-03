@@ -5,12 +5,18 @@ import type { EiPhase, EiTarget } from "./ei-json-shape";
  * percent (0 = dead, 100 = untouched), or null if EI has no health for it.
  *
  * "The last enemy" is boss-agnostic: among the targets of the full-fight
- * phase (EI's first phase — the real bosses, as opposed to adds, hazards
- * and breakbar sub-targets, which only appear in sub-phases), the one that
- * became active last *and* actually had health. Targets that never had
- * health — a final boss that was never reached has `totalHealth: -1` — are
- * skipped, so a wipe on the dragon before it still reports that dragon's
- * health rather than a spawned-but-unengaged successor's.
+ * phase (EI's first phase — essentially the real bosses, though EI also
+ * lists the odd add there, e.g. a purification heart) that actually had
+ * health, the one that was active the longest. A boss that survived to the
+ * end of the fight is "active" until that very moment, whereas an add that
+ * died earlier — or a previous dragon — has an earlier `lastAware`. Ordering
+ * by *start* time instead would wrongly pick such an add, since it can spawn
+ * after the boss was engaged.
+ *
+ * Targets that never had health — a final boss that was never reached has
+ * `totalHealth: -1` — are skipped, so a wipe on the dragon before it still
+ * reports that dragon's health rather than a spawned-but-unengaged
+ * successor's.
  */
 export function computeFinalBossHealthPercent(
   phases: EiPhase[],
@@ -18,7 +24,7 @@ export function computeFinalBossHealthPercent(
 ): number | null {
   const fullFightIndices = phases[0]?.targets ?? targets.map((_, i) => i);
 
-  let last: { target: EiTarget; firstAware: number } | undefined;
+  let last: { target: EiTarget; lastAware: number } | undefined;
   for (const index of fullFightIndices) {
     const target = targets[index];
     if (
@@ -31,9 +37,9 @@ export function computeFinalBossHealthPercent(
     ) {
       continue;
     }
-    const firstAware = target.firstAware ?? 0;
-    if (!last || firstAware >= last.firstAware) {
-      last = { target, firstAware };
+    const lastAware = target.lastAware ?? 0;
+    if (!last || lastAware >= last.lastAware) {
+      last = { target, lastAware };
     }
   }
   if (!last) return null;

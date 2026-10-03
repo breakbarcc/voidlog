@@ -56,7 +56,7 @@ const TARGET_KEEP_WHOLE = new Set([
   "healthPercentBurned",
   "finalHealth",
   "totalHealth",
-  "firstAware",
+  "lastAware",
 ]);
 
 type State =
