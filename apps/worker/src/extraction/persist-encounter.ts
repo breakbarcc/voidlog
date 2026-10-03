@@ -7,6 +7,7 @@ import {
   EXCLUDED_ROTATION_SKILL_IDS,
 } from "../boss-configs/cast-markers";
 import { STEALTH_PHASES_BY_BOSS } from "../boss-configs/stealth-phases";
+import { computeFinalBossHealthPercent } from "./boss-health";
 import { DEATH_MECHANIC_NAME, parseEiTimestamp } from "./ei-json-shape";
 import type { EiRotationEntry } from "./ei-json-shape";
 import type { ExtractedEncounter } from "./extract-encounter";
@@ -195,6 +196,7 @@ export async function persistExtractedEncounter(
           success: root.success,
           durationMs: Math.round(durationMs),
           recordedAt: parseEiTimestamp(root.timeStartStd) ?? null,
+          finalBossHealthPercent: computeFinalBossHealthPercent(root.phases, targets),
         },
       });
 

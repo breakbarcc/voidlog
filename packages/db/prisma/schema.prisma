@@ -172,20 +172,25 @@ model LogFile {
 }
 
 model EncounterResult {
-  id         String    @id @default(cuid())
-  logFileId  String    @unique
-  bossId     String
-  bossName   String
+  id                     String    @id @default(cuid())
+  logFileId              String    @unique
+  bossId                 String
+  bossName               String
   /// EI's `isCM` flag — Normal Mode and Challenge Mode share the same
   /// bossId, so this is the only signal distinguishing them.
-  isCM       Boolean   @default(false)
-  success    Boolean
-  durationMs Int
+  isCM                   Boolean   @default(false)
+  success                Boolean
+  durationMs             Int
   /// When the fight actually happened in-game (EI's timeStartStd), not when
   /// this row was inserted — lets trends sort by real chronology regardless
   /// of upload order. Null for encounters parsed before this field existed.
-  recordedAt DateTime?
-  createdAt  DateTime  @default(now())
+  recordedAt             DateTime?
+  /// Health the encounter's last enemy had left when the attempt ended, in
+  /// percent (0-100) — "86" on a wipe means the boss was still at 86%. Null
+  /// when EI reported no health for it, and for encounters parsed before this
+  /// field existed.
+  finalBossHealthPercent Float?
+  createdAt              DateTime  @default(now())
 
   logFile       LogFile        @relation(fields: [logFileId], references: [id], onDelete: Cascade)
   phaseResults  PhaseResult[]

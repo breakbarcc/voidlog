@@ -15,6 +15,8 @@ export interface EiPhase {
   name: string;
   start: number;
   end: number;
+  /** Indices into the root `targets[]` this phase is about. */
+  targets?: number[];
 }
 
 export interface EiMechanicDataPoint {
@@ -97,6 +99,13 @@ export interface EiTarget {
   id: number;
   /** Absent for targets EI didn't track a cast log for (e.g. static hazards). */
   rotation?: EiRotationEntry[];
+  /** Percent of the target's health burned by the end of the fight (0-100). */
+  healthPercentBurned?: number;
+  /** Absolute health at the end of the fight and at full; both -1 if the target never had health. */
+  finalHealth?: number;
+  totalHealth?: number;
+  /** When the target first became active, in ms from fight start. */
+  firstAware?: number;
 }
 
 export interface EiSkillMapEntry {

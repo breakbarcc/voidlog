@@ -84,6 +84,8 @@ interface EncounterLike {
   recordedAt: Date | null;
   /** Fallback for `recordedAt` — when this row was persisted, not when the fight happened. */
   createdAt: Date;
+  /** Health the last enemy had left when the attempt ended (0-100); null if EI had none, or for encounters parsed before this field existed. */
+  finalBossHealthPercent: number | null;
   playerResults: {
     account: string;
     characterName: string;
@@ -369,6 +371,8 @@ function buildAttemptRow(
     isCM: encounter.isCM,
     n: index + 1,
     success: encounter.success,
+    // Only meaningful for a wipe — a kill always ends with the boss at 0%.
+    bossHealthPercent: encounter.success ? null : (encounter.finalBossHealthPercent ?? null),
     furthestPhase: furthest ? { name: furthest.name, order: furthest.order } : null,
     durationMs: encounter.durationMs,
     recordedAt: encounter.recordedAt ?? encounter.createdAt,

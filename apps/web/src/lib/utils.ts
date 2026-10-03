@@ -33,3 +33,11 @@ export function formatDateTime(
 export function formatNumber(value: number, locale: Locale): string {
   return value.toLocaleString(BCP47_TAG[locale]);
 }
+
+/** Locale-aware percentage from a 0-100 value, e.g. 86.4 → "86,4 %" (de) / "86.4%" (en). */
+export function formatPercent(value: number, locale: Locale): string {
+  return new Intl.NumberFormat(BCP47_TAG[locale], {
+    style: "percent",
+    maximumFractionDigits: 1,
+  }).format(value / 100);
+}

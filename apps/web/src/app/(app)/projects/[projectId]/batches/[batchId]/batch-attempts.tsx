@@ -14,7 +14,7 @@ import { PhaseBadge, phaseColor, readableHeadingColor } from "@/components/phase
 import { SortableColumnHeader } from "@/components/sortable-column-header";
 import type { Locale } from "@/i18n/locale";
 import { isVisibleCastMarker } from "@/lib/mechanics";
-import { formatDateTime } from "@/lib/utils";
+import { formatDateTime, formatPercent } from "@/lib/utils";
 import { RemoveLogButton } from "./remove-log-button";
 
 export interface AttemptRow {
@@ -24,6 +24,8 @@ export interface AttemptRow {
   isCM: boolean;
   n: number;
   success: boolean;
+  /** Health the last enemy had left on a wipe, 0-100; null for kills and logs without it. */
+  bossHealthPercent: number | null;
   furthestPhase: { name: string; order: number } | null;
   durationMs: number;
   /** When the attempt actually happened in-game — falls back to when the log row was persisted, see page.tsx. */
@@ -1173,11 +1175,18 @@ export function BatchAttempts({
                 </Table.Cell>
                 <Table.Cell>
                   {a.furthestPhase ? (
-                    <PhaseBadge
-                      bossId={a.bossId}
-                      name={a.furthestPhase.name}
-                      order={a.furthestPhase.order}
-                    />
+                    <span className="inline-flex items-center gap-2">
+                      <PhaseBadge
+                        bossId={a.bossId}
+                        name={a.furthestPhase.name}
+                        order={a.furthestPhase.order}
+                      />
+                      {a.bossHealthPercent !== null ? (
+                        <span className="text-muted-strong text-xs">
+                          {formatPercent(a.bossHealthPercent, locale)}
+                        </span>
+                      ) : null}
+                    </span>
                   ) : (
                     tCommon("dash")
                   )}
@@ -1470,11 +1479,18 @@ export function BatchAttempts({
                         label={tTimeline("stats.furthestPhase")}
                         value={
                           a.furthestPhase ? (
-                            <PhaseBadge
-                              bossId={a.bossId}
-                              name={a.furthestPhase.name}
-                              order={a.furthestPhase.order}
-                            />
+                            <span className="inline-flex items-center gap-2">
+                              <PhaseBadge
+                                bossId={a.bossId}
+                                name={a.furthestPhase.name}
+                                order={a.furthestPhase.order}
+                              />
+                              {a.bossHealthPercent !== null ? (
+                                <span className="text-muted-strong text-xs">
+                                  {formatPercent(a.bossHealthPercent, locale)}
+                                </span>
+                              ) : null}
+                            </span>
                           ) : (
                             tCommon("dash")
                           )
