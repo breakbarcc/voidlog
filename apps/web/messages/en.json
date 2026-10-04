@@ -341,6 +341,11 @@
       "debilitated": "Debilitated received",
       "revealed": "Revealed too early",
       "empty": "No evaluated logs yet."
+    },
+    "progress": {
+      "title": "Phase progress",
+      "description": "Share of attempts that reached each phase. The later phases catching up with the first means the group is getting more stable.",
+      "tooltip": "{reached} of {total} attempts ({pct}%)"
     }
   },
   "logDetail": {

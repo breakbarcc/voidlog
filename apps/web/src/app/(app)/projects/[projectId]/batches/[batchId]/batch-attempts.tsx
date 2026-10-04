@@ -15,6 +15,7 @@ import { SortableColumnHeader } from "@/components/sortable-column-header";
 import type { Locale } from "@/i18n/locale";
 import { isVisibleCastMarker } from "@/lib/mechanics";
 import { formatDateTime, formatPercent } from "@/lib/utils";
+import { PhaseProgressChart } from "./phase-progress-chart";
 import { RemoveLogButton } from "./remove-log-button";
 
 export interface AttemptRow {
@@ -1149,6 +1150,9 @@ export function BatchAttempts({
       </Tabs.List>
 
       <Tabs.Content value="table" className="mt-4">
+        {batchPhaseStats.length > 0 ? (
+          <PhaseProgressChart bossId={bossId} stats={batchPhaseStats} />
+        ) : null}
         <Table.Root variant="surface" className="border-line bg-surface border">
           <Table.Header>
             <Table.Row>

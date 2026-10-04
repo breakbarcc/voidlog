@@ -341,6 +341,11 @@
       "debilitated": "Geschwächt erhalten",
       "revealed": "Zu früh aufgedeckt",
       "empty": "Noch keine ausgewerteten Logs."
+    },
+    "progress": {
+      "title": "Phasenfortschritt",
+      "description": "Anteil der Versuche, die die jeweilige Phase erreicht haben. Schließen die späteren Phasen zur ersten auf, wird die Gruppe stabiler.",
+      "tooltip": "{reached} von {total} Versuchen ({pct}%)"
     }
   },
   "logDetail": {
