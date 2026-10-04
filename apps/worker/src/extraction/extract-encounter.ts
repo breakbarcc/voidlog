@@ -40,6 +40,7 @@ const PLAYER_KEEP_WHOLE = new Set([
   "profession",
   "group",
   "dpsAll",
+  "dpsTargets",
   "defenses",
   "rotation",
   "buffUptimesActive",

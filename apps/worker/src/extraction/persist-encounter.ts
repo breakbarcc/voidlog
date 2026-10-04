@@ -8,6 +8,7 @@ import {
 } from "../boss-configs/cast-markers";
 import { STEALTH_PHASES_BY_BOSS } from "../boss-configs/stealth-phases";
 import { computeFinalBossHealthPercent } from "./boss-health";
+import { computePhaseDamage } from "./phase-damage";
 import { DEATH_MECHANIC_NAME, parseEiTimestamp } from "./ei-json-shape";
 import type { EiRotationEntry } from "./ei-json-shape";
 import type { ExtractedEncounter } from "./extract-encounter";
@@ -201,6 +202,7 @@ export async function persistExtractedEncounter(
       });
 
       const playerIdByCharacterName = new Map<string, string>();
+      const createdPlayers: { id: string; player: (typeof players)[number] }[] = [];
       for (const player of players) {
         const dps = player.dpsAll?.[0]?.dps ?? 0;
         const deaths = player.defenses?.[0]?.deadCount ?? 0;
@@ -218,6 +220,7 @@ export async function persistExtractedEncounter(
           },
         });
         playerIdByCharacterName.set(player.name, created.id);
+        createdPlayers.push({ id: created.id, player });
       }
 
       const totalPlayers = players.length;
@@ -243,6 +246,19 @@ export async function persistExtractedEncounter(
         });
         phaseIdsInOrder.push(createdPhase.id);
       }
+
+      // Damage per player and phase. EI's dpsAll/dpsTargets are indexed by the
+      // phase's position in the *original* phases[], not in the start-sorted
+      // copy the PhaseResult rows follow.
+      const phaseDamageRows = createdPlayers.flatMap(({ id, player }) =>
+        sortedPhases.flatMap((phase, i) => {
+          const damage = computePhaseDamage(player, phase, root.phases.indexOf(phase));
+          return damage
+            ? [{ playerResultId: id, phaseResultId: phaseIdsInOrder[i]!, ...damage }]
+            : [];
+        }),
+      );
+      await tx.playerPhaseDamage.createMany({ data: phaseDamageRows });
 
       // A timestamp usually falls inside several overlapping phases at once
       // — e.g. "Full Fight" spans the entire encounter — so picking the

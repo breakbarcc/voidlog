@@ -32,6 +32,8 @@ export interface EiMechanic {
 
 export interface EiPlayerDpsAllEntry {
   dps?: number;
+  /** Damage within this phase (not DPS). */
+  damage?: number;
 }
 
 export interface EiPlayerDefensesEntry {
@@ -59,6 +61,13 @@ export interface EiPlayer {
   group?: number;
   /** Per-phase array; index 0 is assumed to be "all phases combined". */
   dpsAll?: EiPlayerDpsAllEntry[];
+  /**
+   * Damage to each target, per phase: `dpsTargets[targetIndex][phaseIndex]`
+   * (target indices as in the root `targets[]`, phase indices as in
+   * `phases[]`). Kept transiently for `computePhaseDamage` — about 125KB per
+   * player because of the many sub-targets, never persisted as-is.
+   */
+  dpsTargets?: { damage?: number }[][];
   /** Per-phase array; index 0 is assumed to be "all phases combined". */
   defenses?: EiPlayerDefensesEntry[];
   /**

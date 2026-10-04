@@ -210,8 +210,9 @@ model PhaseResult {
   success             Boolean
   playersAliveAtStart Int
 
-  encounterResult EncounterResult @relation(fields: [encounterResultId], references: [id], onDelete: Cascade)
+  encounterResult EncounterResult     @relation(fields: [encounterResultId], references: [id], onDelete: Cascade)
   mechanicEvents  MechanicEvent[]
+  playerDamage    PlayerPhaseDamage[]
 
   @@map("phase_results")
 }
@@ -240,6 +241,26 @@ model MechanicEvent {
   @@map("mechanic_events")
 }
 
+/// Damage one player dealt within one phase of an encounter. Both numbers are
+/// stored so views can choose: `bossDamage` counts only the phase's own targets
+/// (EI's `phases[].targets`, e.g. the dragon), `totalDamage` everything incl.
+/// adds. Divide by the phase's duration (endMs - startMs) for DPS. Missing for
+/// encounters parsed before this table existed.
+model PlayerPhaseDamage {
+  id             String @id @default(cuid())
+  playerResultId String
+  phaseResultId  String
+  bossDamage     Int
+  totalDamage    Int
+
+  playerResult PlayerResult @relation(fields: [playerResultId], references: [id], onDelete: Cascade)
+  phaseResult  PhaseResult  @relation(fields: [phaseResultId], references: [id], onDelete: Cascade)
+
+  @@unique([playerResultId, phaseResultId])
+  @@index([phaseResultId])
+  @@map("player_phase_damage")
+}
+
 model PlayerResult {
   id                String  @id @default(cuid())
   encounterResultId String
@@ -252,8 +273,9 @@ model PlayerResult {
   downs             Int
   role              String?
 
-  encounterResult EncounterResult @relation(fields: [encounterResultId], references: [id], onDelete: Cascade)
+  encounterResult EncounterResult     @relation(fields: [encounterResultId], references: [id], onDelete: Cascade)
   mechanicEvents  MechanicEvent[]
+  phaseDamage     PlayerPhaseDamage[]
 
   @@index([encounterResultId, account])
   @@map("player_results")
