@@ -139,7 +139,7 @@ pnpm typecheck        # tsc --noEmit across all packages
   recording time rather than upload order.
 - [x] Per-mechanic filter to show/hide individual mechanics
 - [x] add HTCm greens mechanic in boss attack row
-- [ ] Reveal mechanic analysis
+- [x] Reveal mechanic analysis
 - [ ] Improve mechanic aggregation across a log batch
 - [ ] Track player revives (who revived whom, and when) — `MechanicEvent`
   currently stores one `actor` per "Res"/"Resp"/"Got up" event (real EI
