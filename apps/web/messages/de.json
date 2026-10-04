@@ -344,8 +344,16 @@
     },
     "progress": {
       "title": "Phasenfortschritt",
-      "description": "Anteil der Versuche, die die jeweilige Phase erreicht haben. Schließen die späteren Phasen zur ersten auf, wird die Gruppe stabiler.",
-      "tooltip": "{reached} von {total} Versuchen ({pct}%)"
+      "description": "Anteil der Versuche, die eine Phase erreicht haben, und wo die Versuche geendet sind",
+      "legendReached": "Erreicht (dieser Batch)",
+      "legendPrevious": "Vorheriger Batch",
+      "legendWipes": "Wipes in Phase",
+      "wipesTitle": "Wipes pro Phase",
+      "wipesHint": "Hier endeten die Versuche",
+      "tooltip": "{reached} von {total} Versuchen ({pct}%)",
+      "tooltipPrevious": "Vorheriger Batch ({label}): {pct}%",
+      "tooltipWipes": "{count, plural, one {# Wipe} other {# Wipes}} in dieser Phase",
+      "biggestDrop": "Größter Einbruch: <name>{phase}</name> mit {wipes} Wipes ({pct} % der Versuche)"
     }
   },
   "logDetail": {

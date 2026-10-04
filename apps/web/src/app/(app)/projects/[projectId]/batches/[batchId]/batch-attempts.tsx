@@ -15,7 +15,11 @@ import { SortableColumnHeader } from "@/components/sortable-column-header";
 import type { Locale } from "@/i18n/locale";
 import { isVisibleCastMarker } from "@/lib/mechanics";
 import { formatDateTime, formatPercent } from "@/lib/utils";
-import { PhaseProgressChart, type PhaseProgressStat } from "./phase-progress-chart";
+import {
+  PhaseProgressChart,
+  type PhaseProgressStat,
+  type PreviousPhaseProgress,
+} from "./phase-progress-chart";
 import { RemoveLogButton } from "./remove-log-button";
 
 export interface AttemptRow {
@@ -1005,6 +1009,8 @@ export function BatchAttempts({
   attempts,
   batchPhaseStats,
   phaseProgress,
+  wipesByPhase,
+  previousProgress,
   roster,
   canEdit,
 }: Readonly<{
@@ -1016,6 +1022,8 @@ export function BatchAttempts({
   attempts: AttemptRow[];
   batchPhaseStats: BatchPhaseStat[];
   phaseProgress: PhaseProgressStat[];
+  wipesByPhase: Record<string, number>;
+  previousProgress: PreviousPhaseProgress | null;
   roster: BatchRosterRow[];
 }>) {
   const t = useTranslations("batchAttempts");
@@ -1153,7 +1161,13 @@ export function BatchAttempts({
 
       <Tabs.Content value="table" className="mt-4">
         {phaseProgress.length > 0 ? (
-          <PhaseProgressChart bossId={bossId} stats={phaseProgress} />
+          <PhaseProgressChart
+            bossId={bossId}
+            stats={phaseProgress}
+            wipesByPhase={wipesByPhase}
+            attempts={attempts.length}
+            previous={previousProgress}
+          />
         ) : null}
         <Table.Root variant="surface" className="border-line bg-surface border">
           <Table.Header>

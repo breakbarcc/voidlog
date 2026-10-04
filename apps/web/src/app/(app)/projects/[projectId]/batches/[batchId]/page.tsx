@@ -17,7 +17,7 @@ import {
   type BatchPhaseStat,
   type BatchRosterRow,
 } from "./batch-attempts";
-import type { PhaseProgressStat } from "./phase-progress-chart";
+import type { PhaseProgressStat, PreviousPhaseProgress } from "./phase-progress-chart";
 import { BatchLabelEditor } from "./batch-label-editor";
 import { DeleteBatchButton } from "./delete-batch-button";
 import { RemoveLogButton } from "./remove-log-button";
@@ -276,6 +276,68 @@ function computePhaseProgress(
     reached: byName.get(name)?.reached ?? 0,
     total: attempts,
   }));
+}
+
+/** Failed attempts per furthest main phase — where the attempts ended. */
+function countWipesByPhase(attempts: AttemptRow[]): Record<string, number> {
+  const wipes: Record<string, number> = {};
+  for (const a of attempts) {
+    if (a.success || !a.furthestPhase) continue;
+    wipes[a.furthestPhase.name] = (wipes[a.furthestPhase.name] ?? 0) + 1;
+  }
+  return wipes;
+}
+
+/**
+ * Phase progress of the batch that happened right before `batchId` (by
+ * in-game time, same `recordedAt ?? createdAt` ordering as everywhere else),
+ * for the dashed comparison line. Null if there is none for this boss.
+ */
+async function loadPreviousPhaseProgress(
+  projectId: string,
+  batchId: string,
+  bossId: string,
+  currentStart: Date,
+): Promise<PreviousPhaseProgress | null> {
+  const others = await prisma.encounterResult.findMany({
+    where: { bossId, logFile: { batch: { projectId, id: { not: batchId } } } },
+    select: { recordedAt: true, createdAt: true, logFile: { select: { batchId: true } } },
+  });
+  const starts = new Map<string, number>();
+  for (const e of others) {
+    const time = (e.recordedAt ?? e.createdAt).getTime();
+    const known = starts.get(e.logFile.batchId);
+    if (known === undefined || time < known) starts.set(e.logFile.batchId, time);
+  }
+  let previousId: string | null = null;
+  let previousStart = -Infinity;
+  for (const [id, start] of starts) {
+    if (start < currentStart.getTime() && start > previousStart) {
+      previousId = id;
+      previousStart = start;
+    }
+  }
+  if (!previousId) return null;
+
+  const [batch, encounters] = await Promise.all([
+    prisma.uploadBatch.findUnique({ where: { id: previousId }, select: { label: true } }),
+    prisma.encounterResult.findMany({
+      where: { bossId, logFile: { batchId: previousId } },
+      select: { phaseResults: { where: { reached: true }, select: { name: true } } },
+    }),
+  ]);
+  const reached = new Map<string, number>();
+  for (const e of encounters) {
+    for (const name of new Set(e.phaseResults.map((p) => p.name))) {
+      reached.set(name, (reached.get(name) ?? 0) + 1);
+    }
+  }
+  return {
+    batchLabel: batch?.label ?? "",
+    stats: Object.fromEntries(
+      [...reached].map(([name, count]) => [name, { reached: count, total: encounters.length }]),
+    ),
+  };
 }
 
 interface RosterAccumulator {
@@ -566,6 +628,15 @@ export default async function BatchDetailPage(
   const phaseProgress = computePhaseProgress(batchPhaseStats, batchBossId, attempts);
   const batchRoster = computeBatchRoster(encounters);
   const attemptRows: AttemptRow[] = encounters.map((entry, i) => buildAttemptRow(entry, i, locale));
+  const first = encounters[0]?.encounter;
+  const previousProgress = first
+    ? await loadPreviousPhaseProgress(
+        projectId,
+        batchId,
+        batchBossId,
+        first.recordedAt ?? first.createdAt,
+      )
+    : null;
 
   return (
     <div className="px-10 py-8">
@@ -678,6 +749,8 @@ export default async function BatchDetailPage(
         attempts={attemptRows}
         batchPhaseStats={batchPhaseStats}
         phaseProgress={phaseProgress}
+        wipesByPhase={countWipesByPhase(attemptRows)}
+        previousProgress={previousProgress}
         roster={batchRoster}
       />
     </div>

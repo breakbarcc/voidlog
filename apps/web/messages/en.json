@@ -344,8 +344,16 @@
     },
     "progress": {
       "title": "Phase progress",
-      "description": "Share of attempts that reached each phase. The later phases catching up with the first means the group is getting more stable.",
-      "tooltip": "{reached} of {total} attempts ({pct}%)"
+      "description": "Share of attempts that reached each phase, and where the attempts ended",
+      "legendReached": "Reached (this batch)",
+      "legendPrevious": "Previous batch",
+      "legendWipes": "Wipes in phase",
+      "wipesTitle": "Wipes per phase",
+      "wipesHint": "Where the attempts ended",
+      "tooltip": "{reached} of {total} attempts ({pct}%)",
+      "tooltipPrevious": "Previous batch ({label}): {pct}%",
+      "tooltipWipes": "{count, plural, one {# wipe} other {# wipes}} in this phase",
+      "biggestDrop": "Biggest drop: <name>{phase}</name> with {wipes} wipes ({pct}% of attempts)"
     }
   },
   "logDetail": {
