@@ -37,3 +37,11 @@ export function showsBossHealth(bossId: string, phaseName: string): boolean {
 export function progressPhases(bossId: string): readonly string[] | undefined {
   return getBossCuration(bossId)?.progressPhases;
 }
+
+/**
+ * The phases of `bossId` whose damage is comparable between nights, in fight
+ * order — see `BossCuration.damagePhases`. Undefined for bosses without it.
+ */
+export function damagePhases(bossId: string): readonly string[] | undefined {
+  return getBossCuration(bossId)?.damagePhases;
+}

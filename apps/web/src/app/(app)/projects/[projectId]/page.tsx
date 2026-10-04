@@ -4,12 +4,15 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PhaseBadge } from "@/components/phase-badge";
-import { isMainPhase, progressPhases } from "@/lib/main-phases";
+import type { DpsNight } from "@/lib/dps-model";
+import { damagePhases, isMainPhase, progressPhases } from "@/lib/main-phases";
+import { loadPhaseDamageByBatch } from "@/lib/phase-damage";
 import { hasRole, requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import { DeleteProjectButton } from "./delete-project-button";
 import { PhaseProgressTrend, type ProgressNight } from "./phase-progress-trend";
-import { DpsTrendChart, GreenFailTrendChart, ShockwaveTrendChart } from "./trend-chart";
+import { DpsPhaseChart } from "./dps-phase-chart";
+import { GreenFailTrendChart, ShockwaveTrendChart } from "./trend-chart";
 
 type MechanicEncounter = {
   phaseResults: { mechanicEvents: { mechanicName: string }[] }[];
@@ -80,16 +83,6 @@ export default async function ProjectDetailPage(
       const shockwaveHitCount = encounters.filter((e) => hasMechanic(e, "ShckWv.H")).length;
       const shockwaveHitRate =
         encounters.length > 0 ? Math.round((shockwaveHitCount / encounters.length) * 100) : null;
-      const avgGroupDps =
-        encounters.length > 0
-          ? Math.round(
-              encounters.reduce(
-                (sum, e) => sum + e.playerResults.reduce((s, p) => s + p.dps, 0),
-                0,
-              ) / encounters.length,
-            )
-          : 0;
-
       let furthestPhase: { name: string; order: number; bossId: string } | null = null;
       for (const encounter of encounters) {
         for (const phase of encounter.phaseResults) {
@@ -138,7 +131,6 @@ export default async function ProjectDetailPage(
         greenFailRate,
         shockwaveHitCount,
         shockwaveHitRate,
-        avgGroupDps,
         furthestPhase,
       };
     })
@@ -174,6 +166,17 @@ export default async function ProjectDetailPage(
         })
     : [];
 
+  const dpsPhaseNames = progressBossId ? damagePhases(progressBossId) : undefined;
+  const damageByBatch =
+    progressBossId && dpsPhaseNames
+      ? await loadPhaseDamageByBatch(projectId, progressBossId, dpsPhaseNames)
+      : new Map();
+  const dpsNights: DpsNight[] = progressNights.map((night) => ({
+    id: night.id,
+    occurredAt: night.occurredAt,
+    phases: damageByBatch.get(night.id) ?? {},
+  }));
+
   return (
     <div className="px-10 py-8">
       <Breadcrumbs
@@ -204,13 +207,7 @@ export default async function ProjectDetailPage(
       </div>
 
       {trendPoints.length >= 2 ? (
-        <div className="mb-6 grid grid-cols-1 gap-3.5 lg:grid-cols-3">
-          <Card size="3" className="border-line bg-surface border">
-            <div className="text-muted-strong mb-3.5 text-xs font-medium uppercase tracking-wide">
-              {t("avgGroupDps", { count: trendPoints.length })}
-            </div>
-            <DpsTrendChart points={trendPoints} />
-          </Card>
+        <div className="mb-6 grid grid-cols-1 gap-3.5 lg:grid-cols-2">
           <Card size="3" className="border-line bg-surface border">
             <div className="text-muted-strong mb-3.5 text-xs font-medium uppercase tracking-wide">
               {t("greenFailRate", { count: trendPoints.length })}
@@ -224,6 +221,14 @@ export default async function ProjectDetailPage(
             <ShockwaveTrendChart points={trendPoints} />
           </Card>
         </div>
+      ) : null}
+
+      {progressBossId && dpsPhaseNames && dpsNights.length > 0 ? (
+        <DpsPhaseChart
+          bossId={progressBossId}
+          phases={dpsPhaseNames.map((name, order) => ({ name, order }))}
+          nights={dpsNights}
+        />
       ) : null}
 
       {progressBossId && progressPhaseNames && progressNights.length > 0 ? (

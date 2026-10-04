@@ -31,6 +31,13 @@ export interface BossCuration {
    */
   progressPhases?: readonly string[];
   /**
+   * The phases whose damage numbers are comparable between nights — the ones
+   * where the group can actually hurt the boss, in fight order. Intermissions
+   * with an invulnerable target are left out, they would only add noise.
+   * Omitted = no per-phase damage view for this boss.
+   */
+  damagePhases?: readonly string[];
+  /**
    * Whether the remaining boss health recorded for an attempt that ended in
    * `phaseName` is worth showing. The worker stores the health of the last
    * enemy that had any, which only describes the fight when that enemy is

@@ -9,19 +9,13 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import type { Locale } from "@/i18n/locale";
-import { formatDate, formatNumber } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 
 export interface TrendPoint {
   id: string;
   occurredAt: Date;
-  avgGroupDps: number;
   greenFailRate: number | null;
   shockwaveHitRate: number | null;
-}
-
-function formatCompactNumber(v: number): string {
-  if (Math.abs(v) < 1000) return String(Math.round(v));
-  return `${parseFloat((v / 1000).toFixed(1))}k`;
 }
 
 function formatAxisDate(date: Date, locale: Locale): string {
@@ -85,22 +79,6 @@ function SingleLineChart({
         />
       </LineChart>
     </ChartContainer>
-  );
-}
-
-export function DpsTrendChart({ points }: Readonly<{ points: TrendPoint[] }>) {
-  const t = useTranslations("trendChart");
-  const locale = useLocale() as Locale;
-  return (
-    <SingleLineChart
-      points={points}
-      dataKey="dps"
-      valueOf={(p) => p.avgGroupDps}
-      color="var(--primary)"
-      label={t("avgGroupDps")}
-      formatValue={(v) => formatNumber(Math.round(v), locale)}
-      formatTick={formatCompactNumber}
-    />
   );
 }
 

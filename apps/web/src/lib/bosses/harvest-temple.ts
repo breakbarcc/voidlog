@@ -384,6 +384,19 @@ export const harvestTemple: BossCuration = {
     "Purification 4",
     "Soo-Won 2",
   ],
+  // Purification 1-3 are left out: the orb is invulnerable there, so there is
+  // no boss damage to compare. "Purification 4" kills the orb for real.
+  damagePhases: [
+    "Jormag",
+    "Primordus",
+    "Kralkatorrik",
+    "Mordremoth",
+    "Giants",
+    "Zhaitan",
+    "Purification 4",
+    "Soo-Won 1",
+    "Soo-Won 2",
+  ],
   // Only dragon phases (incl. Soo-Won 1/2) have a boss HP worth showing. In
   // the intermissions the target is an invulnerable orb at a constant 100%
   // (Purification 1-3) or a group of adds ("Giants"), so the stored value
