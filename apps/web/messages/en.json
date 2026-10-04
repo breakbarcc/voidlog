@@ -391,5 +391,19 @@
   "globalMechanicLabels": {
     "Downed": "Downed",
     "DC": "Disconnect"
+  },
+  "projectProgress": {
+    "title": "Phase progress across all raid nights",
+    "description": "Share of attempts that reached each phase. Select a night to compare it with the first night.",
+    "legendSelected": "Selected night",
+    "legendFirst": "First night ({date})",
+    "legendOthers": "Other nights",
+    "changeTitle": "Change",
+    "changeHint": "{selected} vs. {first}, percentage points",
+    "tooltipSelected": "{date}: {reached} of {total} attempts reached ({pct}%)",
+    "tooltipFirst": "First night ({date}): {pct}%",
+    "tooltipBest": "Best: {pct}% ({date})",
+    "summaryBest": "Biggest improvement since {date}: {phase} (+{points} percentage points).",
+    "summaryFurthest": "Furthest phase: {phase}."
   }
 }

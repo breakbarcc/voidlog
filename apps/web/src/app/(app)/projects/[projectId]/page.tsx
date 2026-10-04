@@ -4,10 +4,11 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PhaseBadge } from "@/components/phase-badge";
-import { isMainPhase } from "@/lib/main-phases";
+import { isMainPhase, progressPhases } from "@/lib/main-phases";
 import { hasRole, requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import { DeleteProjectButton } from "./delete-project-button";
+import { PhaseProgressTrend, type ProgressNight } from "./phase-progress-trend";
 import { DpsTrendChart, GreenFailTrendChart, ShockwaveTrendChart } from "./trend-chart";
 
 type MechanicEncounter = {
@@ -114,8 +115,20 @@ export default async function ProjectDetailPage(
           ? new Date(Math.min(...recordedTimestamps.map((d) => d.getTime())))
           : batch.createdAt;
 
+      // Attempts per boss that reached each phase, for the phase progress chart.
+      const reachByBoss = new Map<string, { attempts: number; reached: Map<string, number> }>();
+      for (const e of encounters) {
+        const entry = reachByBoss.get(e.bossId) ?? { attempts: 0, reached: new Map() };
+        entry.attempts += 1;
+        for (const name of new Set(e.phaseResults.filter((p) => p.reached).map((p) => p.name))) {
+          entry.reached.set(name, (entry.reached.get(name) ?? 0) + 1);
+        }
+        reachByBoss.set(e.bossId, entry);
+      }
+
       return {
         id: batch.id,
+        reachByBoss,
         label: batch.label,
         createdAt: batch.createdAt,
         occurredAt,
@@ -135,6 +148,31 @@ export default async function ProjectDetailPage(
     .slice(0, 10)
     .reverse()
     .filter((b) => b.attempts > 0);
+
+  // The chart is about one encounter: the boss most attempts were made on.
+  // Bosses without a curated phase list have nothing to lay out on the x axis.
+  const attemptsByBoss = new Map<string, number>();
+  for (const batch of batches) {
+    for (const [bossId, { attempts }] of batch.reachByBoss) {
+      attemptsByBoss.set(bossId, (attemptsByBoss.get(bossId) ?? 0) + attempts);
+    }
+  }
+  const progressBossId = [...attemptsByBoss].sort((a, b) => b[1] - a[1])[0]?.[0];
+  const progressPhaseNames = progressBossId ? progressPhases(progressBossId) : undefined;
+  const progressNights: ProgressNight[] = progressBossId
+    ? batches
+        .filter((b) => b.reachByBoss.has(progressBossId))
+        .reverse()
+        .map((b) => {
+          const entry = b.reachByBoss.get(progressBossId);
+          return {
+            id: b.id,
+            occurredAt: b.occurredAt,
+            attempts: entry?.attempts ?? 0,
+            reached: Object.fromEntries(entry?.reached ?? []),
+          };
+        })
+    : [];
 
   return (
     <div className="px-10 py-8">
@@ -186,6 +224,14 @@ export default async function ProjectDetailPage(
             <ShockwaveTrendChart points={trendPoints} />
           </Card>
         </div>
+      ) : null}
+
+      {progressBossId && progressPhaseNames && progressNights.length > 0 ? (
+        <PhaseProgressTrend
+          bossId={progressBossId}
+          phases={progressPhaseNames.map((name, order) => ({ name, order }))}
+          nights={progressNights}
+        />
       ) : null}
 
       <div className="text-muted-strong mb-2.5 text-sm font-semibold">{t("raidNights")}</div>

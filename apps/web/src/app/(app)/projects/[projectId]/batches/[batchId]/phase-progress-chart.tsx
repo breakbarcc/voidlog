@@ -2,6 +2,17 @@
 
 import { useTranslations } from "next-intl";
 import { phaseColor, readableHeadingColor } from "@/components/phase-badge";
+import {
+  AREA_COLOR,
+  DASH_COLOR,
+  GUTTER,
+  LINE_COLOR,
+  PlotAxis,
+  PlotGrid,
+  Riser,
+  percent,
+  shortPhaseName,
+} from "@/components/phase-progress-shared";
 
 export interface PhaseProgressStat {
   name: string;
@@ -14,25 +25,6 @@ export interface PhaseProgressStat {
 export interface PreviousPhaseProgress {
   batchLabel: string;
   stats: Record<string, { reached: number; total: number }>;
-}
-
-const LINE_COLOR = "#a46be8";
-const AREA_COLOR = "color-mix(in srgb, var(--primary) 32%, transparent)";
-const DASH_COLOR = "var(--muted-strong)";
-// Left gutter shared by the plot and the wipes panel so columns line up.
-const GUTTER = "w-11 shrink-0";
-
-function percent(reached: number, total: number): number {
-  return total > 0 ? Math.round((reached / total) * 100) : 0;
-}
-
-// "Purification 2" -> "P2"; other long single-word names are clipped so 12
-// columns still fit on a laptop screen (the full name is in the tooltip).
-function shortPhaseName(name: string): string {
-  const purification = /^Purification (\d+)$/.exec(name);
-  if (purification) return `P${purification[1]}`;
-  if (!name.includes(" ") && name.length > 8) return `${name.slice(0, 6)}.`;
-  return name;
 }
 
 function Legend({ hasPrevious }: Readonly<{ hasPrevious: boolean }>) {
@@ -57,22 +49,6 @@ function Legend({ hasPrevious }: Readonly<{ hasPrevious: boolean }>) {
         {t("legendWipes")}
       </span>
     </div>
-  );
-}
-
-/** Vertical stroke on the left edge of a column, joining it to its left neighbour. */
-function Riser({ from, to, dashed }: Readonly<{ from: number; to: number; dashed?: boolean }>) {
-  if (from === to) return null;
-  return (
-    <div
-      className="absolute left-0 -translate-x-1/2"
-      style={{
-        bottom: `${Math.min(from, to)}%`,
-        height: `${Math.abs(from - to)}%`,
-        borderLeft: dashed ? `1.5px dashed ${DASH_COLOR}` : `2px solid ${LINE_COLOR}`,
-        opacity: dashed ? 0.6 : 1,
-      }}
-    />
   );
 }
 
@@ -131,25 +107,9 @@ export function PhaseProgressChart({
       </div>
 
       <div className="flex">
-        <div className={`${GUTTER} relative mt-6 h-[170px]`}>
-          {[100, 50, 0].map((v) => (
-            <span
-              key={v}
-              className="text-muted absolute right-2 translate-y-1/2 text-[10px]"
-              style={{ bottom: `${v}%` }}
-            >
-              {v}%
-            </span>
-          ))}
-        </div>
+        <PlotAxis />
         <div className="relative mt-6 h-[170px] min-w-0 flex-1">
-          {[100, 50, 0].map((v) => (
-            <div
-              key={v}
-              className="border-line-soft absolute inset-x-0 border-t"
-              style={{ bottom: `${v}%` }}
-            />
-          ))}
+          <PlotGrid />
           <div className="absolute inset-0 flex">
             {columns.map((c, i) => {
               const before = columns[i - 1];
@@ -170,7 +130,14 @@ export function PhaseProgressChart({
                         }}
                       />
                       {before?.prevPct == null ? null : (
-                        <Riser from={before.prevPct} to={c.prevPct} dashed />
+                        <Riser
+                          from={before.prevPct}
+                          to={c.prevPct}
+                          color={DASH_COLOR}
+                          width={1.5}
+                          dashed
+                          opacity={0.6}
+                        />
                       )}
                     </>
                   )}

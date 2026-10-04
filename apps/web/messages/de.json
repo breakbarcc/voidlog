@@ -391,5 +391,19 @@
   "globalMechanicLabels": {
     "Downed": "Downstate",
     "DC": "Disconnect"
+  },
+  "projectProgress": {
+    "title": "Phasenfortschritt über alle Raid-Abende",
+    "description": "Anteil der Versuche, die eine Phase erreicht haben. Abend auswählen, um ihn mit dem ersten Abend zu vergleichen.",
+    "legendSelected": "Ausgewählter Abend",
+    "legendFirst": "Erster Abend ({date})",
+    "legendOthers": "Weitere Abende",
+    "changeTitle": "Veränderung",
+    "changeHint": "{selected} ggü. {first}, Prozentpunkte",
+    "tooltipSelected": "{date}: {reached} von {total} Versuchen erreicht ({pct} %)",
+    "tooltipFirst": "Erster Abend ({date}): {pct} %",
+    "tooltipBest": "Bestwert: {pct} % ({date})",
+    "summaryBest": "Größte Verbesserung seit {date}: {phase} (+{points} Prozentpunkte).",
+    "summaryFurthest": "Weiteste Phase: {phase}."
   }
 }
