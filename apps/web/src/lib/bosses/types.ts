@@ -24,6 +24,13 @@ export interface BossCuration {
    */
   isMainPhase: (phaseName: string) => boolean;
   /**
+   * Every main phase of the encounter in fight order, including the ones
+   * nobody reached. Persisted PhaseResult rows only exist for phases an
+   * attempt got to, so views that must show the *whole* progression (e.g. the
+   * phase progress chart) need this list. Omitted = only observed phases.
+   */
+  progressPhases?: readonly string[];
+  /**
    * Whether the remaining boss health recorded for an attempt that ended in
    * `phaseName` is worth showing. The worker stores the health of the last
    * enemy that had any, which only describes the fight when that enemy is

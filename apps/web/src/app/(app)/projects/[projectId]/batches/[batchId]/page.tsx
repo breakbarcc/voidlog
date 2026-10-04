@@ -6,7 +6,7 @@ import type { Locale } from "@/i18n/locale";
 import { BatchSwitcher } from "@/components/batch-switcher";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PhaseBadge } from "@/components/phase-badge";
-import { isMainPhase, showsBossHealth } from "@/lib/main-phases";
+import { isMainPhase, progressPhases, showsBossHealth } from "@/lib/main-phases";
 import { translateMechanicName } from "@/lib/mechanic-names";
 import { isContextualNoiseMechanic, isNoiseMechanic, isVisibleCastMarker } from "@/lib/mechanics";
 import { hasRole, requireProjectMembership } from "@/lib/projects";
@@ -17,6 +17,7 @@ import {
   type BatchPhaseStat,
   type BatchRosterRow,
 } from "./batch-attempts";
+import type { PhaseProgressStat } from "./phase-progress-chart";
 import { BatchLabelEditor } from "./batch-label-editor";
 import { DeleteBatchButton } from "./delete-batch-button";
 import { RemoveLogButton } from "./remove-log-button";
@@ -253,6 +254,28 @@ function computeBatchPhaseStats(
         mechanics,
       };
     });
+}
+
+/**
+ * One entry per main phase of the boss for the progress chart. Phases no
+ * attempt reached have no PhaseResult row, so they are filled in from the
+ * boss's curated phase list with 0 reached — the chart should show how much of
+ * the fight the group never got to. Uncurated bosses only get observed phases.
+ */
+function computePhaseProgress(
+  stats: BatchPhaseStat[],
+  bossId: string,
+  attempts: number,
+): PhaseProgressStat[] {
+  const expected = progressPhases(bossId);
+  if (!expected) return stats;
+  const byName = new Map(stats.map((s) => [s.name, s]));
+  return expected.map((name, index) => ({
+    name,
+    order: byName.get(name)?.order ?? index,
+    reached: byName.get(name)?.reached ?? 0,
+    total: attempts,
+  }));
 }
 
 interface RosterAccumulator {
@@ -540,6 +563,7 @@ export default async function BatchDetailPage(
 
   const furthestPhase = computeFurthestPhase(encounters);
   const batchPhaseStats = computeBatchPhaseStats(encounters, batchBossId, attempts, locale);
+  const phaseProgress = computePhaseProgress(batchPhaseStats, batchBossId, attempts);
   const batchRoster = computeBatchRoster(encounters);
   const attemptRows: AttemptRow[] = encounters.map((entry, i) => buildAttemptRow(entry, i, locale));
 
@@ -653,6 +677,7 @@ export default async function BatchDetailPage(
         bossId={batchBossId}
         attempts={attemptRows}
         batchPhaseStats={batchPhaseStats}
+        phaseProgress={phaseProgress}
         roster={batchRoster}
       />
     </div>

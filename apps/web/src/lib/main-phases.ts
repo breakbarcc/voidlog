@@ -29,3 +29,11 @@ export function isMainPhase(bossId: string, phaseName: string): boolean {
 export function showsBossHealth(bossId: string, phaseName: string): boolean {
   return getBossCuration(bossId)?.showsBossHealth?.(phaseName) ?? true;
 }
+
+/**
+ * Every main phase of `bossId` in fight order, reached or not — see
+ * `BossCuration.progressPhases`. Undefined for bosses without curation.
+ */
+export function progressPhases(bossId: string): readonly string[] | undefined {
+  return getBossCuration(bossId)?.progressPhases;
+}

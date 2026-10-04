@@ -369,6 +369,20 @@ export const harvestTemple: BossCuration = {
     if (phaseName.startsWith("Soo-Won")) return DRAGON_COLORS["Soo-Won"];
     return DRAGON_COLORS[phaseName];
   },
+  progressPhases: [
+    "Purification 1",
+    "Jormag",
+    "Primordus",
+    "Kralkatorrik",
+    "Purification 2",
+    "Mordremoth",
+    "Giants",
+    "Zhaitan",
+    "Purification 3",
+    "Soo-Won 1",
+    "Purification 4",
+    "Soo-Won 2",
+  ],
   // Only dragon phases (incl. Soo-Won 1/2) have a boss HP worth showing. In
   // the intermissions the target is an invulnerable orb at a constant 100%
   // (Purification 1-3) or a group of adds ("Giants"), so the stored value
