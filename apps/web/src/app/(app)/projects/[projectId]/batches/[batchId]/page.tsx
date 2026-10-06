@@ -6,7 +6,7 @@ import type { Locale } from "@/i18n/locale";
 import { BatchSwitcher } from "@/components/batch-switcher";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PhaseBadge } from "@/components/phase-badge";
-import { isMainPhase, progressPhases, showsBossHealth } from "@/lib/main-phases";
+import { impliedReachedPhases, isMainPhase, progressPhases, showsBossHealth } from "@/lib/main-phases";
 import { translateMechanicName } from "@/lib/mechanic-names";
 import { isContextualNoiseMechanic, isNoiseMechanic, isVisibleCastMarker } from "@/lib/mechanics";
 import { hasRole, requireProjectMembership } from "@/lib/projects";
@@ -264,16 +264,26 @@ function computeBatchPhaseStats(
  */
 function computePhaseProgress(
   stats: BatchPhaseStat[],
+  encounters: Encounters,
   bossId: string,
   attempts: number,
 ): PhaseProgressStat[] {
   const expected = progressPhases(bossId);
   if (!expected) return stats;
   const byName = new Map(stats.map((s) => [s.name, s]));
+  // Counted per attempt so a late-started log still counts the phases before
+  // its first recorded one.
+  const reachedCount = new Map<string, number>();
+  for (const { encounter } of encounters) {
+    const reached = encounter.phaseResults.filter((p) => p.reached).map((p) => p.name);
+    for (const name of impliedReachedPhases(bossId, reached)) {
+      reachedCount.set(name, (reachedCount.get(name) ?? 0) + 1);
+    }
+  }
   return expected.map((name, index) => ({
     name,
     order: byName.get(name)?.order ?? index,
-    reached: byName.get(name)?.reached ?? 0,
+    reached: reachedCount.get(name) ?? 0,
     total: attempts,
   }));
 }
@@ -328,7 +338,10 @@ async function loadPreviousPhaseProgress(
   ]);
   const reached = new Map<string, number>();
   for (const e of encounters) {
-    for (const name of new Set(e.phaseResults.map((p) => p.name))) {
+    for (const name of impliedReachedPhases(
+      bossId,
+      e.phaseResults.map((p) => p.name),
+    )) {
       reached.set(name, (reached.get(name) ?? 0) + 1);
     }
   }
@@ -625,7 +638,7 @@ export default async function BatchDetailPage(
 
   const furthestPhase = computeFurthestPhase(encounters);
   const batchPhaseStats = computeBatchPhaseStats(encounters, batchBossId, attempts, locale);
-  const phaseProgress = computePhaseProgress(batchPhaseStats, batchBossId, attempts);
+  const phaseProgress = computePhaseProgress(batchPhaseStats, encounters, batchBossId, attempts);
   const batchRoster = computeBatchRoster(encounters);
   const attemptRows: AttemptRow[] = encounters.map((entry, i) => buildAttemptRow(entry, i, locale));
   const first = encounters[0]?.encounter;

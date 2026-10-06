@@ -45,3 +45,18 @@ export function progressPhases(bossId: string): readonly string[] | undefined {
 export function damagePhases(bossId: string): readonly string[] | undefined {
   return getBossCuration(bossId)?.damagePhases;
 }
+
+/**
+ * The curated progress phases an attempt reached, including the ones before
+ * its deepest reached phase. A log can miss the start of the fight (EI
+ * "Late Start") and then has no row for the earliest phases, although the
+ * group necessarily went through them. Without curation: the names as given.
+ */
+export function impliedReachedPhases(bossId: string, reached: Iterable<string>): Set<string> {
+  const names = new Set(reached);
+  const order = progressPhases(bossId);
+  if (!order) return names;
+  const deepest = order.findLastIndex((name) => names.has(name));
+  for (const name of order.slice(0, deepest + 1)) names.add(name);
+  return names;
+}

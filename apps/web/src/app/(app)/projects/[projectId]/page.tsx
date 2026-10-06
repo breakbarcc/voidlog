@@ -5,7 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PhaseBadge } from "@/components/phase-badge";
 import type { DpsNight } from "@/lib/dps-model";
-import { damagePhases, isMainPhase, progressPhases } from "@/lib/main-phases";
+import { damagePhases, impliedReachedPhases, isMainPhase, progressPhases } from "@/lib/main-phases";
 import { loadPhaseDamageByBatch } from "@/lib/phase-damage";
 import { hasRole, requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
@@ -113,7 +113,11 @@ export default async function ProjectDetailPage(
       for (const e of encounters) {
         const entry = reachByBoss.get(e.bossId) ?? { attempts: 0, reached: new Map() };
         entry.attempts += 1;
-        for (const name of new Set(e.phaseResults.filter((p) => p.reached).map((p) => p.name))) {
+        const names = impliedReachedPhases(
+          e.bossId,
+          e.phaseResults.filter((p) => p.reached).map((p) => p.name),
+        );
+        for (const name of names) {
           entry.reached.set(name, (entry.reached.get(name) ?? 0) + 1);
         }
         reachByBoss.set(e.bossId, entry);
