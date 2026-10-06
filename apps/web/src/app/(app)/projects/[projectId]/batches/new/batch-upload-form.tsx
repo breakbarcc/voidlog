@@ -68,7 +68,7 @@ export function BatchUploadForm({ projectId }: Readonly<{ projectId: string }>) 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          label: label.trim() || t("defaultLabel", { date: new Date().toLocaleString() }),
+          label: label.trim(),
           files: files.map((f) => ({ fileName: f.name })),
         }),
       });

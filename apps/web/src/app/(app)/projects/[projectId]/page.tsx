@@ -1,10 +1,12 @@
 import { prisma, ProjectRole } from "@voidlog/db";
 import { Card, Table } from "@radix-ui/themes";
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import type { Locale } from "@/i18n/locale";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PhaseBadge } from "@/components/phase-badge";
 import type { DpsNight } from "@/lib/dps-model";
+import { batchTitle } from "@/lib/batch-title";
 import { damagePhases, impliedReachedPhases, isMainPhase, progressPhases } from "@/lib/main-phases";
 import { loadPhaseDamageByBatch } from "@/lib/phase-damage";
 import { hasRole, requireProjectMembership } from "@/lib/projects";
@@ -30,6 +32,7 @@ export default async function ProjectDetailPage(
   const { projectId } = await props.params;
   const session = await requireSession();
   const membership = await requireProjectMembership(projectId, session.user.id);
+  const locale = (await getLocale()) as Locale;
   const t = await getTranslations("project");
   const tCommon = await getTranslations("common");
   const tSidebar = await getTranslations("sidebar");
@@ -126,7 +129,7 @@ export default async function ProjectDetailPage(
       return {
         id: batch.id,
         reachByBoss,
-        label: batch.label,
+        label: batchTitle(batch.label, occurredAt, locale),
         createdAt: batch.createdAt,
         occurredAt,
         attempts: encounters.length,

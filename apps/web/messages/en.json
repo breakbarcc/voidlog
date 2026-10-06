@@ -225,8 +225,7 @@
     "description": ".evtc/.zevtc files only. Each file goes straight to storage (ADR-003), then processing starts automatically and progress shows live below."
   },
   "batchUploadForm": {
-    "labelPlaceholder": "Batch label (e.g. Raid Night 2026-08-06)",
-    "defaultLabel": "Batch {date}",
+    "labelPlaceholder": "Label (empty = date of the logs)",
     "dropFiles": ".evtc / .zevtc files here",
     "filesSelected": "{count} file(s) selected",
     "dropHint": "up to 30 files at once · or click to browse",

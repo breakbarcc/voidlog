@@ -6,7 +6,8 @@ import { checkProjectRole } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 
 interface CreateBatchBody {
-  label: string;
+  /** Empty: the batch is named after the date of its logs. */
+  label?: string;
   files: { fileName: string }[];
 }
 
@@ -27,15 +28,15 @@ export async function POST(
   if (!access.ok) return access.response;
 
   const body = (await request.json()) as CreateBatchBody;
-  if (!body.label?.trim() || !Array.isArray(body.files) || body.files.length === 0) {
+  if (!Array.isArray(body.files) || body.files.length === 0) {
     return NextResponse.json(
-      { error: "label and at least one file are required" },
+      { error: "at least one file is required" },
       { status: 400 },
     );
   }
 
   const batch = await prisma.uploadBatch.create({
-    data: { projectId, label: body.label.trim() },
+    data: { projectId, label: body.label?.trim() ?? "" },
   });
 
   const storageClient = createStorageClient();

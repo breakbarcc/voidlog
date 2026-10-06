@@ -1,3 +1,4 @@
+import { loadBatchTitles } from "@/lib/batch-title";
 import { prisma } from "@voidlog/db";
 import { Card } from "@radix-ui/themes";
 import { notFound } from "next/navigation";
@@ -54,6 +55,10 @@ export default async function LogAnalysisPage(
     },
   });
 
+  const batchName = logFile
+    ? ((await loadBatchTitles([logFile.batch], locale)).get(logFile.batchId) ?? logFile.batch.label)
+    : "";
+
   if (
     !logFile ||
     logFile.batchId !== batchId ||
@@ -86,7 +91,7 @@ export default async function LogAnalysisPage(
         items={[
           { label: tSidebar("projects"), href: "/" },
           { label: membership.project.name, href: `/projects/${projectId}` },
-          { label: logFile.batch.label, href: `/projects/${projectId}/batches/${batchId}` },
+          { label: batchName, href: `/projects/${projectId}/batches/${batchId}` },
           { label: encounter.bossName },
         ]}
       />
@@ -107,7 +112,7 @@ export default async function LogAnalysisPage(
           <p className="text-muted mt-1 text-sm">
             {t("summary", {
               result: encounter.success ? tCommon("kill") : tCommon("wipe"),
-              batchLabel: logFile.batch.label,
+              batchLabel: batchName,
               duration: Math.round(encounter.durationMs / 1000),
               playerCount: encounter.playerResults.length,
             })}

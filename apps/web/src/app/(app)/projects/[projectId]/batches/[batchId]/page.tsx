@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/locale";
 import { BatchSwitcher } from "@/components/batch-switcher";
+import { loadBatchTitles } from "@/lib/batch-title";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PhaseBadge } from "@/components/phase-badge";
 import { impliedReachedPhases, isMainPhase, progressPhases, showsBossHealth } from "@/lib/main-phases";
@@ -308,6 +309,7 @@ async function loadPreviousPhaseProgress(
   batchId: string,
   bossId: string,
   currentStart: Date,
+  locale: Locale,
 ): Promise<PreviousPhaseProgress | null> {
   const others = await prisma.encounterResult.findMany({
     where: { bossId, logFile: { batch: { projectId, id: { not: batchId } } } },
@@ -330,7 +332,10 @@ async function loadPreviousPhaseProgress(
   if (!previousId) return null;
 
   const [batch, encounters] = await Promise.all([
-    prisma.uploadBatch.findUnique({ where: { id: previousId }, select: { label: true } }),
+    prisma.uploadBatch.findUnique({
+      where: { id: previousId },
+      select: { id: true, label: true, createdAt: true },
+    }),
     prisma.encounterResult.findMany({
       where: { bossId, logFile: { batchId: previousId } },
       select: { phaseResults: { where: { reached: true }, select: { name: true } } },
@@ -346,7 +351,7 @@ async function loadPreviousPhaseProgress(
     }
   }
   return {
-    batchLabel: batch?.label ?? "",
+    batchLabel: batch ? ((await loadBatchTitles([batch], locale)).get(batch.id) ?? "") : "",
     stats: Object.fromEntries(
       [...reached].map(([name, count]) => [name, { reached: count, total: encounters.length }]),
     ),
@@ -577,9 +582,15 @@ export default async function BatchDetailPage(
 
   const allBatches = await prisma.uploadBatch.findMany({
     where: { projectId },
-    select: { id: true, label: true },
+    select: { id: true, label: true, createdAt: true },
     orderBy: { createdAt: "desc" },
   });
+  const batchTitles = await loadBatchTitles(allBatches, locale);
+  const currentTitle = batchTitles.get(batchId) ?? "";
+  const switcherOptions = allBatches.map((b) => ({
+    id: b.id,
+    label: batchTitles.get(b.id) ?? b.label,
+  }));
 
   const batch = await prisma.uploadBatch.findUnique({
     where: { id: batchId },
@@ -648,6 +659,7 @@ export default async function BatchDetailPage(
         batchId,
         batchBossId,
         first.recordedAt ?? first.createdAt,
+        locale,
       )
     : null;
 
@@ -657,18 +669,27 @@ export default async function BatchDetailPage(
         items={[
           { label: tSidebar("projects"), href: "/" },
           { label: membership.project.name, href: `/projects/${projectId}` },
-          { label: batch.label },
+          { label: currentTitle },
         ]}
       />
       <div className="mb-6 flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <BatchLabelEditor batchId={batchId} label={batch.label} canEdit={canEdit} />
+          <BatchLabelEditor
+            batchId={batchId}
+            label={batch.label}
+            title={currentTitle}
+            canEdit={canEdit}
+          />
           {allBatches.length > 1 ? (
-            <BatchSwitcher projectId={projectId} batches={allBatches} currentBatchId={batchId} />
+            <BatchSwitcher
+              projectId={projectId}
+              batches={switcherOptions}
+              currentBatchId={batchId}
+            />
           ) : null}
         </div>
         {canEdit ? (
-          <DeleteBatchButton projectId={projectId} batchId={batchId} batchLabel={batch.label} />
+          <DeleteBatchButton projectId={projectId} batchId={batchId} batchLabel={currentTitle} />
         ) : null}
       </div>
 

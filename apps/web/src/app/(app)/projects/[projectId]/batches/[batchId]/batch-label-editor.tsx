@@ -9,8 +9,9 @@ import { useTranslations } from "next-intl";
 export function BatchLabelEditor({
   batchId,
   label,
+  title,
   canEdit,
-}: Readonly<{ batchId: string; label: string; canEdit: boolean }>) {
+}: Readonly<{ batchId: string; label: string; title: string; canEdit: boolean }>) {
   const router = useRouter();
   const t = useTranslations("batchLabelEditor");
   const tCommon = useTranslations("common");
@@ -32,7 +33,7 @@ export function BatchLabelEditor({
 
   async function save() {
     const trimmed = value.trim();
-    if (!trimmed || trimmed === label) {
+    if (trimmed === label) {
       setEditing(false);
       return;
     }
@@ -59,7 +60,7 @@ export function BatchLabelEditor({
   if (!editing) {
     return (
       <div className="flex items-center gap-2">
-        <h1 className="font-heading text-foreground-strong text-2xl font-bold">{label}</h1>
+        <h1 className="font-heading text-foreground-strong text-2xl font-bold">{title}</h1>
         {canEdit ? (
           <button
             type="button"
@@ -81,6 +82,7 @@ export function BatchLabelEditor({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           disabled={pending}
+          placeholder={title}
           autoFocus
           className="min-w-[280px]"
           onKeyDown={(e) => {

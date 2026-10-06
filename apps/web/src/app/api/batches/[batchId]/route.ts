@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { checkProjectRole } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 
-/** Renames a batch's label. */
+/** Renames a batch; an empty label switches back to the automatic date name. */
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ batchId: string }> },
@@ -21,9 +21,6 @@ export async function PATCH(
 
   const body = await request.json().catch(() => null);
   const label = typeof body?.label === "string" ? body.label.trim() : "";
-  if (!label) {
-    return NextResponse.json({ error: "Label must not be empty" }, { status: 400 });
-  }
 
   const updated = await prisma.uploadBatch.update({
     where: { id: batchId },
