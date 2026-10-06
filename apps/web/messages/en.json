@@ -284,6 +284,8 @@
     },
     "table": {
       "number": "#",
+      "time": "Time",
+      "logId": "Log no.",
       "result": "Result",
       "mode": "Mode",
       "furthestPhase": "Furthest phase",

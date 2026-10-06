@@ -284,6 +284,8 @@
     },
     "table": {
       "number": "#",
+      "time": "Uhrzeit",
+      "logId": "Log-Nr.",
       "result": "Ergebnis",
       "mode": "Modus",
       "furthestPhase": "Weiteste Phase",

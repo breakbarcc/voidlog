@@ -133,6 +133,12 @@ function compareRosterRows(a: BatchRosterRow, b: BatchRosterRow, key: RosterSort
   }
 }
 
+// File names look like "20260712-204218.zevtc"; the digits after the dash are
+// the recording time, which is how players tell their logs apart.
+function logSuffix(fileName: string): string {
+  return /-(\d+)\.[^.]+$/.exec(fileName)?.[1] ?? "–";
+}
+
 function formatDuration(ms: number): string {
   const totalSeconds = Math.round(ms / 1000);
   return `${Math.floor(totalSeconds / 60)}:${String(totalSeconds % 60).padStart(2, "0")}`;
@@ -1173,6 +1179,8 @@ export function BatchAttempts({
           <Table.Header>
             <Table.Row>
               <Table.ColumnHeaderCell>{t("table.number")}</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>{t("table.time")}</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>{t("table.logId")}</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>{t("table.result")}</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>{t("table.mode")}</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>{t("table.furthestPhase")}</Table.ColumnHeaderCell>
@@ -1185,6 +1193,12 @@ export function BatchAttempts({
             {attempts.map((a) => (
               <Table.Row key={a.logFileId}>
                 <Table.Cell className="text-muted">{a.n}</Table.Cell>
+                <Table.Cell className="text-muted-strong tabular-nums">
+                  {formatDateTime(a.recordedAt, locale, { timeStyle: "medium" })}
+                </Table.Cell>
+                <Table.Cell className="text-muted-strong tabular-nums">
+                  {logSuffix(a.fileName)}
+                </Table.Cell>
                 <Table.Cell
                   className={a.success ? "text-success font-semibold" : "text-danger font-semibold"}
                 >
@@ -1234,7 +1248,7 @@ export function BatchAttempts({
             ))}
             {attempts.length === 0 ? (
               <Table.Row>
-                <Table.Cell colSpan={7} className="text-muted">
+                <Table.Cell colSpan={9} className="text-muted">
                   {t("table.empty")}
                 </Table.Cell>
               </Table.Row>
