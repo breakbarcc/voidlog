@@ -12,9 +12,10 @@ export const config = {
     /*
      * Run on everything except:
      * - /login (the sign-in page itself)
+     * - /datenschutz (public privacy policy)
      * - /api/auth/* (Auth.js's own endpoints)
      * - Next.js internals and static assets
      */
-    "/((?!login|api/auth|_next/static|_next/image|favicon.ico).*)",
+    "/((?!login|datenschutz|api/auth|_next/static|_next/image|favicon.ico).*)",
   ],
 };

@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import type { Locale } from "@/i18n/locale";
+import { PRIVACY } from "@/lib/legal/privacy";
 import { safeRedirectPath } from "@/lib/redirect";
 import { SignInButton } from "./sign-in-button";
 
@@ -36,6 +39,7 @@ export default async function LoginPage(props: Readonly<PageProps<"/login">>) {
   }
   const t = await getTranslations("login");
   const features = t.raw("features") as Feature[];
+  const privacyTitle = PRIVACY[(await getLocale()) as Locale].title;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -137,6 +141,12 @@ export default async function LoginPage(props: Readonly<PageProps<"/login">>) {
           </div>
         </div>
       </main>
+
+      <footer className="relative z-10 px-6 pb-6 text-center sm:px-12">
+        <Link href="/datenschutz" className="text-muted hover:text-foreground-strong text-xs">
+          {privacyTitle}
+        </Link>
+      </footer>
     </div>
   );
 }
