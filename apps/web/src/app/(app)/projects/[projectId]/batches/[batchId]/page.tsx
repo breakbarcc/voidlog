@@ -373,6 +373,10 @@ interface RosterAccumulator {
   roleCounts: Map<string, number>;
   failedMechanics: number;
   shockwaveHits: number;
+  /** Attempts the player took part in that reached Mordremoth — the shockwave denominator. */
+  shockwaveEncounters: number;
+  /** Of those, the ones in which the player was hit at least once. */
+  shockwaveHitEncounters: number;
   debilitatedHits: number;
   revealCount: number;
 }
@@ -418,6 +422,20 @@ function accumulateRosterFails(
 function computeBatchRoster(encounters: Encounters): BatchRosterRow[] {
   const rosterByAccount = new Map<string, RosterAccumulator>();
   for (const { encounter } of encounters) {
+    // Wiped before Mordremoth = no shockwave could have hit anyone.
+    const shockwavePossible = reachedMechanicPhase(
+      encounter.bossId,
+      "ShckWv.H",
+      encounter.phaseResults.filter((ph) => ph.reached).map((ph) => ph.name),
+    );
+    const shockwaveHitAccounts = new Set<string>();
+    for (const phase of encounter.phaseResults) {
+      for (const event of phase.mechanicEvents) {
+        if (event.mechanicName === "ShckWv.H" && event.playerResult) {
+          shockwaveHitAccounts.add(event.playerResult.account);
+        }
+      }
+    }
     for (const p of encounter.playerResults) {
       const entry = rosterByAccount.get(p.account) ?? {
         characterNames: new Set<string>(),
@@ -428,6 +446,8 @@ function computeBatchRoster(encounters: Encounters): BatchRosterRow[] {
         roleCounts: new Map<string, number>(),
         failedMechanics: 0,
         shockwaveHits: 0,
+        shockwaveEncounters: 0,
+        shockwaveHitEncounters: 0,
         debilitatedHits: 0,
         revealCount: 0,
       };
@@ -437,6 +457,10 @@ function computeBatchRoster(encounters: Encounters): BatchRosterRow[] {
       entry.totalDowns += p.downs;
       if (encounter.success) entry.kills += 1;
       if (p.role) entry.roleCounts.set(p.role, (entry.roleCounts.get(p.role) ?? 0) + 1);
+      if (shockwavePossible) {
+        entry.shockwaveEncounters += 1;
+        if (shockwaveHitAccounts.has(p.account)) entry.shockwaveHitEncounters += 1;
+      }
       rosterByAccount.set(p.account, entry);
     }
     accumulateRosterFails(rosterByAccount, encounter);
@@ -452,6 +476,8 @@ function computeBatchRoster(encounters: Encounters): BatchRosterRow[] {
       avgDowns: (entry.totalDowns / entry.encounters).toFixed(1),
       failedMechanics: entry.failedMechanics,
       shockwaveHits: entry.shockwaveHits,
+      shockwaveEncounters: entry.shockwaveEncounters,
+      shockwaveHitEncounters: entry.shockwaveHitEncounters,
       debilitatedHits: entry.debilitatedHits,
       revealCount: entry.revealCount,
     }))

@@ -75,6 +75,10 @@ export interface BatchRosterRow {
   avgDowns: string;
   failedMechanics: number;
   shockwaveHits: number;
+  /** Attempts that reached Mordremoth — the denominator of the shockwave percentage. */
+  shockwaveEncounters: number;
+  /** Of those, the attempts in which the player was hit at least once. */
+  shockwaveHitEncounters: number;
   debilitatedHits: number;
   revealCount: number;
 }
@@ -1074,14 +1078,21 @@ export function BatchAttempts({
     return rosterDirection === "asc" ? rows : rows.reverse();
   }, [roster, rosterSortKey, rosterDirection]);
 
-  function rosterHeader(key: RosterSortKey, label: string) {
+  function rosterHeader(key: RosterSortKey, label: string, hint?: string) {
     return (
       <SortableColumnHeader
         active={rosterSortKey === key}
         direction={rosterDirection}
         onClick={() => handleRosterSort(key)}
       >
-        {label}
+        {hint ? (
+          <span>
+            {label}
+            <span className="text-muted block text-xs font-normal">{hint}</span>
+          </span>
+        ) : (
+          label
+        )}
       </SortableColumnHeader>
     );
   }
@@ -1641,7 +1652,7 @@ export function BatchAttempts({
               {rosterHeader("avgDps", t("roster.avgDps"))}
               {rosterHeader("avgDowns", t("roster.avgDowns"))}
               {rosterHeader("failedMechanics", t("roster.failedMechanics"))}
-              {rosterHeader("shockwaveHits", t("roster.shockwaves"))}
+              {rosterHeader("shockwaveHits", t("roster.shockwaves"), t("roster.shockwavesHint"))}
               {rosterHeader("debilitatedHits", t("roster.debilitated"))}
               {rosterHeader("revealCount", t("roster.revealed"))}
             </Table.Row>
@@ -1667,7 +1678,14 @@ export function BatchAttempts({
                   {entry.failedMechanics}
                 </Table.Cell>
                 <Table.Cell className="text-warning font-semibold">
-                  {entry.shockwaveHits}
+                  {entry.shockwaveHits}{" "}
+                  <span className="text-muted text-sm font-medium">
+                    (
+                    {entry.shockwaveEncounters > 0
+                      ? `${Math.round((entry.shockwaveHitEncounters / entry.shockwaveEncounters) * 100)}%`
+                      : tCommon("dash")}
+                    )
+                  </span>
                 </Table.Cell>
                 <Table.Cell className="text-warning font-semibold">
                   {entry.debilitatedHits}

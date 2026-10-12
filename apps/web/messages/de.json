@@ -341,6 +341,7 @@
       "avgDowns": "Ø Downs",
       "failedMechanics": "Gefailte Mechaniken",
       "shockwaves": "Schockwellen getroffen",
+      "shockwavesHint": "Klammer: % der Versuche ab Mordremoth mit Treffer",
       "debilitated": "Geschwächt erhalten",
       "revealed": "Zu früh aufgedeckt",
       "empty": "Noch keine ausgewerteten Logs."

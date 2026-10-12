@@ -341,6 +341,7 @@
       "avgDowns": "Avg downs",
       "failedMechanics": "Failed mechanics",
       "shockwaves": "Shockwaves hit",
+      "shockwavesHint": "Brackets: % of attempts from Mordremoth with a hit",
       "debilitated": "Debilitated received",
       "revealed": "Revealed too early",
       "empty": "No evaluated logs yet."
