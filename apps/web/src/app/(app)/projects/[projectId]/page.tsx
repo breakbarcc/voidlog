@@ -8,7 +8,7 @@ import { PhaseBadge } from "@/components/phase-badge";
 import type { DpsNight } from "@/lib/dps-model";
 import { batchTitle } from "@/lib/batch-title";
 import { damagePhases, impliedReachedPhases, isMainPhase, progressPhases } from "@/lib/main-phases";
-import { encounterShockwaves, shockwavePercent } from "@/lib/shockwave-stats";
+import { shockwavePercent, squadShockwaves } from "@/lib/shockwave-stats";
 import { loadPhaseDamageByBatch } from "@/lib/phase-damage";
 import { hasRole, requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
@@ -86,12 +86,12 @@ export default async function ProjectDetailPage(
 
       // "ShckWv.H" is Mordremoth's raw EI code for a Schockwelle hit — same
       // hardcoded-stat treatment as the Green-fail count above.
-      // Share of all shockwaves played (alive for, by any player) that hit
-      // their player — counted per shockwave, see lib/shockwave-stats.ts.
+      // Share of the squad's shockwaves that failed (hit at least one player),
+      // over all attempts — see lib/shockwave-stats.ts.
       let shockwavesPlayed = 0;
       let shockwavesHit = 0;
       for (const encounter of encounters) {
-        const counts = encounterShockwaves(
+        const squad = squadShockwaves(
           encounter.bossId,
           encounter.phaseResults.flatMap((phase) =>
             phase.mechanicEvents.map((event) => ({
@@ -102,10 +102,8 @@ export default async function ProjectDetailPage(
           ),
           encounter.playerResults.map((player) => player.id),
         );
-        for (const count of counts.values()) {
-          shockwavesPlayed += count.played;
-          shockwavesHit += count.hit;
-        }
+        shockwavesPlayed += squad.played;
+        shockwavesHit += squad.hit;
       }
       const shockwaveHitRate = shockwavePercent({ played: shockwavesPlayed, hit: shockwavesHit });
       let furthestPhase: { name: string; order: number; bossId: string } | null = null;

@@ -13,7 +13,7 @@ import {
   progressPhases,
   showsBossHealth,
 } from "@/lib/main-phases";
-import { encounterShockwaves } from "@/lib/shockwave-stats";
+import { encounterShockwaves, squadShockwaves } from "@/lib/shockwave-stats";
 import { translateMechanicName } from "@/lib/mechanic-names";
 import { isContextualNoiseMechanic, isNoiseMechanic, isVisibleCastMarker } from "@/lib/mechanics";
 import { hasRole, requireProjectMembership } from "@/lib/projects";
@@ -668,10 +668,25 @@ export default async function BatchDetailPage(
   const batchPhaseStats = computeBatchPhaseStats(encounters, batchBossId, attempts, locale);
   const phaseProgress = computePhaseProgress(batchPhaseStats, encounters, batchBossId, attempts);
   const batchRoster = computeBatchRoster(encounters);
-  // Shockwave card: every shockwave played by anybody in the batch, and how
-  // many of those hit their player (lib/shockwave-stats.ts).
-  const shockwavesPlayed = batchRoster.reduce((sum, r) => sum + r.shockwavesPlayed, 0);
-  const shockwavesHit = batchRoster.reduce((sum, r) => sum + r.shockwavesHit, 0);
+  // Shockwave card: the squad's shockwaves over all attempts — a wave is
+  // failed as soon as it hit anybody (lib/shockwave-stats.ts).
+  let shockwavesPlayed = 0;
+  let shockwavesHit = 0;
+  for (const { encounter } of encounters) {
+    const squad = squadShockwaves(
+      encounter.bossId,
+      encounter.phaseResults.flatMap((phase) =>
+        phase.mechanicEvents.map((event) => ({
+          mechanicName: event.mechanicName,
+          timeMs: event.timeMs,
+          playerKey: event.playerResult?.account ?? null,
+        })),
+      ),
+      encounter.playerResults.map((p) => p.account),
+    );
+    shockwavesPlayed += squad.played;
+    shockwavesHit += squad.hit;
+  }
   const attemptRows: AttemptRow[] = encounters.map((entry, i) => buildAttemptRow(entry, i, locale));
   const first = encounters[0]?.encounter;
   const previousProgress = first

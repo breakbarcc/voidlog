@@ -124,7 +124,7 @@
       "kills": "Kills",
       "greensMissed": "Greens missed",
       "shockwavesHit": "Shockwaves hit",
-      "shockwavesHitHint": "Share of played shockwaves that hit",
+      "shockwavesHitHint": "Share of shockwaves that hit at least one player",
       "furthestPhase": "Furthest phase"
     },
     "empty": "No batches yet.",
@@ -373,7 +373,7 @@
     "reveals": "Reveals reached",
     "greenMissed": "Green missed",
     "shockwavesHit": "Shockwaves hit",
-    "shockwavesHitHint": "Hit / played shockwaves of all players",
+    "shockwavesHitHint": "Shockwaves played by the squad. One counts as failed as soon as at least one player was hit.",
     "furthestPhase": "Furthest phase",
     "failedUploads": "Failed uploads"
   },

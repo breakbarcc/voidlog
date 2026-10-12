@@ -124,7 +124,7 @@
       "kills": "Kills",
       "greensMissed": "Greens verfehlt",
       "shockwavesHit": "Schockwellen getroffen",
-      "shockwavesHitHint": "Anteil der gespielten Schockwellen, die getroffen haben",
+      "shockwavesHitHint": "Anteil der Schockwellen, die mindestens einen Spieler getroffen haben",
       "furthestPhase": "Weiteste Phase"
     },
     "empty": "Noch keine Batches.",
@@ -373,7 +373,7 @@
     "reveals": "Mit Reveal erreicht",
     "greenMissed": "Green verfehlt",
     "shockwavesHit": "Schockwellen getroffen",
-    "shockwavesHitHint": "Getroffene / gespielte Schockwellen aller Spieler",
+    "shockwavesHitHint": "Von der Gruppe gespielte Schockwellen. Eine gilt als gefailed, sobald mindestens ein Spieler getroffen wurde.",
     "furthestPhase": "Weiteste Phase",
     "failedUploads": "Fehlgeschlagene Uploads"
   },
