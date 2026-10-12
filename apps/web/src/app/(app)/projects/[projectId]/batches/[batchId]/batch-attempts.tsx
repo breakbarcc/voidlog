@@ -112,6 +112,13 @@ const ROSTER_DEFAULT_DIRECTION: Record<RosterSortKey, "asc" | "desc"> = {
   revealCount: "desc",
 };
 
+// Share of the player's attempts from Mordremoth on in which a shockwave hit
+// them; null when none of their attempts got that far (sorts below 0%).
+function shockwaveShare(row: BatchRosterRow): number | null {
+  if (row.shockwaveEncounters === 0) return null;
+  return row.shockwaveHitEncounters / row.shockwaveEncounters;
+}
+
 function compareRosterRows(a: BatchRosterRow, b: BatchRosterRow, key: RosterSortKey): number {
   switch (key) {
     case "account":
@@ -129,7 +136,7 @@ function compareRosterRows(a: BatchRosterRow, b: BatchRosterRow, key: RosterSort
     case "failedMechanics":
       return a.failedMechanics - b.failedMechanics;
     case "shockwaveHits":
-      return a.shockwaveHits - b.shockwaveHits;
+      return (shockwaveShare(a) ?? -1) - (shockwaveShare(b) ?? -1);
     case "debilitatedHits":
       return a.debilitatedHits - b.debilitatedHits;
     case "revealCount":
@@ -1678,14 +1685,10 @@ export function BatchAttempts({
                   {entry.failedMechanics}
                 </Table.Cell>
                 <Table.Cell className="text-warning font-semibold">
-                  {entry.shockwaveHits}{" "}
-                  <span className="text-muted text-sm font-medium">
-                    (
-                    {entry.shockwaveEncounters > 0
-                      ? `${Math.round((entry.shockwaveHitEncounters / entry.shockwaveEncounters) * 100)}%`
-                      : tCommon("dash")}
-                    )
-                  </span>
+                  {entry.shockwaveEncounters > 0
+                    ? `${Math.round((entry.shockwaveHitEncounters / entry.shockwaveEncounters) * 100)}%`
+                    : tCommon("dash")}{" "}
+                  <span className="text-muted text-sm font-medium">({entry.shockwaveHits})</span>
                 </Table.Cell>
                 <Table.Cell className="text-warning font-semibold">
                   {entry.debilitatedHits}
