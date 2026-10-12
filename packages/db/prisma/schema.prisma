@@ -141,6 +141,7 @@ model UploadBatch {
   project  Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   logFiles LogFile[]
 
+  @@index([projectId])
   @@map("upload_batches")
 }
 
@@ -168,6 +169,7 @@ model LogFile {
   uploadedBy      User?            @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
   encounterResult EncounterResult?
 
+  @@index([batchId])
   @@map("log_files")
 }
 
@@ -214,6 +216,7 @@ model PhaseResult {
   mechanicEvents  MechanicEvent[]
   playerDamage    PlayerPhaseDamage[]
 
+  @@index([encounterResultId])
   @@map("phase_results")
 }
 
@@ -238,6 +241,8 @@ model MechanicEvent {
   phaseResult  PhaseResult   @relation(fields: [phaseResultId], references: [id], onDelete: Cascade)
   playerResult PlayerResult? @relation(fields: [playerResultId], references: [id], onDelete: SetNull)
 
+  @@index([phaseResultId])
+  @@index([playerResultId])
   @@map("mechanic_events")
 }
 
