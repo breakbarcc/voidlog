@@ -59,12 +59,6 @@ function shockwaveShare(row: RosterRow): number | null {
   return row.shockwavesPlayed > 0 ? row.shockwavesHit / row.shockwavesPlayed : null;
 }
 
-// "—" (no data) sorts below every real average.
-function average(value: string): number {
-  const n = Number.parseFloat(value);
-  return Number.isNaN(n) ? -1 : n;
-}
-
 function compareRows(a: RosterRow, b: RosterRow, key: SortKey): number {
   switch (key) {
     case "account":
