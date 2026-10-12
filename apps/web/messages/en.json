@@ -38,8 +38,9 @@
     "overview": "Overview",
     "projects": "Projects",
     "currentProject": "Current Project",
-    "history": "History & Trend",
+    "history": "Log overview",
     "roster": "Roster",
+    "statistics": "Statistics",
     "members": "Members",
     "uploadLogs": "+ Upload logs",
     "account": "Account",
@@ -241,6 +242,12 @@
     "errorCreateBatch": "Could not create batch ({status})",
     "errorUploadFile": "Upload failed for {fileName} ({status})",
     "errorEnqueue": "Could not start processing ({status})"
+  },
+  "statistics": {
+    "breadcrumb": "Statistics",
+    "title": "Statistics",
+    "subtitle": "Damage, progress and mechanic trends across all raid nights",
+    "empty": "Not enough evaluated logs for statistics yet."
   },
   "roster": {
     "breadcrumb": "Roster",

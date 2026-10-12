@@ -38,8 +38,9 @@
     "overview": "Übersicht",
     "projects": "Projekte",
     "currentProject": "Aktuelles Projekt",
-    "history": "Verlauf & Trend",
+    "history": "Log-Übersicht",
     "roster": "Roster",
+    "statistics": "Statistiken",
     "members": "Mitglieder",
     "uploadLogs": "+ Logs hochladen",
     "account": "Account",
@@ -241,6 +242,12 @@
     "errorCreateBatch": "Batch konnte nicht erstellt werden ({status})",
     "errorUploadFile": "Upload für {fileName} fehlgeschlagen ({status})",
     "errorEnqueue": "Verarbeitung konnte nicht gestartet werden ({status})"
+  },
+  "statistics": {
+    "breadcrumb": "Statistiken",
+    "title": "Statistiken",
+    "subtitle": "Schaden, Fortschritt und Mechanik-Trends über alle Raid-Abende",
+    "empty": "Noch nicht genug ausgewertete Logs für Statistiken."
   },
   "roster": {
     "breadcrumb": "Roster",

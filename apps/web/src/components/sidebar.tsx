@@ -87,6 +87,13 @@ export function Sidebar({ userName, userImage, currentProject }: Readonly<Sideba
             {t("history")}
           </NavLink>
           <NavLink
+            href={`/projects/${currentProject.id}/statistics`}
+            active={pathname === `/projects/${currentProject.id}/statistics`}
+          >
+            <NavDot shape="circle" />
+            {t("statistics")}
+          </NavLink>
+          <NavLink
             href={`/projects/${currentProject.id}/players`}
             active={pathname === `/projects/${currentProject.id}/players`}
           >
