@@ -60,3 +60,18 @@ export function impliedReachedPhases(bossId: string, reached: Iterable<string>):
   for (const name of order.slice(0, deepest + 1)) names.add(name);
   return names;
 }
+
+/**
+ * Whether an attempt that reached `reached` got far enough for `mechanicName`
+ * to have occurred at all — see `BossCuration.mechanicFirstPhase`. True for
+ * mechanics without a curated first phase, and for bosses without curation.
+ */
+export function reachedMechanicPhase(
+  bossId: string,
+  mechanicName: string,
+  reached: Iterable<string>,
+): boolean {
+  const first = getBossCuration(bossId)?.mechanicFirstPhase?.[mechanicName];
+  if (!first) return true;
+  return impliedReachedPhases(bossId, reached).has(first);
+}

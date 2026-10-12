@@ -256,7 +256,8 @@
       "debilitated": "Debilitated received",
       "revealed": "Revealed too early",
       "lastActive": "Last active",
-      "perFightHint": "avg per fight (total)"
+      "perFightHint": "avg per fight (total)",
+      "shockwavesHint": "avg per fight from Mordremoth (total)"
     },
     "empty": "No evaluated logs yet."
   },

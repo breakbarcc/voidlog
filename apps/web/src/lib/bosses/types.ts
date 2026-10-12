@@ -38,6 +38,13 @@ export interface BossCuration {
    */
   damagePhases?: readonly string[];
   /**
+   * Raw EI mechanic short code -> the first progress phase in which that
+   * mechanic can occur at all. Per-attempt averages of such a mechanic must
+   * only count attempts that got at least that far, otherwise attempts that
+   * ended earlier dilute the number. Mechanics not listed can occur anywhere.
+   */
+  mechanicFirstPhase?: Readonly<Record<string, string>>;
+  /**
    * Whether the remaining boss health recorded for an attempt that ended in
    * `phaseName` is worth showing. The worker stores the health of the last
    * enemy that had any, which only describes the fight when that enemy is

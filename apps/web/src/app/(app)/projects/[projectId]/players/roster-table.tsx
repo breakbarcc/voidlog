@@ -53,6 +53,12 @@ const DEFAULT_DIRECTION: Record<SortKey, "asc" | "desc"> = {
   lastActive: "desc",
 };
 
+// "—" (no eligible attempts) sorts below every real average.
+function average(value: string): number {
+  const n = Number.parseFloat(value);
+  return Number.isNaN(n) ? -1 : n;
+}
+
 function compareRows(a: RosterRow, b: RosterRow, key: SortKey): number {
   switch (key) {
     case "account":
@@ -68,10 +74,7 @@ function compareRows(a: RosterRow, b: RosterRow, key: SortKey): number {
     case "avgDowns":
       return Number.parseFloat(a.avgDowns) - Number.parseFloat(b.avgDowns);
     case "shockwaveHits":
-      return (
-        Number.parseFloat(a.shockwaveHitsPerEncounter) -
-        Number.parseFloat(b.shockwaveHitsPerEncounter)
-      );
+      return average(a.shockwaveHitsPerEncounter) - average(b.shockwaveHitsPerEncounter);
     case "debilitatedHits":
       return (
         Number.parseFloat(a.debilitatedHitsPerEncounter) -
@@ -79,8 +82,7 @@ function compareRows(a: RosterRow, b: RosterRow, key: SortKey): number {
       );
     case "revealCount":
       return (
-        Number.parseFloat(a.revealCountPerEncounter) -
-        Number.parseFloat(b.revealCountPerEncounter)
+        Number.parseFloat(a.revealCountPerEncounter) - Number.parseFloat(b.revealCountPerEncounter)
       );
     case "lastActive":
       return a.lastActive.getTime() - b.lastActive.getTime();
@@ -136,7 +138,7 @@ export function RosterTable({ roster }: Readonly<{ roster: RosterRow[] }>) {
           {header("kills", t("columns.kills"))}
           {header("avgDps", t("columns.avgDps"))}
           {header("avgDowns", t("columns.avgDowns"))}
-          {header("shockwaveHits", t("columns.shockwaves"), t("columns.perFightHint"))}
+          {header("shockwaveHits", t("columns.shockwaves"), t("columns.shockwavesHint"))}
           {header("debilitatedHits", t("columns.debilitated"), t("columns.perFightHint"))}
           {header("revealCount", t("columns.revealed"), t("columns.perFightHint"))}
           {header("lastActive", t("columns.lastActive"))}

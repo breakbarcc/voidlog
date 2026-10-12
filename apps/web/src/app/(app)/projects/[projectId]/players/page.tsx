@@ -1,6 +1,7 @@
 import { prisma } from "@voidlog/db";
 import { getTranslations } from "next-intl/server";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { reachedMechanicPhase } from "@/lib/main-phases";
 import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import { RosterTable } from "./roster-table";
@@ -15,6 +16,8 @@ interface RosterEntry {
   roleCounts: Map<string, number>;
   lastActive: Date;
   shockwaveHits: number;
+  // Encounters that got far enough for a shockwave to be possible at all.
+  shockwaveEncounters: number;
   debilitatedHits: number;
   revealCount: number;
 }
@@ -36,7 +39,14 @@ export default async function RosterPage(
       dps: true,
       downs: true,
       role: true,
-      encounterResult: { select: { success: true, createdAt: true } },
+      encounterResult: {
+        select: {
+          success: true,
+          createdAt: true,
+          bossId: true,
+          phaseResults: { select: { name: true, reached: true } },
+        },
+      },
       mechanicEvents: { select: { mechanicName: true } },
     },
   });
@@ -55,6 +65,7 @@ export default async function RosterPage(
       roleCounts: new Map<string, number>(),
       lastActive: p.encounterResult.createdAt,
       shockwaveHits: 0,
+      shockwaveEncounters: 0,
       debilitatedHits: 0,
       revealCount: 0,
     };
@@ -69,6 +80,14 @@ export default async function RosterPage(
     // "ShckWv.H" is Mordremoth's raw EI code for a Schockwelle hit — same
     // hardcoded-stat treatment as the batch-roster and batch-detail stats.
     entry.shockwaveHits += p.mechanicEvents.filter((m) => m.mechanicName === "ShckWv.H").length;
+    // Attempts that ended before Mordremoth never had a shockwave, so they
+    // must not dilute the per-encounter average.
+    const reachedPhases = p.encounterResult.phaseResults
+      .filter((r) => r.reached)
+      .map((r) => r.name);
+    if (reachedMechanicPhase(p.encounterResult.bossId, "ShckWv.H", reachedPhases)) {
+      entry.shockwaveEncounters += 1;
+    }
     // "Debilitated" is HTCM's raw EI debuff name for the Geschwächt stack
     // (see harvest-temple.ts) — same hardcoded-stat treatment.
     entry.debilitatedHits += p.mechanicEvents.filter(
@@ -97,7 +116,11 @@ export default async function RosterPage(
       // Hits per encounter (not a percentage) — a player can be hit by
       // more than one shockwave per encounter, so a "%" reads oddly once
       // it passes 100.
-      shockwaveHitsPerEncounter: (entry.shockwaveHits / entry.encounters).toFixed(2),
+      // "—" when none of the player's attempts reached the first shockwave.
+      shockwaveHitsPerEncounter:
+        entry.shockwaveEncounters > 0
+          ? (entry.shockwaveHits / entry.shockwaveEncounters).toFixed(2)
+          : "—",
       debilitatedHits: entry.debilitatedHits,
       debilitatedHitsPerEncounter: (entry.debilitatedHits / entry.encounters).toFixed(2),
       revealCount: entry.revealCount,
