@@ -379,7 +379,7 @@ function MultiMechanicHoverCard({
           <div className="flex flex-col gap-1">
             {clusters.map((cluster) => (
               <div
-                key={cluster.mechanicName}
+                key={`${cluster.mechanicName}-${cluster.timeMs}`}
                 className="border-line bg-surface rounded-sm border px-3 py-2.5"
               >
                 <MechanicSummary
