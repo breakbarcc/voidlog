@@ -124,7 +124,7 @@
       "kills": "Kills",
       "greensMissed": "Greens missed",
       "shockwavesHit": "Shockwaves hit",
-      "shockwavesHitHint": "Share of attempts that reached Mordremoth",
+      "shockwavesHitHint": "Share of played shockwaves that hit",
       "furthestPhase": "Furthest phase"
     },
     "empty": "No batches yet.",
@@ -258,7 +258,7 @@
       "revealed": "Revealed too early",
       "lastActive": "Last active",
       "perFightHint": "avg per fight (total)",
-      "shockwavesHint": "avg per fight from Mordremoth (total)"
+      "shockwavesHint": "% of played shockwaves that hit"
     },
     "empty": "No evaluated logs yet."
   },
@@ -341,7 +341,7 @@
       "avgDowns": "Avg downs",
       "failedMechanics": "Failed mechanics",
       "shockwaves": "Shockwaves hit",
-      "shockwavesHint": "% of attempts from Mordremoth with a hit",
+      "shockwavesHint": "% of played shockwaves that hit",
       "debilitated": "Debilitated received",
       "revealed": "Revealed too early",
       "empty": "No evaluated logs yet."
@@ -373,7 +373,7 @@
     "reveals": "Reveals reached",
     "greenMissed": "Green missed",
     "shockwavesHit": "Shockwaves hit",
-    "shockwavesHitHint": "Share of attempts that reached Mordremoth ({count})",
+    "shockwavesHitHint": "Hit / played shockwaves of all players",
     "furthestPhase": "Furthest phase",
     "failedUploads": "Failed uploads"
   },

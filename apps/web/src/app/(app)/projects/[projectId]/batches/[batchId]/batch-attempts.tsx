@@ -74,11 +74,10 @@ export interface BatchRosterRow {
   avgDps: number;
   avgDowns: string;
   failedMechanics: number;
-  shockwaveHits: number;
-  /** Attempts that reached Mordremoth — the denominator of the shockwave percentage. */
-  shockwaveEncounters: number;
-  /** Of those, the attempts in which the player was hit at least once. */
-  shockwaveHitEncounters: number;
+  /** Shockwaves the player was alive for — the denominator of the hit share. */
+  shockwavesPlayed: number;
+  /** Of those, the ones that hit the player. */
+  shockwavesHit: number;
   debilitatedHits: number;
   revealCount: number;
 }
@@ -91,7 +90,7 @@ type RosterSortKey =
   | "avgDps"
   | "avgDowns"
   | "failedMechanics"
-  | "shockwaveHits"
+  | "shockwaves"
   | "debilitatedHits"
   | "revealCount";
 
@@ -107,16 +106,16 @@ const ROSTER_DEFAULT_DIRECTION: Record<RosterSortKey, "asc" | "desc"> = {
   avgDps: "desc",
   avgDowns: "desc",
   failedMechanics: "desc",
-  shockwaveHits: "desc",
+  shockwaves: "desc",
   debilitatedHits: "desc",
   revealCount: "desc",
 };
 
-// Share of the player's attempts from Mordremoth on in which a shockwave hit
-// them; null when none of their attempts got that far (sorts below 0%).
+// Share of the shockwaves the player played that hit them; null when they
+// played none (sorts below 0%).
 function shockwaveShare(row: BatchRosterRow): number | null {
-  if (row.shockwaveEncounters === 0) return null;
-  return row.shockwaveHitEncounters / row.shockwaveEncounters;
+  if (row.shockwavesPlayed === 0) return null;
+  return row.shockwavesHit / row.shockwavesPlayed;
 }
 
 function compareRosterRows(a: BatchRosterRow, b: BatchRosterRow, key: RosterSortKey): number {
@@ -135,7 +134,7 @@ function compareRosterRows(a: BatchRosterRow, b: BatchRosterRow, key: RosterSort
       return Number.parseFloat(a.avgDowns) - Number.parseFloat(b.avgDowns);
     case "failedMechanics":
       return a.failedMechanics - b.failedMechanics;
-    case "shockwaveHits":
+    case "shockwaves":
       return (shockwaveShare(a) ?? -1) - (shockwaveShare(b) ?? -1);
     case "debilitatedHits":
       return a.debilitatedHits - b.debilitatedHits;
@@ -1659,7 +1658,7 @@ export function BatchAttempts({
               {rosterHeader("avgDps", t("roster.avgDps"))}
               {rosterHeader("avgDowns", t("roster.avgDowns"))}
               {rosterHeader("failedMechanics", t("roster.failedMechanics"))}
-              {rosterHeader("shockwaveHits", t("roster.shockwaves"), t("roster.shockwavesHint"))}
+              {rosterHeader("shockwaves", t("roster.shockwaves"), t("roster.shockwavesHint"))}
               {rosterHeader("debilitatedHits", t("roster.debilitated"))}
               {rosterHeader("revealCount", t("roster.revealed"))}
             </Table.Row>
@@ -1685,10 +1684,12 @@ export function BatchAttempts({
                   {entry.failedMechanics}
                 </Table.Cell>
                 <Table.Cell className="text-warning font-semibold">
-                  {entry.shockwaveEncounters > 0
-                    ? `${Math.round((entry.shockwaveHitEncounters / entry.shockwaveEncounters) * 100)}%`
+                  {entry.shockwavesPlayed > 0
+                    ? `${Math.round((entry.shockwavesHit / entry.shockwavesPlayed) * 100)}%`
                     : tCommon("dash")}{" "}
-                  <span className="text-muted text-sm font-medium">({entry.shockwaveHits})</span>
+                  <span className="text-muted text-sm font-medium">
+                    ({entry.shockwavesHit}/{entry.shockwavesPlayed})
+                  </span>
                 </Table.Cell>
                 <Table.Cell className="text-warning font-semibold">
                   {entry.debilitatedHits}

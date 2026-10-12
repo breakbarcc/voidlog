@@ -124,7 +124,7 @@
       "kills": "Kills",
       "greensMissed": "Greens verfehlt",
       "shockwavesHit": "Schockwellen getroffen",
-      "shockwavesHitHint": "Anteil der Versuche, die Mordremoth erreicht haben",
+      "shockwavesHitHint": "Anteil der gespielten Schockwellen, die getroffen haben",
       "furthestPhase": "Weiteste Phase"
     },
     "empty": "Noch keine Batches.",
@@ -258,7 +258,7 @@
       "revealed": "Zu früh aufgedeckt",
       "lastActive": "Zuletzt aktiv",
       "perFightHint": "Ø pro Kampf (gesamt)",
-      "shockwavesHint": "Ø pro Kampf ab Mordremoth (gesamt)"
+      "shockwavesHint": "% der gespielten Schockwellen mit Treffer"
     },
     "empty": "Noch keine ausgewerteten Logs."
   },
@@ -341,7 +341,7 @@
       "avgDowns": "Ø Downs",
       "failedMechanics": "Gefailte Mechaniken",
       "shockwaves": "Schockwellen getroffen",
-      "shockwavesHint": "% der Versuche ab Mordremoth mit Treffer",
+      "shockwavesHint": "% der gespielten Schockwellen mit Treffer",
       "debilitated": "Geschwächt erhalten",
       "revealed": "Zu früh aufgedeckt",
       "empty": "Noch keine ausgewerteten Logs."
@@ -373,7 +373,7 @@
     "reveals": "Mit Reveal erreicht",
     "greenMissed": "Green verfehlt",
     "shockwavesHit": "Schockwellen getroffen",
-    "shockwavesHitHint": "Anteil der Versuche, die Mordremoth erreicht haben ({count})",
+    "shockwavesHitHint": "Getroffene / gespielte Schockwellen aller Spieler",
     "furthestPhase": "Weiteste Phase",
     "failedUploads": "Fehlgeschlagene Uploads"
   },

@@ -1,9 +1,9 @@
 import { prisma } from "@voidlog/db";
 import { getTranslations } from "next-intl/server";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { reachedMechanicPhase } from "@/lib/main-phases";
 import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
+import { countShockwaves, shockwaveCastTimes } from "@/lib/shockwave-stats";
 import { RosterTable } from "./roster-table";
 
 interface RosterEntry {
@@ -15,9 +15,9 @@ interface RosterEntry {
   totalDowns: number;
   roleCounts: Map<string, number>;
   lastActive: Date;
-  shockwaveHits: number;
-  // Encounters that got far enough for a shockwave to be possible at all.
-  shockwaveEncounters: number;
+  // Shockwaves the player was alive for / that hit them (lib/shockwave-stats.ts).
+  shockwavesPlayed: number;
+  shockwavesHit: number;
   debilitatedHits: number;
   revealCount: number;
 }
@@ -44,10 +44,18 @@ export default async function RosterPage(
           success: true,
           createdAt: true,
           bossId: true,
-          phaseResults: { select: { name: true, reached: true } },
+          // Boss-side events only (no player) — carries the shockwave casts.
+          phaseResults: {
+            select: {
+              mechanicEvents: {
+                where: { playerResultId: null },
+                select: { mechanicName: true, timeMs: true },
+              },
+            },
+          },
         },
       },
-      mechanicEvents: { select: { mechanicName: true } },
+      mechanicEvents: { select: { mechanicName: true, timeMs: true } },
     },
   });
 
@@ -64,8 +72,8 @@ export default async function RosterPage(
       totalDowns: 0,
       roleCounts: new Map<string, number>(),
       lastActive: p.encounterResult.createdAt,
-      shockwaveHits: 0,
-      shockwaveEncounters: 0,
+      shockwavesPlayed: 0,
+      shockwavesHit: 0,
       debilitatedHits: 0,
       revealCount: 0,
     };
@@ -77,17 +85,15 @@ export default async function RosterPage(
     if (p.encounterResult.createdAt > entry.lastActive)
       entry.lastActive = p.encounterResult.createdAt;
     if (p.role) entry.roleCounts.set(p.role, (entry.roleCounts.get(p.role) ?? 0) + 1);
-    // "ShckWv.H" is Mordremoth's raw EI code for a Schockwelle hit — same
-    // hardcoded-stat treatment as the batch-roster and batch-detail stats.
-    entry.shockwaveHits += p.mechanicEvents.filter((m) => m.mechanicName === "ShckWv.H").length;
-    // Attempts that ended before Mordremoth never had a shockwave, so they
-    // must not dilute the per-encounter average.
-    const reachedPhases = p.encounterResult.phaseResults
-      .filter((r) => r.reached)
-      .map((r) => r.name);
-    if (reachedMechanicPhase(p.encounterResult.bossId, "ShckWv.H", reachedPhases)) {
-      entry.shockwaveEncounters += 1;
-    }
+    // Counted per shockwave (not per attempt), so a short attempt only weighs
+    // in with the shockwaves it actually contained — see lib/shockwave-stats.ts.
+    const castTimes = shockwaveCastTimes(
+      p.encounterResult.bossId,
+      p.encounterResult.phaseResults.flatMap((phase) => phase.mechanicEvents),
+    );
+    const shockwaves = countShockwaves(p.encounterResult.bossId, castTimes, p.mechanicEvents);
+    entry.shockwavesPlayed += shockwaves.played;
+    entry.shockwavesHit += shockwaves.hit;
     // "Debilitated" is HTCM's raw EI debuff name for the Geschwächt stack
     // (see harvest-temple.ts) — same hardcoded-stat treatment.
     entry.debilitatedHits += p.mechanicEvents.filter(
@@ -112,15 +118,8 @@ export default async function RosterPage(
       avgDps: Math.round(entry.totalDps / entry.encounters),
       avgDowns: (entry.totalDowns / entry.encounters).toFixed(1),
       lastActive: entry.lastActive,
-      shockwaveHits: entry.shockwaveHits,
-      // Hits per encounter (not a percentage) — a player can be hit by
-      // more than one shockwave per encounter, so a "%" reads oddly once
-      // it passes 100.
-      // "—" when none of the player's attempts reached the first shockwave.
-      shockwaveHitsPerEncounter:
-        entry.shockwaveEncounters > 0
-          ? (entry.shockwaveHits / entry.shockwaveEncounters).toFixed(2)
-          : "—",
+      shockwavesPlayed: entry.shockwavesPlayed,
+      shockwavesHit: entry.shockwavesHit,
       debilitatedHits: entry.debilitatedHits,
       debilitatedHitsPerEncounter: (entry.debilitatedHits / entry.encounters).toFixed(2),
       revealCount: entry.revealCount,

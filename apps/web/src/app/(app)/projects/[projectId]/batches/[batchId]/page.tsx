@@ -11,9 +11,9 @@ import {
   impliedReachedPhases,
   isMainPhase,
   progressPhases,
-  reachedMechanicPhase,
   showsBossHealth,
 } from "@/lib/main-phases";
+import { encounterShockwaves } from "@/lib/shockwave-stats";
 import { translateMechanicName } from "@/lib/mechanic-names";
 import { isContextualNoiseMechanic, isNoiseMechanic, isVisibleCastMarker } from "@/lib/mechanics";
 import { hasRole, requireProjectMembership } from "@/lib/projects";
@@ -372,11 +372,9 @@ interface RosterAccumulator {
   totalDowns: number;
   roleCounts: Map<string, number>;
   failedMechanics: number;
-  shockwaveHits: number;
-  /** Attempts the player took part in that reached Mordremoth — the shockwave denominator. */
-  shockwaveEncounters: number;
-  /** Of those, the ones in which the player was hit at least once. */
-  shockwaveHitEncounters: number;
+  /** Shockwaves the player was alive for / of those, the ones that hit them — see lib/shockwave-stats.ts. */
+  shockwavesPlayed: number;
+  shockwavesHit: number;
   debilitatedHits: number;
   revealCount: number;
 }
@@ -400,9 +398,6 @@ function accumulateRosterFails(
       const entry = rosterByAccount.get(event.playerResult.account);
       if (!entry) continue;
       entry.failedMechanics += 1;
-      // "ShckWv.H" is Mordremoth's raw EI code for a Schockwelle hit — same
-      // hardcoded-stat treatment as the batch-wide stat card above.
-      if (event.mechanicName === "ShckWv.H") entry.shockwaveHits += 1;
       // "Debilitated" is HTCM's raw EI debuff name for the Geschwächt stack
       // (see harvest-temple.ts) — same hardcoded-stat treatment.
       if (event.mechanicName === "Debilitated") entry.debilitatedHits += 1;
@@ -422,20 +417,18 @@ function accumulateRosterFails(
 function computeBatchRoster(encounters: Encounters): BatchRosterRow[] {
   const rosterByAccount = new Map<string, RosterAccumulator>();
   for (const { encounter } of encounters) {
-    // Wiped before Mordremoth = no shockwave could have hit anyone.
-    const shockwavePossible = reachedMechanicPhase(
+    // Counted per shockwave, not per attempt — see lib/shockwave-stats.ts.
+    const shockwaves = encounterShockwaves(
       encounter.bossId,
-      "ShckWv.H",
-      encounter.phaseResults.filter((ph) => ph.reached).map((ph) => ph.name),
+      encounter.phaseResults.flatMap((phase) =>
+        phase.mechanicEvents.map((event) => ({
+          mechanicName: event.mechanicName,
+          timeMs: event.timeMs,
+          playerKey: event.playerResult?.account ?? null,
+        })),
+      ),
+      encounter.playerResults.map((p) => p.account),
     );
-    const shockwaveHitAccounts = new Set<string>();
-    for (const phase of encounter.phaseResults) {
-      for (const event of phase.mechanicEvents) {
-        if (event.mechanicName === "ShckWv.H" && event.playerResult) {
-          shockwaveHitAccounts.add(event.playerResult.account);
-        }
-      }
-    }
     for (const p of encounter.playerResults) {
       const entry = rosterByAccount.get(p.account) ?? {
         characterNames: new Set<string>(),
@@ -445,9 +438,8 @@ function computeBatchRoster(encounters: Encounters): BatchRosterRow[] {
         totalDowns: 0,
         roleCounts: new Map<string, number>(),
         failedMechanics: 0,
-        shockwaveHits: 0,
-        shockwaveEncounters: 0,
-        shockwaveHitEncounters: 0,
+        shockwavesPlayed: 0,
+        shockwavesHit: 0,
         debilitatedHits: 0,
         revealCount: 0,
       };
@@ -457,9 +449,10 @@ function computeBatchRoster(encounters: Encounters): BatchRosterRow[] {
       entry.totalDowns += p.downs;
       if (encounter.success) entry.kills += 1;
       if (p.role) entry.roleCounts.set(p.role, (entry.roleCounts.get(p.role) ?? 0) + 1);
-      if (shockwavePossible) {
-        entry.shockwaveEncounters += 1;
-        if (shockwaveHitAccounts.has(p.account)) entry.shockwaveHitEncounters += 1;
+      const shockwaveCount = shockwaves.get(p.account);
+      if (shockwaveCount) {
+        entry.shockwavesPlayed += shockwaveCount.played;
+        entry.shockwavesHit += shockwaveCount.hit;
       }
       rosterByAccount.set(p.account, entry);
     }
@@ -475,9 +468,8 @@ function computeBatchRoster(encounters: Encounters): BatchRosterRow[] {
       avgDps: Math.round(entry.totalDps / entry.encounters),
       avgDowns: (entry.totalDowns / entry.encounters).toFixed(1),
       failedMechanics: entry.failedMechanics,
-      shockwaveHits: entry.shockwaveHits,
-      shockwaveEncounters: entry.shockwaveEncounters,
-      shockwaveHitEncounters: entry.shockwaveHitEncounters,
+      shockwavesPlayed: entry.shockwavesPlayed,
+      shockwavesHit: entry.shockwavesHit,
       debilitatedHits: entry.debilitatedHits,
       revealCount: entry.revealCount,
     }))
@@ -666,22 +658,6 @@ export default async function BatchDetailPage(
       p.mechanicEvents.some((m) => m.mechanicName === "F.Green"),
     ),
   ).length;
-  // "ShckWv.H" is Mordremoth's raw EI code for a Schockwelle hit — same
-  // hardcoded-stat-card treatment as the Green-fail count above.
-  // Only attempts that got as far as Mordremoth can be hit by a shockwave,
-  // so the rate is taken over those, not over every attempt.
-  const shockwaveEligible = encounters.filter((e) =>
-    reachedMechanicPhase(
-      e.encounter.bossId,
-      "ShckWv.H",
-      e.encounter.phaseResults.filter((p) => p.reached).map((p) => p.name),
-    ),
-  );
-  const shockwaveHitCount = shockwaveEligible.filter((e) =>
-    e.encounter.phaseResults.some((p) =>
-      p.mechanicEvents.some((m) => m.mechanicName === "ShckWv.H"),
-    ),
-  ).length;
 
   // Assumes one boss per batch (true for every real batch so far) — used
   // for the aggregate phase cards and the client-side timeline component,
@@ -692,6 +668,10 @@ export default async function BatchDetailPage(
   const batchPhaseStats = computeBatchPhaseStats(encounters, batchBossId, attempts, locale);
   const phaseProgress = computePhaseProgress(batchPhaseStats, encounters, batchBossId, attempts);
   const batchRoster = computeBatchRoster(encounters);
+  // Shockwave card: every shockwave played by anybody in the batch, and how
+  // many of those hit their player (lib/shockwave-stats.ts).
+  const shockwavesPlayed = batchRoster.reduce((sum, r) => sum + r.shockwavesPlayed, 0);
+  const shockwavesHit = batchRoster.reduce((sum, r) => sum + r.shockwavesHit, 0);
   const attemptRows: AttemptRow[] = encounters.map((entry, i) => buildAttemptRow(entry, i, locale));
   const first = encounters[0]?.encounter;
   const previousProgress = first
@@ -766,18 +746,16 @@ export default async function BatchDetailPage(
         <Card size="2" className="border-line bg-surface border">
           <div
             className="text-muted mb-1.5 text-[11px] font-medium uppercase tracking-wide"
-            title={t("shockwavesHitHint", { count: shockwaveEligible.length })}
+            title={t("shockwavesHitHint")}
           >
             {t("shockwavesHit")}
           </div>
           <div className="font-heading text-danger text-xl font-bold">
-            {shockwaveHitCount}{" "}
+            {shockwavesPlayed > 0
+              ? `${Math.round((shockwavesHit / shockwavesPlayed) * 100)}%`
+              : tCommon("dash")}{" "}
             <span className="text-muted text-sm font-medium">
-              (
-              {shockwaveEligible.length > 0
-                ? Math.round((shockwaveHitCount / shockwaveEligible.length) * 100)
-                : 0}
-              %)
+              ({shockwavesHit}/{shockwavesPlayed})
             </span>
           </div>
         </Card>

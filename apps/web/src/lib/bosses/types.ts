@@ -1,5 +1,18 @@
 import type { Locale } from "@/i18n/locale";
 
+export interface ShockwaveConfig {
+  /** Synthesized boss cast marker (worker cast-markers.ts) — one event per shockwave. */
+  castMechanic: string;
+  /** Raw EI mechanic of a player being hit. One cast may produce several of these. */
+  hitMechanic: string;
+  /**
+   * A hit belongs to the latest cast at most this long before it. Must stay
+   * below the shortest gap between two casts so hits cannot be assigned to
+   * the wrong one.
+   */
+  hitWindowMs: number;
+}
+
 /**
  * Everything hand-curated about a single boss encounter, in one place.
  * One file per boss (see harvest-temple.ts) instead of one file per
@@ -38,12 +51,10 @@ export interface BossCuration {
    */
   damagePhases?: readonly string[];
   /**
-   * Raw EI mechanic short code -> the first progress phase in which that
-   * mechanic can occur at all. Per-attempt averages of such a mechanic must
-   * only count attempts that got at least that far, otherwise attempts that
-   * ended earlier dilute the number. Mechanics not listed can occur anywhere.
+   * The boss's shockwave mechanic, counted per shockwave (see
+   * lib/shockwave-stats.ts). Omitted = no shockwave statistics for this boss.
    */
-  mechanicFirstPhase?: Readonly<Record<string, string>>;
+  shockwave?: ShockwaveConfig;
   /**
    * Whether the remaining boss health recorded for an attempt that ended in
    * `phaseName` is worth showing. The worker stores the health of the last

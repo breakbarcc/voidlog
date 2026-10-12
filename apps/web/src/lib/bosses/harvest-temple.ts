@@ -398,9 +398,9 @@ export const harvestTemple: BossCuration = {
     "Soo-Won 1",
     "Soo-Won 2",
   ],
-  // Mordremoth's shockwaves only start in his own phase — an attempt that
-  // wiped before it never had a chance to be hit by one.
-  mechanicFirstPhase: { "ShckWv.H": "Mordremoth" },
+  // Mordremoth's shockwave. Measured on real logs: a hit lands 0.7-1.5 s
+  // after its cast, casts of one wave are >= 1.9 s apart.
+  shockwave: { castMechanic: "ShckWv.Cast", hitMechanic: "ShckWv.H", hitWindowMs: 1900 },
   // Only dragon phases (incl. Soo-Won 1/2) have a boss HP worth showing. In
   // the intermissions the target is an invulnerable orb at a constant 100%
   // (Purification 1-3) or a group of adds ("Giants"), so the stored value

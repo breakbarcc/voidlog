@@ -7,13 +7,8 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PhaseBadge } from "@/components/phase-badge";
 import type { DpsNight } from "@/lib/dps-model";
 import { batchTitle } from "@/lib/batch-title";
-import {
-  damagePhases,
-  impliedReachedPhases,
-  isMainPhase,
-  progressPhases,
-  reachedMechanicPhase,
-} from "@/lib/main-phases";
+import { damagePhases, impliedReachedPhases, isMainPhase, progressPhases } from "@/lib/main-phases";
+import { encounterShockwaves, shockwavePercent } from "@/lib/shockwave-stats";
 import { loadPhaseDamageByBatch } from "@/lib/phase-damage";
 import { hasRole, requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
@@ -61,10 +56,12 @@ export default async function ProjectDetailPage(
                   name: true,
                   order: true,
                   reached: true,
-                  mechanicEvents: { select: { mechanicName: true } },
+                  mechanicEvents: {
+                    select: { mechanicName: true, timeMs: true, playerResultId: true },
+                  },
                 },
               },
-              playerResults: { select: { dps: true } },
+              playerResults: { select: { id: true, dps: true } },
             },
           },
         },
@@ -89,20 +86,28 @@ export default async function ProjectDetailPage(
 
       // "ShckWv.H" is Mordremoth's raw EI code for a Schockwelle hit — same
       // hardcoded-stat treatment as the Green-fail count above.
-      // Only attempts that got as far as Mordremoth count towards the rate —
-      // earlier wipes never had a shockwave and would dilute it.
-      const shockwaveEligible = encounters.filter((e) =>
-        reachedMechanicPhase(
-          e.bossId,
-          "ShckWv.H",
-          e.phaseResults.filter((p) => p.reached).map((p) => p.name),
-        ),
-      );
-      const shockwaveHitCount = shockwaveEligible.filter((e) => hasMechanic(e, "ShckWv.H")).length;
-      const shockwaveHitRate =
-        shockwaveEligible.length > 0
-          ? Math.round((shockwaveHitCount / shockwaveEligible.length) * 100)
-          : null;
+      // Share of all shockwaves played (alive for, by any player) that hit
+      // their player — counted per shockwave, see lib/shockwave-stats.ts.
+      let shockwavesPlayed = 0;
+      let shockwavesHit = 0;
+      for (const encounter of encounters) {
+        const counts = encounterShockwaves(
+          encounter.bossId,
+          encounter.phaseResults.flatMap((phase) =>
+            phase.mechanicEvents.map((event) => ({
+              mechanicName: event.mechanicName,
+              timeMs: event.timeMs,
+              playerKey: event.playerResultId,
+            })),
+          ),
+          encounter.playerResults.map((player) => player.id),
+        );
+        for (const count of counts.values()) {
+          shockwavesPlayed += count.played;
+          shockwavesHit += count.hit;
+        }
+      }
+      const shockwaveHitRate = shockwavePercent({ played: shockwavesPlayed, hit: shockwavesHit });
       let furthestPhase: { name: string; order: number; bossId: string } | null = null;
       for (const encounter of encounters) {
         for (const phase of encounter.phaseResults) {
@@ -153,7 +158,6 @@ export default async function ProjectDetailPage(
         kills,
         greenFailedCount,
         greenFailRate,
-        shockwaveHitCount,
         shockwaveHitRate,
         furthestPhase,
       };
