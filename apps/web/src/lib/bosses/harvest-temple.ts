@@ -324,7 +324,8 @@ const NOISE_MECHANIC_NAMES = new Set([
   "S.Green",
   "NigEpoch.H", // Orb Aura
   "Scream.H", // Zhaitan's Scream — unavoidable, always hits all 10 players
-  "Grav.Cru.H" // Gravity Crush — unavoidable
+  "Grav.Cru.H", // Gravity Crush — unavoidable
+  "Lckt" // Targeted (presumed) — just a targeting marker, not a fail
 ]);
 
 // The handful of boss-cast markers (see cast-markers.ts on the worker)
