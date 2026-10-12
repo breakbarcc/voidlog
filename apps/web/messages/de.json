@@ -255,7 +255,8 @@
       "shockwaves": "Schockwellen getroffen",
       "debilitated": "Geschwächt erhalten",
       "revealed": "Zu früh aufgedeckt",
-      "lastActive": "Zuletzt aktiv"
+      "lastActive": "Zuletzt aktiv",
+      "perFightHint": "Ø pro Kampf (gesamt)"
     },
     "empty": "Noch keine ausgewerteten Logs."
   },

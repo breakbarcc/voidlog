@@ -107,14 +107,21 @@ export function RosterTable({ roster }: Readonly<{ roster: RosterRow[] }>) {
     return direction === "asc" ? rows : rows.reverse();
   }, [roster, sortKey, direction]);
 
-  function header(key: SortKey, label: string) {
+  function header(key: SortKey, label: string, hint?: string) {
     return (
       <SortableColumnHeader
         active={sortKey === key}
         direction={direction}
         onClick={() => handleSort(key)}
       >
-        {label}
+        {hint ? (
+          <span>
+            {label}
+            <span className="text-muted block text-xs font-normal">{hint}</span>
+          </span>
+        ) : (
+          label
+        )}
       </SortableColumnHeader>
     );
   }
@@ -129,9 +136,9 @@ export function RosterTable({ roster }: Readonly<{ roster: RosterRow[] }>) {
           {header("kills", t("columns.kills"))}
           {header("avgDps", t("columns.avgDps"))}
           {header("avgDowns", t("columns.avgDowns"))}
-          {header("shockwaveHits", t("columns.shockwaves"))}
-          {header("debilitatedHits", t("columns.debilitated"))}
-          {header("revealCount", t("columns.revealed"))}
+          {header("shockwaveHits", t("columns.shockwaves"), t("columns.perFightHint"))}
+          {header("debilitatedHits", t("columns.debilitated"), t("columns.perFightHint"))}
+          {header("revealCount", t("columns.revealed"), t("columns.perFightHint"))}
           {header("lastActive", t("columns.lastActive"))}
         </Table.Row>
       </Table.Header>

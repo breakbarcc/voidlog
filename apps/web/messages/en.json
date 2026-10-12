@@ -255,7 +255,8 @@
       "shockwaves": "Shockwaves hit",
       "debilitated": "Debilitated received",
       "revealed": "Revealed too early",
-      "lastActive": "Last active"
+      "lastActive": "Last active",
+      "perFightHint": "avg per fight (total)"
     },
     "empty": "No evaluated logs yet."
   },
