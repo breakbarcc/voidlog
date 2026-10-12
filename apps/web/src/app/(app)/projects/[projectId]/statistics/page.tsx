@@ -27,6 +27,7 @@ export default async function ProjectStatisticsPage(
 
   const {
     trendPoints,
+    allTrendPoints,
     progressBossId,
     progressPhaseNames,
     progressNights,
@@ -35,7 +36,7 @@ export default async function ProjectStatisticsPage(
   } = await loadProjectOverview(projectId, locale, true);
 
   const hasContent =
-    trendPoints.length >= 2 ||
+    allTrendPoints.length >= 2 ||
     (progressBossId && dpsPhaseNames && dpsNights.length > 0) ||
     (progressBossId && progressPhaseNames && progressNights.length > 0);
 
@@ -59,7 +60,7 @@ export default async function ProjectStatisticsPage(
         />
       ) : null}
 
-      {trendPoints.length >= 2 ? (
+      {allTrendPoints.length >= 2 ? (
         <div className="mb-6 grid grid-cols-1 gap-3.5 lg:grid-cols-2">
           <Card size="3" className="border-line bg-surface border">
             <div className="text-muted-strong mb-3.5 text-xs font-medium uppercase tracking-wide">
@@ -69,9 +70,9 @@ export default async function ProjectStatisticsPage(
           </Card>
           <Card size="3" className="border-line bg-surface border">
             <div className="text-muted-strong mb-3.5 text-xs font-medium uppercase tracking-wide">
-              {tProject("shockwaveRate", { count: trendPoints.length })}
+              {tProject("shockwaveRateAll", { count: allTrendPoints.length })}
             </div>
-            <ShockwaveTrendChart points={trendPoints} />
+            <ShockwaveTrendChart points={allTrendPoints} />
           </Card>
         </div>
       ) : null}

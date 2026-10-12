@@ -155,10 +155,10 @@ export async function loadProjectOverview(projectId: string, locale: Locale, wit
     })
     .sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime());
 
-  const trendPoints = batches
-    .slice(0, 10)
-    .reverse()
-    .filter((b) => b.attempts > 0);
+  // Oldest first. `trendPoints` is the recent window the simple trend charts
+  // show, `allTrendPoints` every raid night for the long-term charts.
+  const allTrendPoints = [...batches].reverse().filter((b) => b.attempts > 0);
+  const trendPoints = allTrendPoints.slice(-10);
 
   // The chart is about one encounter: the boss most attempts were made on.
   // Bosses without a curated phase list have nothing to lay out on the x axis.
@@ -199,6 +199,7 @@ export async function loadProjectOverview(projectId: string, locale: Locale, wit
   return {
     batches,
     trendPoints,
+    allTrendPoints,
     progressBossId,
     progressPhaseNames,
     progressNights,

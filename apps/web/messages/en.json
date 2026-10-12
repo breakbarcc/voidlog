@@ -118,6 +118,7 @@
     "deletePrompt": "Delete project \"{name}\"? This permanently removes all its batches, logs, and results.",
     "greenFailRate": "Green-fail rate · last {count} nights",
     "shockwaveRate": "Shockwave rate · last {count} nights",
+    "shockwaveRateAll": "Shockwave rate · all {count} nights",
     "raidNights": "Raid nights",
     "table": {
       "raidNight": "Raid night",
