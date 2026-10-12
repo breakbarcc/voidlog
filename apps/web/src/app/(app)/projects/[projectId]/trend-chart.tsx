@@ -33,7 +33,8 @@ function SingleLineChart({
 }: Readonly<{
   points: TrendPoint[];
   dataKey: string;
-  valueOf: (p: TrendPoint) => number;
+  /** null = no value for this night: the x-axis keeps the date, the line shows a gap. */
+  valueOf: (p: TrendPoint) => number | null;
   color: string;
   label: string;
   formatValue: (v: number) => string;
@@ -75,7 +76,27 @@ function SingleLineChart({
           type="monotone"
           stroke={`var(--color-${dataKey})`}
           strokeWidth={2}
-          dot={false}
+          connectNulls={false}
+          // A night between two gaps has no line segment to carry it, so
+          // it gets a dot of its own; connected nights stay dot-free.
+          dot={(props: { index?: number; cx?: number; cy?: number; payload?: unknown }) => {
+            const i = props.index ?? 0;
+            const key = `${dataKey}-dot-${i}`;
+            const value = (props.payload as Record<string, number | null> | undefined)?.[dataKey];
+            const isolated = data[i - 1]?.[dataKey] == null && data[i + 1]?.[dataKey] == null;
+            if (value == null || !isolated || props.cx == null || props.cy == null) {
+              return <g key={key} />;
+            }
+            return (
+              <circle
+                key={key}
+                cx={props.cx}
+                cy={props.cy}
+                r={3}
+                fill={`var(--color-${dataKey})`}
+              />
+            );
+          }}
         />
       </LineChart>
     </ChartContainer>
@@ -88,7 +109,7 @@ export function GreenFailTrendChart({ points }: Readonly<{ points: TrendPoint[] 
     <SingleLineChart
       points={points}
       dataKey="greenFail"
-      valueOf={(p) => p.greenFailRate ?? 0}
+      valueOf={(p) => p.greenFailRate}
       color="var(--danger)"
       label={t("greenFailRate")}
       formatValue={(v) => `${Math.round(v)}%`}
@@ -102,7 +123,7 @@ export function ShockwaveTrendChart({ points }: Readonly<{ points: TrendPoint[] 
     <SingleLineChart
       points={points}
       dataKey="shockwave"
-      valueOf={(p) => p.shockwaveHitRate ?? 0}
+      valueOf={(p) => p.shockwaveHitRate}
       color="var(--warning)"
       label={t("shockwaveRate")}
       formatValue={(v) => `${Math.round(v)}%`}
