@@ -1,4 +1,4 @@
-import { getBossCuration } from "./bosses/registry";
+import { getBossCuration, listBossCurations } from "./bosses/registry";
 import type { ShockwaveConfig } from "./bosses/types";
 
 /**
@@ -35,6 +35,31 @@ export interface ShockwaveCount {
 // following "Resp" (respawn), if any.
 const DEATH = "Dead";
 const RESPAWN = "Resp";
+
+/** Mechanic names that making player lifecycle readable depends on — never filter these out of a read. */
+export const PLAYER_LIFECYCLE_MECHANICS: readonly string[] = [DEATH, RESPAWN];
+
+/**
+ * Every mechanic name the shockwave statistics read (casts, hits, deaths,
+ * respawns) across all curated bosses — for narrowing database reads to the
+ * events the statistics actually need.
+ */
+export function shockwaveMechanicNames(): string[] {
+  const names = new Set<string>(PLAYER_LIFECYCLE_MECHANICS);
+  for (const boss of listBossCurations()) {
+    if (!boss.shockwave) continue;
+    names.add(boss.shockwave.castMechanic);
+    names.add(boss.shockwave.hitMechanic);
+  }
+  return [...names];
+}
+
+/** Just the cast mechanics of `shockwaveMechanicNames` (boss side, no player). */
+export function shockwaveCastMechanicNames(): string[] {
+  return listBossCurations().flatMap((boss) =>
+    boss.shockwave ? [boss.shockwave.castMechanic] : [],
+  );
+}
 
 export function shockwaveConfig(bossId: string): ShockwaveConfig | undefined {
   return getBossCuration(bossId)?.shockwave;

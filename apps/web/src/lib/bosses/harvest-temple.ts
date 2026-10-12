@@ -411,6 +411,8 @@ export const harvestTemple: BossCuration = {
     !(phaseName.startsWith("Purification") || phaseName === "Giants"),
   mechanicNames: MECHANIC_NAMES,
   noiseMechanicNames: NOISE_MECHANIC_NAMES,
+  // Scream.H is the context isContextualNoise (below) looks at.
+  noiseNamesStillRead: new Set(["Scream.H"]),
   visibleCastMarkers: VISIBLE_CAST_MARKERS,
   isContextualNoise: (event, allEvents) => {
     if (event.mechanicName !== "Infirmity") return false;

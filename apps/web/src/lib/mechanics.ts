@@ -1,4 +1,5 @@
 import { getBossCuration } from "./bosses/registry";
+import { PLAYER_LIFECYCLE_MECHANICS } from "./shockwave-stats";
 
 // Matches the generic bulk-captured cast markers from cast-markers.ts on
 // the worker ("<Group>.Cast.<skillId>") — boss-agnostic, so it stays here
@@ -31,3 +32,31 @@ export function isContextualNoiseMechanic(
 ): boolean {
   return getBossCuration(bossId)?.isContextualNoise?.(event, allEvents) ?? false;
 }
+
+/**
+ * Mechanic names of an encounter that no view reads, so a database query can
+ * leave them out instead of loading and then discarding them (a single
+ * noise mechanic such as "Orb Push" can be half of all stored events). That
+ * is every name that is noise for *all* of `bossIds` — a name that is real
+ * for even one of the bosses must still be loaded — except the ones other
+ * logic reads: a boss's `noiseNamesStillRead` and the player lifecycle
+ * events (respawns). Bulk-captured generic casts are covered separately by
+ * `GENERIC_CAST_MARKER_NAME_PART`.
+ */
+export function unusedMechanicNames(bossIds: readonly string[]): string[] {
+  const curations = bossIds.map((id) => getBossCuration(id));
+  if (curations.length === 0 || curations.some((c) => c === undefined)) return [];
+  const keep = new Set<string>(PLAYER_LIFECYCLE_MECHANICS);
+  const sets = curations.map((c) => c!);
+  for (const c of sets) for (const name of c.noiseNamesStillRead ?? []) keep.add(name);
+  const [first, ...rest] = sets;
+  return [...first!.noiseMechanicNames].filter(
+    (name) =>
+      !keep.has(name) &&
+      !first!.visibleCastMarkers.has(name) &&
+      rest.every((c) => c.noiseMechanicNames.has(name) && !c.visibleCastMarkers.has(name)),
+  );
+}
+
+/** Generic bulk casts are named "<Group>.Cast.<skillId>" — see `isNoiseMechanic`; curated ones end in ".Cast". */
+export const GENERIC_CAST_MARKER_NAME_PART = ".Cast.";

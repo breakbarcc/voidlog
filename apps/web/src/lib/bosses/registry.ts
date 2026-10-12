@@ -14,3 +14,8 @@ const BOSSES: Record<string, BossCuration> = {
 export function getBossCuration(bossId: string): BossCuration | undefined {
   return BOSSES[bossId];
 }
+
+/** Every curated boss — for callers that need names across all of them (e.g. DB query filters). */
+export function listBossCurations(): BossCuration[] {
+  return Object.values(BOSSES);
+}

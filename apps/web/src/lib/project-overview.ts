@@ -5,7 +5,7 @@ import { batchTitle } from "@/lib/batch-title";
 import type { DpsNight } from "@/lib/dps-model";
 import { damagePhases, impliedReachedPhases, isMainPhase, progressPhases } from "@/lib/main-phases";
 import { loadPhaseDamageByBatch } from "@/lib/phase-damage";
-import { shockwavePercent, squadShockwaves } from "@/lib/shockwave-stats";
+import { shockwaveMechanicNames, shockwavePercent, squadShockwaves } from "@/lib/shockwave-stats";
 
 type MechanicEncounter = {
   phaseResults: { mechanicEvents: { mechanicName: string }[] }[];
@@ -16,6 +16,9 @@ function hasMechanic(encounter: MechanicEncounter, mechanicName: string): boolea
     phase.mechanicEvents.some((event) => event.mechanicName === mechanicName),
   );
 }
+
+// "F.Green" is HTCM's raw EI mechanic code for a failed Green stack.
+const OVERVIEW_MECHANIC_NAMES = ["F.Green", ...shockwaveMechanicNames()];
 
 /**
  * Everything the project's history and statistics pages draw from, derived
@@ -42,7 +45,11 @@ export async function loadProjectOverview(projectId: string, locale: Locale, wit
                   name: true,
                   order: true,
                   reached: true,
+                  // Only what the overview computes from: the green stat and the
+                  // shockwave statistics. A project holds hundreds of thousands
+                  // of events, most of them irrelevant here.
                   mechanicEvents: {
+                    where: { mechanicName: { in: OVERVIEW_MECHANIC_NAMES } },
                     select: { mechanicName: true, timeMs: true, playerResultId: true },
                   },
                 },

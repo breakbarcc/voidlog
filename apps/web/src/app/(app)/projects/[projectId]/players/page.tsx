@@ -3,7 +3,12 @@ import { getTranslations } from "next-intl/server";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
-import { countShockwaves, shockwaveCastTimes } from "@/lib/shockwave-stats";
+import {
+  countShockwaves,
+  shockwaveCastMechanicNames,
+  shockwaveCastTimes,
+  shockwaveMechanicNames,
+} from "@/lib/shockwave-stats";
 import { RosterTable } from "./roster-table";
 
 interface RosterEntry {
@@ -48,14 +53,19 @@ export default async function RosterPage(
           phaseResults: {
             select: {
               mechanicEvents: {
-                where: { playerResultId: null },
+                where: { playerResultId: null, mechanicName: { in: shockwaveCastMechanicNames() } },
                 select: { mechanicName: true, timeMs: true },
               },
             },
           },
         },
       },
-      mechanicEvents: { select: { mechanicName: true, timeMs: true } },
+      // Only the events the roster counts: Geschwächt, Revealed and what the
+      // shockwave statistics read. The rest is most of the table.
+      mechanicEvents: {
+        where: { mechanicName: { in: ["Debilitated", "Revealed", ...shockwaveMechanicNames()] } },
+        select: { mechanicName: true, timeMs: true },
+      },
     },
   });
 

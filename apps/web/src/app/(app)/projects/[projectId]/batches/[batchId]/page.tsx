@@ -15,7 +15,13 @@ import {
 } from "@/lib/main-phases";
 import { encounterShockwaves, squadShockwaves } from "@/lib/shockwave-stats";
 import { translateMechanicName } from "@/lib/mechanic-names";
-import { isContextualNoiseMechanic, isNoiseMechanic, isVisibleCastMarker } from "@/lib/mechanics";
+import {
+  GENERIC_CAST_MARKER_NAME_PART,
+  isContextualNoiseMechanic,
+  isNoiseMechanic,
+  isVisibleCastMarker,
+  unusedMechanicNames,
+} from "@/lib/mechanics";
 import { hasRole, requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import {
@@ -616,6 +622,16 @@ export default async function BatchDetailPage(
     label: batchTitles.get(b.id) ?? b.label,
   }));
 
+  // Leave out the events no view of this batch reads (mostly noise
+  // mechanics — one of them alone can be half of all stored events) instead
+  // of loading and discarding them below.
+  const batchBosses = await prisma.encounterResult.findMany({
+    where: { logFile: { batchId } },
+    select: { bossId: true },
+    distinct: ["bossId"],
+  });
+  const unusedNames = unusedMechanicNames(batchBosses.map((b) => b.bossId));
+
   const batch = await prisma.uploadBatch.findUnique({
     where: { id: batchId },
     include: {
@@ -628,7 +644,14 @@ export default async function BatchDetailPage(
               phaseResults: {
                 orderBy: { order: "asc" },
                 include: {
-                  mechanicEvents: { include: { playerResult: true }, orderBy: { timeMs: "asc" } },
+                  mechanicEvents: {
+                    where: {
+                      mechanicName: { notIn: unusedNames },
+                      NOT: { mechanicName: { contains: GENERIC_CAST_MARKER_NAME_PART } },
+                    },
+                    include: { playerResult: true },
+                    orderBy: { timeMs: "asc" },
+                  },
                 },
               },
             },

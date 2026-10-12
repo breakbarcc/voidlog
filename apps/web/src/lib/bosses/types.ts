@@ -73,6 +73,13 @@ export interface BossCuration {
   mechanicNames: Record<Locale, Record<string, string>>;
   /** Raw EI mechanic short codes that are noise (achievement/res spam), not real fails. */
   noiseMechanicNames: Set<string>;
+  /**
+   * Noise names that other logic still reads — e.g. as the context
+   * `isContextualNoise` looks at. Everything else in `noiseMechanicNames`
+   * is never used by any view, so queries leave it out of the database read
+   * (see lib/mechanics.ts `unusedMechanicNames`).
+   */
+  noiseNamesStillRead?: ReadonlySet<string>;
   /** Synthetic "*.Cast" markers (see worker cast-markers.ts) individually curated with their own timeline icon in the UI. */
   visibleCastMarkers: Set<string>;
   /**
