@@ -7,7 +7,13 @@ import { BatchSwitcher } from "@/components/batch-switcher";
 import { loadBatchTitles } from "@/lib/batch-title";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PhaseBadge } from "@/components/phase-badge";
-import { impliedReachedPhases, isMainPhase, progressPhases, showsBossHealth } from "@/lib/main-phases";
+import {
+  impliedReachedPhases,
+  isMainPhase,
+  progressPhases,
+  reachedMechanicPhase,
+  showsBossHealth,
+} from "@/lib/main-phases";
 import { translateMechanicName } from "@/lib/mechanic-names";
 import { isContextualNoiseMechanic, isNoiseMechanic, isVisibleCastMarker } from "@/lib/mechanics";
 import { hasRole, requireProjectMembership } from "@/lib/projects";
@@ -636,7 +642,16 @@ export default async function BatchDetailPage(
   ).length;
   // "ShckWv.H" is Mordremoth's raw EI code for a Schockwelle hit — same
   // hardcoded-stat-card treatment as the Green-fail count above.
-  const shockwaveHitCount = encounters.filter((e) =>
+  // Only attempts that got as far as Mordremoth can be hit by a shockwave,
+  // so the rate is taken over those, not over every attempt.
+  const shockwaveEligible = encounters.filter((e) =>
+    reachedMechanicPhase(
+      e.encounter.bossId,
+      "ShckWv.H",
+      e.encounter.phaseResults.filter((p) => p.reached).map((p) => p.name),
+    ),
+  );
+  const shockwaveHitCount = shockwaveEligible.filter((e) =>
     e.encounter.phaseResults.some((p) =>
       p.mechanicEvents.some((m) => m.mechanicName === "ShckWv.H"),
     ),
@@ -723,13 +738,20 @@ export default async function BatchDetailPage(
           </div>
         </Card>
         <Card size="2" className="border-line bg-surface border">
-          <div className="text-muted mb-1.5 text-[11px] font-medium uppercase tracking-wide">
+          <div
+            className="text-muted mb-1.5 text-[11px] font-medium uppercase tracking-wide"
+            title={t("shockwavesHitHint", { count: shockwaveEligible.length })}
+          >
             {t("shockwavesHit")}
           </div>
           <div className="font-heading text-danger text-xl font-bold">
             {shockwaveHitCount}{" "}
             <span className="text-muted text-sm font-medium">
-              ({attempts > 0 ? Math.round((shockwaveHitCount / attempts) * 100) : 0}%)
+              (
+              {shockwaveEligible.length > 0
+                ? Math.round((shockwaveHitCount / shockwaveEligible.length) * 100)
+                : 0}
+              %)
             </span>
           </div>
         </Card>

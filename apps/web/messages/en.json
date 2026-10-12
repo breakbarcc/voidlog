@@ -124,6 +124,7 @@
       "kills": "Kills",
       "greensMissed": "Greens missed",
       "shockwavesHit": "Shockwaves hit",
+      "shockwavesHitHint": "Share of attempts that reached Mordremoth",
       "furthestPhase": "Furthest phase"
     },
     "empty": "No batches yet.",
@@ -371,6 +372,7 @@
     "reveals": "Reveals reached",
     "greenMissed": "Green missed",
     "shockwavesHit": "Shockwaves hit",
+    "shockwavesHitHint": "Share of attempts that reached Mordremoth ({count})",
     "furthestPhase": "Furthest phase",
     "failedUploads": "Failed uploads"
   },

@@ -7,7 +7,13 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PhaseBadge } from "@/components/phase-badge";
 import type { DpsNight } from "@/lib/dps-model";
 import { batchTitle } from "@/lib/batch-title";
-import { damagePhases, impliedReachedPhases, isMainPhase, progressPhases } from "@/lib/main-phases";
+import {
+  damagePhases,
+  impliedReachedPhases,
+  isMainPhase,
+  progressPhases,
+  reachedMechanicPhase,
+} from "@/lib/main-phases";
 import { loadPhaseDamageByBatch } from "@/lib/phase-damage";
 import { hasRole, requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
@@ -83,9 +89,20 @@ export default async function ProjectDetailPage(
 
       // "ShckWv.H" is Mordremoth's raw EI code for a Schockwelle hit — same
       // hardcoded-stat treatment as the Green-fail count above.
-      const shockwaveHitCount = encounters.filter((e) => hasMechanic(e, "ShckWv.H")).length;
+      // Only attempts that got as far as Mordremoth count towards the rate —
+      // earlier wipes never had a shockwave and would dilute it.
+      const shockwaveEligible = encounters.filter((e) =>
+        reachedMechanicPhase(
+          e.bossId,
+          "ShckWv.H",
+          e.phaseResults.filter((p) => p.reached).map((p) => p.name),
+        ),
+      );
+      const shockwaveHitCount = shockwaveEligible.filter((e) => hasMechanic(e, "ShckWv.H")).length;
       const shockwaveHitRate =
-        encounters.length > 0 ? Math.round((shockwaveHitCount / encounters.length) * 100) : null;
+        shockwaveEligible.length > 0
+          ? Math.round((shockwaveHitCount / shockwaveEligible.length) * 100)
+          : null;
       let furthestPhase: { name: string; order: number; bossId: string } | null = null;
       for (const encounter of encounters) {
         for (const phase of encounter.phaseResults) {
@@ -254,7 +271,9 @@ export default async function ProjectDetailPage(
             <Table.ColumnHeaderCell>{t("table.attempts")}</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>{t("table.kills")}</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>{t("table.greensMissed")}</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>{t("table.shockwavesHit")}</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell title={t("table.shockwavesHitHint")}>
+              {t("table.shockwavesHit")}
+            </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>{t("table.furthestPhase")}</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>

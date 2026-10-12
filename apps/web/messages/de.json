@@ -124,6 +124,7 @@
       "kills": "Kills",
       "greensMissed": "Greens verfehlt",
       "shockwavesHit": "Schockwellen getroffen",
+      "shockwavesHitHint": "Anteil der Versuche, die Mordremoth erreicht haben",
       "furthestPhase": "Weiteste Phase"
     },
     "empty": "Noch keine Batches.",
@@ -371,6 +372,7 @@
     "reveals": "Mit Reveal erreicht",
     "greenMissed": "Green verfehlt",
     "shockwavesHit": "Schockwellen getroffen",
+    "shockwavesHitHint": "Anteil der Versuche, die Mordremoth erreicht haben ({count})",
     "furthestPhase": "Weiteste Phase",
     "failedUploads": "Fehlgeschlagene Uploads"
   },
