@@ -68,11 +68,20 @@ function compareRows(a: RosterRow, b: RosterRow, key: SortKey): number {
     case "avgDowns":
       return Number.parseFloat(a.avgDowns) - Number.parseFloat(b.avgDowns);
     case "shockwaveHits":
-      return a.shockwaveHits - b.shockwaveHits;
+      return (
+        Number.parseFloat(a.shockwaveHitsPerEncounter) -
+        Number.parseFloat(b.shockwaveHitsPerEncounter)
+      );
     case "debilitatedHits":
-      return a.debilitatedHits - b.debilitatedHits;
+      return (
+        Number.parseFloat(a.debilitatedHitsPerEncounter) -
+        Number.parseFloat(b.debilitatedHitsPerEncounter)
+      );
     case "revealCount":
-      return a.revealCount - b.revealCount;
+      return (
+        Number.parseFloat(a.revealCountPerEncounter) -
+        Number.parseFloat(b.revealCountPerEncounter)
+      );
     case "lastActive":
       return a.lastActive.getTime() - b.lastActive.getTime();
   }
@@ -144,22 +153,16 @@ export function RosterTable({ roster }: Readonly<{ roster: RosterRow[] }>) {
             <Table.Cell className="text-muted-strong">{entry.avgDps}</Table.Cell>
             <Table.Cell className="text-muted-strong">{entry.avgDowns}</Table.Cell>
             <Table.Cell className="text-warning font-semibold">
-              {entry.shockwaveHits}{" "}
-              <span className="text-muted text-sm font-medium">
-                (Ø {entry.shockwaveHitsPerEncounter})
-              </span>
+              {entry.shockwaveHitsPerEncounter}{" "}
+              <span className="text-muted text-sm font-medium">({entry.shockwaveHits})</span>
             </Table.Cell>
             <Table.Cell className="text-warning font-semibold">
-              {entry.debilitatedHits}{" "}
-              <span className="text-muted text-sm font-medium">
-                (Ø {entry.debilitatedHitsPerEncounter})
-              </span>
+              {entry.debilitatedHitsPerEncounter}{" "}
+              <span className="text-muted text-sm font-medium">({entry.debilitatedHits})</span>
             </Table.Cell>
             <Table.Cell className="text-warning font-semibold">
-              {entry.revealCount}{" "}
-              <span className="text-muted text-sm font-medium">
-                (Ø {entry.revealCountPerEncounter})
-              </span>
+              {entry.revealCountPerEncounter}{" "}
+              <span className="text-muted text-sm font-medium">({entry.revealCount})</span>
             </Table.Cell>
             <Table.Cell className="text-muted text-sm">
               {formatDate(entry.lastActive, locale)}
