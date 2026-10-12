@@ -51,14 +51,6 @@ export default async function ProjectStatisticsPage(
       <h1 className="font-heading text-foreground-strong text-2xl font-bold">{t("title")}</h1>
       <p className="text-muted mb-6 mt-1 text-sm">{t("subtitle")}</p>
 
-      {progressBossId && dpsPhaseNames && dpsNights.length > 0 ? (
-        <DpsPhaseChart
-          bossId={progressBossId}
-          phases={dpsPhaseNames.map((name, order) => ({ name, order }))}
-          nights={dpsNights}
-        />
-      ) : null}
-
       {progressBossId && progressPhaseNames && progressNights.length > 0 ? (
         <PhaseProgressTrend
           bossId={progressBossId}
@@ -82,6 +74,14 @@ export default async function ProjectStatisticsPage(
             <ShockwaveTrendChart points={trendPoints} />
           </Card>
         </div>
+      ) : null}
+
+      {progressBossId && dpsPhaseNames && dpsNights.length > 0 ? (
+        <DpsPhaseChart
+          bossId={progressBossId}
+          phases={dpsPhaseNames.map((name, order) => ({ name, order }))}
+          nights={dpsNights}
+        />
       ) : null}
 
       {hasContent ? null : <p className="text-muted text-sm">{t("empty")}</p>}
