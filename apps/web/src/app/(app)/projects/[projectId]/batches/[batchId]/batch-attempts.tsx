@@ -477,9 +477,6 @@ const HARVEST_TEMPLE_BOSS_ID = "43488";
 // glyphs do — it gets its own fixed, mechanic-appropriate green instead.
 const GREEN_SPAWN_COLOR = "#4CA64C";
 
-// Soo-Won's Swipe telegraph in the game is a big orange half circle.
-const SWIPE_COLOR = "#F0A23C";
-
 // Matches the game's own yellow "orange/gold circle" bait indicator.
 const SPREAD_BAIT_COLOR = "#E8B84C";
 const RED_BAIT_COLOR = "#E0453D";
@@ -494,7 +491,7 @@ const ATTACK_COLOR: Record<AttackType, string> = {
   beam: phaseColor(HARVEST_TEMPLE_BOSS_ID, 0, "Kralkatorrik"),
   shockwave: phaseColor(HARVEST_TEMPLE_BOSS_ID, 0, "Mordremoth"),
   scream: phaseColor(HARVEST_TEMPLE_BOSS_ID, 0, "Zhaitan"),
-  swipe: SWIPE_COLOR,
+  swipe: phaseColor(HARVEST_TEMPLE_BOSS_ID, 0, "Soo-Won"),
   green: GREEN_SPAWN_COLOR,
   spreadBait: SPREAD_BAIT_COLOR,
   redBait: RED_BAIT_COLOR,
@@ -577,10 +574,18 @@ function AttackGlyph({ type, flipped }: Readonly<{ type: AttackType; flipped?: b
     );
   }
   if (type === "swipe") {
-    // Half circle, flat side down — the shape of the attack's telegraph.
+    // The attack's telegraph: a big half circle in front of Soo-Won with the
+    // direction it sweeps in drawn as short rays fanning out of it.
     return (
-      <svg viewBox="0 0 12 12" width="13" height="13" className="opacity-85">
-        <path d="M0.8 9.5 A5.2 5.2 0 0 1 11.2 9.5 Z" fill={color} />
+      <svg viewBox="0 0 14 14" width="15" height="15" className="opacity-80">
+        <path d="M2.4 12.2 A4.6 4.6 0 0 1 11.6 12.2 Z" fill={color} />
+        <path
+          d="M11.9 9.9 L13.3 9.3 M9.9 7.7 L10.8 6.4 M7.0 6.8 L7.0 5.3 M4.1 7.7 L3.2 6.4 M2.1 9.9 L0.7 9.3"
+          fill="none"
+          stroke={color}
+          strokeWidth="1.2"
+          strokeLinecap="round"
+        />
       </svg>
     );
   }
