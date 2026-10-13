@@ -459,7 +459,7 @@ type AttackType =
   | "beam"
   | "shockwave"
   | "scream"
-  | "clawSlap"
+  | "swipe"
   | "green"
   | "spreadBait"
   | "redBait"
@@ -477,6 +477,9 @@ const HARVEST_TEMPLE_BOSS_ID = "43488";
 // glyphs do — it gets its own fixed, mechanic-appropriate green instead.
 const GREEN_SPAWN_COLOR = "#4CA64C";
 
+// Soo-Won's Swipe telegraph in the game is a big orange half circle.
+const SWIPE_COLOR = "#F0A23C";
+
 // Matches the game's own yellow "orange/gold circle" bait indicator.
 const SPREAD_BAIT_COLOR = "#E8B84C";
 const RED_BAIT_COLOR = "#E0453D";
@@ -491,7 +494,7 @@ const ATTACK_COLOR: Record<AttackType, string> = {
   beam: phaseColor(HARVEST_TEMPLE_BOSS_ID, 0, "Kralkatorrik"),
   shockwave: phaseColor(HARVEST_TEMPLE_BOSS_ID, 0, "Mordremoth"),
   scream: phaseColor(HARVEST_TEMPLE_BOSS_ID, 0, "Zhaitan"),
-  clawSlap: phaseColor(HARVEST_TEMPLE_BOSS_ID, 0, "Soo-Won"),
+  swipe: SWIPE_COLOR,
   green: GREEN_SPAWN_COLOR,
   spreadBait: SPREAD_BAIT_COLOR,
   redBait: RED_BAIT_COLOR,
@@ -573,17 +576,11 @@ function AttackGlyph({ type, flipped }: Readonly<{ type: AttackType; flipped?: b
       </svg>
     );
   }
-  if (type === "clawSlap") {
-    // Three parallel claw marks.
+  if (type === "swipe") {
+    // Half circle, flat side down — the shape of the attack's telegraph.
     return (
-      <svg viewBox="0 0 12 12" width="13" height="13" className="opacity-70">
-        <path
-          d="M2.5 1.5 L4.5 10.5 M6 1 L8 11 M9.5 1.5 L11 10"
-          fill="none"
-          stroke={color}
-          strokeWidth="1.6"
-          strokeLinecap="round"
-        />
+      <svg viewBox="0 0 12 12" width="13" height="13" className="opacity-85">
+        <path d="M0.8 9.5 A5.2 5.2 0 0 1 11.2 9.5 Z" fill={color} />
       </svg>
     );
   }
@@ -640,7 +637,7 @@ function attackType(mechanicName: string): AttackType | null {
   if (mechanicName === "Beam.Cast") return "beam";
   if (mechanicName === "ShckWv.Cast") return "shockwave";
   if (mechanicName === "Scream.Cast") return "scream";
-  if (mechanicName === "ClawSlap.Cast") return "clawSlap";
+  if (mechanicName === "ClawSlap.Cast") return "swipe";
   if (mechanicName === "Green.Spawn") return "green";
   if (mechanicName === "Spread.B") return "spreadBait";
   if (mechanicName === "Red.B") return "redBait";

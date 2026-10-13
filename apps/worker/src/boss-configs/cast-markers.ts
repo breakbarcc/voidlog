@@ -78,8 +78,10 @@ export const CURATED_CAST_MARKERS_BY_BOSS: Record<string, CuratedCastMarker[]> =
     {
       targetId: -18, // The SooWonVoid
       skillId: 63588,
+      // The in-game skill is "Claw Slap"; the community calls the attack
+      // "Soo-Won Swipe" (a large half-circle sweep in front of her).
       mechanicName: "ClawSlap.Cast",
-      displayName: "Claw Slap (Cast)",
+      displayName: "Soo-Won Swipe (Cast)",
     },
   ],
 };
