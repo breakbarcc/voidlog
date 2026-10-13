@@ -173,6 +173,9 @@ function StatItem({
 
 const MARKER_CLUSTER_GAP_MS = 1000;
 
+// EI's generic death mechanic — deaths are drawn as their own markers.
+const DEAD_MECHANIC_NAME = "Dead";
+
 interface PlayerHitCount {
   player: string;
   count: number;
@@ -1495,18 +1498,24 @@ export function BatchAttempts({
                     {/* Lane 3: fails/deaths — icon size matched to the attack lane. */}
                     <span className="relative h-4 w-full">
                       {a.deaths.map((d) => (
-                        <span
+                        <MechanicHoverCard
                           key={`${d.timeMs}-${d.player ?? ""}`}
-                          title={
-                            d.player
-                              ? tTimeline("deathByPlayer", { player: d.player })
-                              : tTimeline("death")
-                          }
-                          className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
-                          style={{ left: `${(d.timeMs / a.durationMs) * 100}%` }}
+                          cluster={{
+                            timeMs: d.timeMs,
+                            mechanicName: DEAD_MECHANIC_NAME,
+                            name: tTimeline("death"),
+                            count: 1,
+                            players: d.player ? [{ player: d.player, count: 1 }] : [],
+                          }}
+                          icon={<Cross2Icon className="text-danger h-3.5 w-3.5" />}
                         >
-                          <Cross2Icon className="text-danger h-3.5 w-3.5" />
-                        </span>
+                          <span
+                            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
+                            style={{ left: `${(d.timeMs / a.durationMs) * 100}%` }}
+                          >
+                            <Cross2Icon className="text-danger h-3.5 w-3.5" />
+                          </span>
+                        </MechanicHoverCard>
                       ))}
                       {failGroups.map((group) => {
                         const first = group.clusters[0]!;

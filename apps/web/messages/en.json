@@ -314,7 +314,6 @@
       "sincePhaseEnd": "since phase end",
       "sinceInvisCastEnd": "since Mass Invis cast end",
       "death": "Death",
-      "deathByPlayer": "Death — {player}",
       "players": "Players ({count})",
       "causes": "Caused by",
       "showMarker": "Show marker",
