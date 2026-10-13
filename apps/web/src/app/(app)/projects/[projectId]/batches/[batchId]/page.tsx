@@ -16,7 +16,9 @@ import {
 import { encounterShockwaves, squadShockwaves } from "@/lib/shockwave-stats";
 import { translateMechanicName } from "@/lib/mechanic-names";
 import {
+  DOWNED_MECHANIC_NAME,
   GENERIC_CAST_MARKER_NAME_PART,
+  downCauseConfig,
   isContextualNoiseMechanic,
   isNoiseMechanic,
   isVisibleCastMarker,
@@ -543,10 +545,52 @@ function buildAttemptRow(
           player: m.playerResult?.characterName ?? null,
           msSincePhaseEnd: readMsSincePhaseEnd(m.context),
           msSinceInvisCast: readMsSinceInvisCast(m.context),
+          causes: downCauses(encounter, m, locale),
         })),
     ),
     phases: mainPhases.map((p) => buildAttemptPhase(p, mainPhasesByStart, encounter, locale)),
   };
+}
+
+/**
+ * The unavoidable mechanics that put a player down: for a downstate, the
+ * boss's `downCauses` mechanics that hit the same player in the window
+ * before it, counted by name. Undefined for everything else, and when there
+ * is nothing — see `BossCuration.downCauses`.
+ */
+function downCauses(
+  encounter: Encounters[number]["encounter"],
+  event: MechanicEventLike,
+  locale: Locale,
+): { name: string; count: number }[] | undefined {
+  if (event.mechanicName !== DOWNED_MECHANIC_NAME || !event.playerResult) return undefined;
+  const config = downCauseConfig(encounter.bossId);
+  if (!config) return undefined;
+  const counts = new Map<string, { name: string; count: number }>();
+  for (const phase of encounter.phaseResults) {
+    for (const other of phase.mechanicEvents) {
+      if (
+        !config.mechanics.has(other.mechanicName) ||
+        other.playerResult?.account !== event.playerResult.account ||
+        other.timeMs > event.timeMs ||
+        event.timeMs - other.timeMs > config.windowMs
+      ) {
+        continue;
+      }
+      const entry = counts.get(other.mechanicName) ?? {
+        name: translateMechanicName(
+          encounter.bossId,
+          locale,
+          other.mechanicName,
+          other.displayName,
+        ),
+        count: 0,
+      };
+      entry.count += 1;
+      counts.set(other.mechanicName, entry);
+    }
+  }
+  return counts.size > 0 ? [...counts.values()] : undefined;
 }
 
 function buildAttemptPhase(

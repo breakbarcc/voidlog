@@ -330,6 +330,7 @@ const NOISE_MECHANIC_NAMES = new Set([
   "NigEpoch.H", // Orb Aura
   "Scream.H", // Zhaitan's Scream — unavoidable, always hits all 10 players
   "Grav.Cru.H", // Gravity Crush — unavoidable
+  "MagHail.H", // Magic Hail — unavoidable, only named on a downstate (downCauses below)
   "Lckt", // Targeted (presumed) — just a targeting marker, not a fail
 ]);
 
@@ -417,7 +418,10 @@ export const harvestTemple: BossCuration = {
   mechanicNames: MECHANIC_NAMES,
   noiseMechanicNames: NOISE_MECHANIC_NAMES,
   // Scream.H is the context isContextualNoise (below) looks at.
-  noiseNamesStillRead: new Set(["Scream.H"]),
+  noiseNamesStillRead: new Set(["Scream.H", "MagHail.H"]),
+  // Hail ticks are dense; on real logs 116 of 118 downstates that follow one
+  // come within 1 s of it.
+  downCauses: { mechanics: new Set(["MagHail.H"]), windowMs: 1500 },
   visibleCastMarkers: VISIBLE_CAST_MARKERS,
   isContextualNoise: (event, allEvents) => {
     if (event.mechanicName !== "Infirmity") return false;

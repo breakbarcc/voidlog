@@ -316,6 +316,7 @@
       "death": "Death",
       "deathByPlayer": "Death — {player}",
       "players": "Players ({count})",
+      "causes": "Caused by",
       "showMarker": "Show marker",
       "hideMarker": "Hide marker",
       "phase": "Phase",

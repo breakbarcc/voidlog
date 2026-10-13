@@ -46,6 +46,8 @@ export interface AttemptRow {
     msSincePhaseEnd?: number;
     /** Only populated on "Revealed" events — time since the causing Mass-Invisibility cast's channel ended, not the phase end. */
     msSinceInvisCast?: number;
+    /** Only populated on downstates: unavoidable mechanics that hit the player just before — see BossCuration.downCauses. */
+    causes?: { name: string; count: number }[];
   }[];
   phases: {
     name: string;
@@ -187,6 +189,8 @@ interface MarkerCluster {
   msSincePhaseEnd?: number;
   /** Taken from the cluster's first event — see AttemptRow.mechanics. */
   msSinceInvisCast?: number;
+  /** Summed over the cluster's events, by name — see AttemptRow.mechanics. */
+  causes?: { name: string; count: number }[];
 }
 
 // Collapses same-mechanic markers that land within MARKER_CLUSTER_GAP_MS of
@@ -205,6 +209,7 @@ function clusterMarkers(
     player?: string | null;
     msSincePhaseEnd?: number;
     msSinceInvisCast?: number;
+    causes?: { name: string; count: number }[];
   }[],
 ): MarkerCluster[] {
   const byMechanic = new Map<string, typeof events>();
@@ -216,8 +221,12 @@ function clusterMarkers(
 
   function pushCluster(clusters: MarkerCluster[], mechanicName: string, group: typeof events) {
     const counts = new Map<string, number>();
+    const causes = new Map<string, number>();
     for (const e of group) {
       if (e.player) counts.set(e.player, (counts.get(e.player) ?? 0) + 1);
+      for (const cause of e.causes ?? []) {
+        causes.set(cause.name, (causes.get(cause.name) ?? 0) + cause.count);
+      }
     }
     clusters.push({
       timeMs: group[0]!.timeMs,
@@ -227,6 +236,10 @@ function clusterMarkers(
       players: [...counts.entries()].map(([player, count]) => ({ player, count })),
       msSincePhaseEnd: group[0]!.msSincePhaseEnd,
       msSinceInvisCast: group[0]!.msSinceInvisCast,
+      causes:
+        causes.size > 0
+          ? [...causes.entries()].map(([name, count]) => ({ name, count }))
+          : undefined,
     });
   }
 
@@ -329,6 +342,16 @@ function MechanicSummary({ cluster, icon }: Readonly<{ cluster: MarkerCluster; i
             {cluster.players
               .map((p) => (p.count > 1 ? `${p.player} ×${p.count}` : p.player))
               .join(", ")}
+          </div>
+        </div>
+      ) : null}
+      {cluster.causes ? (
+        <div className="mt-1.5">
+          <div className="text-muted text-[10px] font-semibold uppercase tracking-wide">
+            {t("causes")}
+          </div>
+          <div className="text-foreground mt-0.5 text-[11px]">
+            {cluster.causes.map((c) => (c.count > 1 ? `${c.name} ×${c.count}` : c.name)).join(", ")}
           </div>
         </div>
       ) : null}

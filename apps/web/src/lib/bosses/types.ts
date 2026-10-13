@@ -80,6 +80,14 @@ export interface BossCuration {
    * (see lib/mechanics.ts `unusedMechanicNames`).
    */
   noiseNamesStillRead?: ReadonlySet<string>;
+  /**
+   * Unavoidable mechanics that are noise on their own (so listed in
+   * `noiseMechanicNames` and never shown or counted as fails) but are named
+   * in the tooltip of a downstate of the same player that follows them within
+   * `windowMs` — they are what put the player down. Must also be in
+   * `noiseNamesStillRead`, the tooltip needs the events.
+   */
+  downCauses?: { mechanics: ReadonlySet<string>; windowMs: number };
   /** Synthetic "*.Cast" markers (see worker cast-markers.ts) individually curated with their own timeline icon in the UI. */
   visibleCastMarkers: Set<string>;
   /**

@@ -60,3 +60,17 @@ export function unusedMechanicNames(bossIds: readonly string[]): string[] {
 
 /** Generic bulk casts are named "<Group>.Cast.<skillId>" — see `isNoiseMechanic`; curated ones end in ".Cast". */
 export const GENERIC_CAST_MARKER_NAME_PART = ".Cast.";
+
+/** EI's generic downstate mechanic — what `BossCuration.downCauses` hangs off. */
+export const DOWNED_MECHANIC_NAME = "Downed";
+
+/**
+ * The unavoidable mechanics to name in the tooltip of a downstate, and how
+ * far before it they count — see `BossCuration.downCauses`. Undefined for
+ * bosses without any.
+ */
+export function downCauseConfig(
+  bossId: string,
+): { mechanics: ReadonlySet<string>; windowMs: number } | undefined {
+  return getBossCuration(bossId)?.downCauses;
+}
