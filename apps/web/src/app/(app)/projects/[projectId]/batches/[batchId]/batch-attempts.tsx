@@ -789,23 +789,17 @@ function MechanicToggle({
 // visitor needs. Grouping by phase (instead of one flat list) mirrors the
 // aggregate phase cards above it, so the same phase names/colors orient the
 // user here too.
-// A failed Green: the three circles of the Greens hazard (same as the
-// boss-attack lane's "Green.Spawn" marker) struck through in red, so it reads
-// as "the Greens went wrong" at a glance and cannot be mistaken for the spawn
-// marker right above it.
+// A failed Green: a solid green disc with an exclamation mark. Solid and
+// round on purpose — the fail lane is full of outlined triangles and red
+// crosses (deaths), and the previous strike-through circles disappeared
+// between them. Bigger than the other fail icons for the same reason.
 function GreenFailGlyph({ size }: Readonly<{ size: "sm" | "md" }>) {
-  const px = size === "md" ? 18 : 15;
+  const px = size === "md" ? 20 : 17;
   return (
-    <svg viewBox="0 0 12 12" width={px} height={px} aria-hidden="true">
-      <circle cx="3" cy="8.5" r="1.7" fill={GREEN_SPAWN_COLOR} />
-      <circle cx="6" cy="3.5" r="1.7" fill={GREEN_SPAWN_COLOR} />
-      <circle cx="9" cy="8.5" r="1.7" fill={GREEN_SPAWN_COLOR} />
-      <path
-        d="M1.5 1.5 L10.5 10.5 M10.5 1.5 L1.5 10.5"
-        stroke="var(--danger)"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-      />
+    <svg viewBox="0 0 16 16" width={px} height={px} aria-hidden="true">
+      <circle cx="8" cy="8" r="7" fill={GREEN_SPAWN_COLOR} stroke="#0d2410" strokeWidth="1.2" />
+      <rect x="7" y="3.4" width="2" height="6" rx="1" fill="#fff" />
+      <circle cx="8" cy="12" r="1.2" fill="#fff" />
     </svg>
   );
 }
@@ -1548,7 +1542,11 @@ export function BatchAttempts({
                             clusters={clusters}
                           >
                             <span
-                              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
+                              className={`absolute top-1/2 -translate-x-1/2 -translate-y-1/2 ${
+                                markerRank(representative.mechanicName) < MARKER_PRIORITY.length
+                                  ? "z-20"
+                                  : "z-10"
+                              }`}
                               style={{ left: `${(group.timeMs / a.durationMs) * 100}%` }}
                             >
                               {failMechanicIcon(representative.mechanicName)}
