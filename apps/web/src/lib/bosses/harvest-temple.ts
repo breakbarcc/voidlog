@@ -176,6 +176,7 @@ const MECHANIC_NAMES_DE: Record<string, string> = {
   "ShatEarth.H": "Erdbeben (Shatter Earth) — getroffen",
 
   // Soo-Won
+  "ClawSlap.Cast": "Soo-Wons Klauenschlag — Angriff",
   "Tsunami.H": "Soo-Wons Tsunami — getroffen",
   "Claw.H": "Klaue Soo-Wons — getroffen",
   "SW.Pool.H": "Soo-Wons Void-Pool — getroffen",
@@ -287,6 +288,7 @@ const MECHANIC_NAMES_EN: Record<string, string> = {
   "ShatEarth.H": "Shatter Earth — hit",
 
   // Soo-Won
+  "ClawSlap.Cast": "Soo-Won's Claw Slap — cast",
   "Tsunami.H": "Soo-Won's Tsunami — hit",
   "Claw.H": "Soo-Won's Claw — hit",
   "SW.Pool.H": "Soo-Won's Void Pool — hit",
@@ -344,6 +346,7 @@ const VISIBLE_CAST_MARKERS = new Set([
   "Beam.Cast",
   "ShckWv.Cast",
   "Scream.Cast",
+  "ClawSlap.Cast",
   "Green.Spawn",
   "Spread.B",
   "Red.B",

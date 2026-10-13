@@ -75,6 +75,12 @@ export const CURATED_CAST_MARKERS_BY_BOSS: Record<string, CuratedCastMarker[]> =
       mechanicName: "Scream.Cast",
       displayName: "Zhaitan Scream (Cast)",
     },
+    {
+      targetId: -18, // The SooWonVoid
+      skillId: 63588,
+      mechanicName: "ClawSlap.Cast",
+      displayName: "Claw Slap (Cast)",
+    },
   ],
 };
 

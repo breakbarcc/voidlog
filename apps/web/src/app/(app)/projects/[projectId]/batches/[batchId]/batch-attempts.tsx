@@ -454,7 +454,16 @@ function ModeBadge({ isCM }: Readonly<{ isCM: boolean }>) {
 }
 
 type AttackType =
-  "jaws" | "slam" | "beam" | "shockwave" | "scream" | "green" | "spreadBait" | "redBait" | "invis";
+  | "jaws"
+  | "slam"
+  | "beam"
+  | "shockwave"
+  | "scream"
+  | "clawSlap"
+  | "green"
+  | "spreadBait"
+  | "redBait"
+  | "invis";
 
 // The glyphs below (attackType/ATTACK_LABEL too) are inherently specific
 // to Harvest Temple CM's curated cast markers (see cast-markers.ts on the
@@ -482,6 +491,7 @@ const ATTACK_COLOR: Record<AttackType, string> = {
   beam: phaseColor(HARVEST_TEMPLE_BOSS_ID, 0, "Kralkatorrik"),
   shockwave: phaseColor(HARVEST_TEMPLE_BOSS_ID, 0, "Mordremoth"),
   scream: phaseColor(HARVEST_TEMPLE_BOSS_ID, 0, "Zhaitan"),
+  clawSlap: phaseColor(HARVEST_TEMPLE_BOSS_ID, 0, "Soo-Won"),
   green: GREEN_SPAWN_COLOR,
   spreadBait: SPREAD_BAIT_COLOR,
   redBait: RED_BAIT_COLOR,
@@ -563,6 +573,20 @@ function AttackGlyph({ type, flipped }: Readonly<{ type: AttackType; flipped?: b
       </svg>
     );
   }
+  if (type === "clawSlap") {
+    // Three parallel claw marks.
+    return (
+      <svg viewBox="0 0 12 12" width="13" height="13" className="opacity-70">
+        <path
+          d="M2.5 1.5 L4.5 10.5 M6 1 L8 11 M9.5 1.5 L11 10"
+          fill="none"
+          stroke={color}
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+      </svg>
+    );
+  }
   if (type === "green") {
     // Three small circles — the Greens hazard always spawns as multiple
     // simultaneous stack points, unlike the other single-target casts.
@@ -616,6 +640,7 @@ function attackType(mechanicName: string): AttackType | null {
   if (mechanicName === "Beam.Cast") return "beam";
   if (mechanicName === "ShckWv.Cast") return "shockwave";
   if (mechanicName === "Scream.Cast") return "scream";
+  if (mechanicName === "ClawSlap.Cast") return "clawSlap";
   if (mechanicName === "Green.Spawn") return "green";
   if (mechanicName === "Spread.B") return "spreadBait";
   if (mechanicName === "Red.B") return "redBait";
