@@ -428,7 +428,10 @@ function MultiMechanicHoverCard({
                 key={`${cluster.mechanicName}-${cluster.timeMs}`}
                 className="border-line bg-surface rounded-sm border px-3 py-2.5"
               >
-                <MechanicSummary cluster={cluster} icon={failMechanicIcon(cluster.mechanicName)} />
+                <MechanicSummary
+                  cluster={cluster}
+                  icon={tooltipMechanicIcon(cluster.mechanicName)}
+                />
               </div>
             ))}
           </div>
@@ -858,6 +861,20 @@ function failMechanicIcon(mechanicName: string, options?: { size?: "sm" | "md" }
       className={`text-warning ${size === "md" ? "h-4 w-4" : "h-3.5 w-3.5"}`}
     />
   );
+}
+
+// Icon for a mechanic's entry inside a hover card. A hit by a boss attack
+// shows that attack's own glyph there, so the tooltip ties the hit to the cast
+// in the lane above; the fail lane itself keeps the generic warning icon.
+// Boss-specific like the glyphs themselves (see HARVEST_TEMPLE_BOSS_ID).
+const HIT_ATTACK_GLYPHS: Record<string, AttackType> = {
+  "Claw.H": "swipe",
+  "Red.H": "redBait",
+};
+
+function tooltipMechanicIcon(mechanicName: string) {
+  const attack = HIT_ATTACK_GLYPHS[mechanicName];
+  return attack ? <AttackGlyph type={attack} /> : failMechanicIcon(mechanicName);
 }
 
 // One filter-table cell's worth of toggle chips — used for both the

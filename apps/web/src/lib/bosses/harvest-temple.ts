@@ -178,7 +178,7 @@ const MECHANIC_NAMES_DE: Record<string, string> = {
   // Soo-Won
   "ClawSlap.Cast": "Soo-Won Swipe",
   "Tsunami.H": "Soo-Wons Tsunami — getroffen",
-  "Claw.H": "Klaue Soo-Wons — getroffen",
+  "Claw.H": "Soo-Won Swipe",
   "SW.Pool.H": "Soo-Wons Void-Pool — getroffen",
   "Tail.H": "Schwanz Soo-Wons — getroffen",
   "Torment.H": "Qual der Leere (Torment of the Void) — getroffen",
@@ -290,7 +290,7 @@ const MECHANIC_NAMES_EN: Record<string, string> = {
   // Soo-Won
   "ClawSlap.Cast": "Soo-Won Swipe",
   "Tsunami.H": "Soo-Won's Tsunami — hit",
-  "Claw.H": "Soo-Won's Claw — hit",
+  "Claw.H": "Soo-Won Swipe",
   "SW.Pool.H": "Soo-Won's Void Pool — hit",
   "Tail.H": "Soo-Won's Tail — hit",
   "Torment.H": "Torment of the Void — hit",
