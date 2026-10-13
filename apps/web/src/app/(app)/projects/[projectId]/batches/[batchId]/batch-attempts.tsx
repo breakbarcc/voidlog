@@ -13,7 +13,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { PhaseBadge, phaseColor, readableHeadingColor } from "@/components/phase-badge";
 import { SortableColumnHeader } from "@/components/sortable-column-header";
 import type { Locale } from "@/i18n/locale";
-import { isVisibleCastMarker } from "@/lib/mechanics";
+import { DOWNED_MECHANIC_NAME, isVisibleCastMarker } from "@/lib/mechanics";
 import { formatDateTime, formatPercent } from "@/lib/utils";
 import {
   PhaseProgressChart,
@@ -1509,10 +1509,16 @@ export function BatchAttempts({
                         </span>
                       ))}
                       {failGroups.map((group) => {
-                        const representative = group.clusters[0]!;
+                        const first = group.clusters[0]!;
+                        // A downstate in the group wins the icon: it is the
+                        // consequence the other mechanics in the group led to,
+                        // and the one marker the timeline must not hide.
+                        const representative =
+                          group.clusters.find((c) => c.mechanicName === DOWNED_MECHANIC_NAME) ??
+                          first;
                         return (
                           <MultiMechanicHoverCard
-                            key={`${representative.mechanicName}-${group.timeMs}`}
+                            key={`${first.mechanicName}-${group.timeMs}`}
                             clusters={group.clusters}
                           >
                             <span
