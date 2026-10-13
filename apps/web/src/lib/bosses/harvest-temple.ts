@@ -421,7 +421,12 @@ export const harvestTemple: BossCuration = {
   noiseNamesStillRead: new Set(["Scream.H", "MagHail.H"]),
   // Hail ticks are dense; on real logs 116 of 118 downstates that follow one
   // come within 1 s of it.
-  downCauses: { mechanics: new Set(["MagHail.H"]), windowMs: 1500 },
+  // A failed Green downs the whole squad at once, hail or not.
+  downCauses: {
+    mechanics: new Set(["MagHail.H"]),
+    windowMs: 1500,
+    overriddenBy: new Set(["F.Green"]),
+  },
   visibleCastMarkers: VISIBLE_CAST_MARKERS,
   isContextualNoise: (event, allEvents) => {
     if (event.mechanicName !== "Infirmity") return false;

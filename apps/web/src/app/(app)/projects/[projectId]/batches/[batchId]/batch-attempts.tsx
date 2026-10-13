@@ -173,6 +173,16 @@ function StatItem({
 
 const MARKER_CLUSTER_GAP_MS = 1000;
 
+// When several mechanics share one timeline marker, the most consequential one
+// gives the icon and is listed first in the tooltip: a failed Green downs the
+// whole squad, so it outranks the downstate that always comes with it.
+const MARKER_PRIORITY = ["F.Green", DOWNED_MECHANIC_NAME];
+
+function markerRank(mechanicName: string): number {
+  const index = MARKER_PRIORITY.indexOf(mechanicName);
+  return index === -1 ? MARKER_PRIORITY.length : index;
+}
+
 // EI's generic death mechanic — deaths are drawn as their own markers.
 const DEAD_MECHANIC_NAME = "Dead";
 
@@ -418,10 +428,7 @@ function MultiMechanicHoverCard({
                 key={`${cluster.mechanicName}-${cluster.timeMs}`}
                 className="border-line bg-surface rounded-sm border px-3 py-2.5"
               >
-                <MechanicSummary
-                  cluster={cluster}
-                  icon={failMechanicIcon(cluster.mechanicName, { distinguishGreen: false })}
-                />
+                <MechanicSummary cluster={cluster} icon={failMechanicIcon(cluster.mechanicName)} />
               </div>
             ))}
           </div>
@@ -782,10 +789,28 @@ function MechanicToggle({
 // visitor needs. Grouping by phase (instead of one flat list) mirrors the
 // aggregate phase cards above it, so the same phase names/colors orient the
 // user here too.
-function failMechanicIcon(
-  mechanicName: string,
-  options?: { distinguishGreen?: boolean; size?: "sm" | "md" },
-) {
+// A failed Green: the three circles of the Greens hazard (same as the
+// boss-attack lane's "Green.Spawn" marker) struck through in red, so it reads
+// as "the Greens went wrong" at a glance and cannot be mistaken for the spawn
+// marker right above it.
+function GreenFailGlyph({ size }: Readonly<{ size: "sm" | "md" }>) {
+  const px = size === "md" ? 18 : 15;
+  return (
+    <svg viewBox="0 0 12 12" width={px} height={px} aria-hidden="true">
+      <circle cx="3" cy="8.5" r="1.7" fill={GREEN_SPAWN_COLOR} />
+      <circle cx="6" cy="3.5" r="1.7" fill={GREEN_SPAWN_COLOR} />
+      <circle cx="9" cy="8.5" r="1.7" fill={GREEN_SPAWN_COLOR} />
+      <path
+        d="M1.5 1.5 L10.5 10.5 M10.5 1.5 L1.5 10.5"
+        stroke="var(--danger)"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function failMechanicIcon(mechanicName: string, options?: { size?: "sm" | "md" }) {
   // "sm" matches the compact timeline lanes/filter chips (unchanged); "md"
   // is for spots like the phase-summary cards where a 14px glyph at this
   // component's tiny label sizes read as blurry rather than just small.
@@ -806,15 +831,7 @@ function failMechanicIcon(
       />
     );
   }
-  if (mechanicName === "F.Green" && options?.distinguishGreen !== false) {
-    // Reuse the same green-circle glyph as the boss-attack lane's
-    // "Green.Spawn" marker, instead of the generic warning triangle, so a
-    // failed Green reads as "the same hazard" wherever it shows up. Opt out
-    // (distinguishGreen: false) in the per-attempt timeline's fail lane,
-    // which sits directly under the boss-attack lane using that same green
-    // glyph — there the two lanes need to stay visually distinct.
-    return <AttackGlyph type="green" />;
-  }
+  if (mechanicName === "F.Green") return <GreenFailGlyph size={size} />;
   return (
     <ExclamationTriangleIcon
       className={`text-warning ${size === "md" ? "h-4 w-4" : "h-3.5 w-3.5"}`}
@@ -1519,24 +1536,22 @@ export function BatchAttempts({
                       ))}
                       {failGroups.map((group) => {
                         const first = group.clusters[0]!;
-                        // A downstate in the group wins the icon: it is the
-                        // consequence the other mechanics in the group led to,
-                        // and the one marker the timeline must not hide.
-                        const representative =
-                          group.clusters.find((c) => c.mechanicName === DOWNED_MECHANIC_NAME) ??
-                          first;
+                        // Priority mechanics (failed Green, downstate) win the icon
+                        // and lead the tooltip; ties keep the time order.
+                        const clusters = [...group.clusters].sort(
+                          (x, y) => markerRank(x.mechanicName) - markerRank(y.mechanicName),
+                        );
+                        const representative = clusters[0]!;
                         return (
                           <MultiMechanicHoverCard
                             key={`${first.mechanicName}-${group.timeMs}`}
-                            clusters={group.clusters}
+                            clusters={clusters}
                           >
                             <span
                               className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
                               style={{ left: `${(group.timeMs / a.durationMs) * 100}%` }}
                             >
-                              {failMechanicIcon(representative.mechanicName, {
-                                distinguishGreen: false,
-                              })}
+                              {failMechanicIcon(representative.mechanicName)}
                             </span>
                           </MultiMechanicHoverCard>
                         );

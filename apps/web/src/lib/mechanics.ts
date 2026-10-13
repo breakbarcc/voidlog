@@ -1,4 +1,5 @@
 import { getBossCuration } from "./bosses/registry";
+import type { BossCuration } from "./bosses/types";
 import { PLAYER_LIFECYCLE_MECHANICS } from "./shockwave-stats";
 
 // Matches the generic bulk-captured cast markers from cast-markers.ts on
@@ -71,6 +72,6 @@ export const DOWNED_MECHANIC_NAME = "Downed";
  */
 export function downCauseConfig(
   bossId: string,
-): { mechanics: ReadonlySet<string>; windowMs: number } | undefined {
+): NonNullable<BossCuration["downCauses"]> | undefined {
   return getBossCuration(bossId)?.downCauses;
 }

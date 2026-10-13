@@ -87,7 +87,16 @@ export interface BossCuration {
    * `windowMs` — they are what put the player down. Must also be in
    * `noiseNamesStillRead`, the tooltip needs the events.
    */
-  downCauses?: { mechanics: ReadonlySet<string>; windowMs: number };
+  downCauses?: {
+    mechanics: ReadonlySet<string>;
+    windowMs: number;
+    /**
+     * Mechanics that explain a downstate on their own: when one of them
+     * (from any player) happened in the same window, the downstate is theirs
+     * and `mechanics` are not named as its cause.
+     */
+    overriddenBy?: ReadonlySet<string>;
+  };
   /** Synthetic "*.Cast" markers (see worker cast-markers.ts) individually curated with their own timeline icon in the UI. */
   visibleCastMarkers: Set<string>;
   /**

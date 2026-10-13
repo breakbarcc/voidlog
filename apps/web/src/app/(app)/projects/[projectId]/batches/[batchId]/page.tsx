@@ -566,14 +566,26 @@ function downCauses(
   if (event.mechanicName !== DOWNED_MECHANIC_NAME || !event.playerResult) return undefined;
   const config = downCauseConfig(encounter.bossId);
   if (!config) return undefined;
+  const inWindow = (timeMs: number) =>
+    timeMs <= event.timeMs && event.timeMs - timeMs <= config.windowMs;
+  // Something else already explains this downstate (e.g. a failed Green).
+  if (
+    config.overriddenBy &&
+    encounter.phaseResults.some((phase) =>
+      phase.mechanicEvents.some(
+        (other) => config.overriddenBy!.has(other.mechanicName) && inWindow(other.timeMs),
+      ),
+    )
+  ) {
+    return undefined;
+  }
   const counts = new Map<string, { name: string; count: number }>();
   for (const phase of encounter.phaseResults) {
     for (const other of phase.mechanicEvents) {
       if (
         !config.mechanics.has(other.mechanicName) ||
         other.playerResult?.account !== event.playerResult.account ||
-        other.timeMs > event.timeMs ||
-        event.timeMs - other.timeMs > config.windowMs
+        !inWindow(other.timeMs)
       ) {
         continue;
       }
