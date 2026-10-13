@@ -19,6 +19,11 @@ import type { BossCuration } from "./types";
 // for anyone who reaches "Soo-Won 2", verified against real BIG-project
 // logs), and so they get their own phase card instead of one redundant
 // wrapper card duplicating both.
+//
+// EI only emits the two sub-phases once the fight has gone through the 50%
+// split; an attempt that wipes earlier has just the wrapper. The worker
+// therefore adds "Soo-Won 1" for those (see worker boss-configs/
+// derived-phases.ts), so every Soo-Won attempt has a progress phase here.
 const MAIN_PHASE_NAMES = [
   "Jormag",
   "Primordus",

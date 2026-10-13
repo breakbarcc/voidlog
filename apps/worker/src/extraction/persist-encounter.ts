@@ -6,6 +6,7 @@ import {
   CURATED_CAST_MARKERS_BY_BOSS,
   EXCLUDED_ROTATION_SKILL_IDS,
 } from "../boss-configs/cast-markers";
+import { withDerivedPhases } from "../boss-configs/derived-phases";
 import { STEALTH_PHASES_BY_BOSS } from "../boss-configs/stealth-phases";
 import { computeFinalBossHealthPercent } from "./boss-health";
 import { computePhaseDamage } from "./phase-damage";
@@ -175,7 +176,12 @@ export async function persistExtractedEncounter(
     root.triggerID !== undefined ? String(root.triggerID) : slugify(root.fightName ?? "unknown");
   const bossName = root.fightName ?? "Unknown Encounter";
 
-  const sortedPhases = [...root.phases].sort((a, b) => a.start - b.start);
+  // EI's phases plus the ones the boss's progression needs but EI only emits
+  // after a split (e.g. "Soo-Won 1" — see boss-configs/derived-phases.ts). A
+  // derived phase sorts behind every phase that starts at the same time.
+  const { phases: allPhases, derivedFrom } = withDerivedPhases(bossId, root.phases);
+  const sortedPhases = [...allPhases].sort((a, b) => a.start - b.start);
+  const lastEiPhase = [...root.phases].sort((a, b) => a.start - b.start).at(-1);
 
   const deathMechanic = (root.mechanics ?? []).find((m) => m.name === DEATH_MECHANIC_NAME);
   const earliestDeathByActor = new Map<string, number>();
@@ -227,7 +233,8 @@ export async function persistExtractedEncounter(
       const phaseIdsInOrder: string[] = [];
       for (let i = 0; i < sortedPhases.length; i++) {
         const phase = sortedPhases[i]!;
-        const isLast = i === sortedPhases.length - 1;
+        // A derived phase takes over the result of the phase it was copied from.
+        const isLast = (derivedFrom.get(phase) ?? phase) === lastEiPhase;
         const playersAliveAtStart =
           totalPlayers -
           [...earliestDeathByActor.values()].filter((deathTime) => deathTime <= phase.start).length;
@@ -252,7 +259,11 @@ export async function persistExtractedEncounter(
       // copy the PhaseResult rows follow.
       const phaseDamageRows = createdPlayers.flatMap(({ id, player }) =>
         sortedPhases.flatMap((phase, i) => {
-          const damage = computePhaseDamage(player, phase, root.phases.indexOf(phase));
+          const damage = computePhaseDamage(
+            player,
+            phase,
+            root.phases.indexOf(derivedFrom.get(phase) ?? phase),
+          );
           return damage
             ? [{ playerResultId: id, phaseResultId: phaseIdsInOrder[i]!, ...damage }]
             : [];
@@ -272,7 +283,9 @@ export async function persistExtractedEncounter(
           const phase = sortedPhases[i]!;
           if (timeMs < phase.start || timeMs >= phase.end) continue;
           const span = phase.end - phase.start;
-          if (span < bestSpan) {
+          // A derived phase spans exactly what its source does — events
+          // belong to the derived one (the progression phase).
+          if (span < bestSpan || (span === bestSpan && derivedFrom.has(phase))) {
             bestSpan = span;
             bestIndex = i;
           }
