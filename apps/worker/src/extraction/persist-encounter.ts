@@ -7,11 +7,13 @@ import {
   EXCLUDED_ROTATION_SKILL_IDS,
 } from "../boss-configs/cast-markers";
 import { withDerivedPhases } from "../boss-configs/derived-phases";
+import { GREENS_BY_BOSS } from "../boss-configs/greens";
 import { STEALTH_PHASES_BY_BOSS } from "../boss-configs/stealth-phases";
 import { computeFinalBossHealthPercent } from "./boss-health";
 import { computePhaseDamage } from "./phase-damage";
 import { DEATH_MECHANIC_NAME, parseEiTimestamp } from "./ei-json-shape";
-import type { EiRotationEntry } from "./ei-json-shape";
+import type { EiMechanicDataPoint, EiRotationEntry } from "./ei-json-shape";
+import { greenEventContext, greenWaveContext, resolveGreenWaves } from "./green-waves";
 import type { ExtractedEncounter } from "./extract-encounter";
 
 // An instant-cast skill firing right at the reveal instant can still be
@@ -294,6 +296,25 @@ export async function persistExtractedEncounter(
         return timeMs < sortedPhases[0]!.start ? 0 : sortedPhases.length - 1;
       }
 
+      // Which circle each S.Green/F.Green was and who stood in it — attached as
+      // `context` to the raw resolution rows and to the wave's Green.Spawn marker
+      // below (see green-waves.ts).
+      const greensConfig = GREENS_BY_BOSS[bossId];
+      const greenWaves = greensConfig
+        ? resolveGreenWaves(greensConfig, root, players, targets, root.phases)
+        : [];
+      const greenContextByPoint = new Map<
+        EiMechanicDataPoint,
+        ReturnType<typeof greenEventContext>
+      >();
+      const greenWaveByTime = new Map<number, ReturnType<typeof greenWaveContext>>();
+      for (const wave of greenWaves) {
+        greenWaveByTime.set(wave.timeMs, greenWaveContext(wave));
+        for (const green of wave.greens) {
+          greenContextByPoint.set(green.dataPoint, greenEventContext(wave, green));
+        }
+      }
+
       for (const mechanic of root.mechanics ?? []) {
         const mapping = bossConfig?.mechanics.find((m) => m.rawName === mechanic.name);
         const category = CATEGORY_MAP[mapping?.category ?? "boss_specific"];
@@ -309,6 +330,7 @@ export async function persistExtractedEncounter(
               category,
               displayName,
               timeMs: Math.round(dataPoint.time),
+              context: greenContextByPoint.get(dataPoint),
             },
           });
         }
@@ -395,6 +417,7 @@ export async function persistExtractedEncounter(
               category: MechanicCategory.BOSS_SPECIFIC,
               displayName: marker.displayName,
               timeMs: Math.round(time),
+              context: greenWaveByTime.get(time),
             },
           });
         }

@@ -242,3 +242,40 @@ export function resolveGreenWaves(
 
   return waves;
 }
+
+/**
+ * The `MechanicEvent.context` of one raw S.Green/F.Green row. Inferred as a
+ * plain object type (not an interface) so it stays assignable to Prisma's
+ * JSON input.
+ */
+export function greenEventContext(wave: ResolvedWave, green: ResolvedGreen) {
+  return {
+    green: {
+      phase: wave.phase,
+      wave: wave.wave,
+      targetId: green.targetId,
+      label: green.label,
+      result: green.result,
+      inside: green.inside,
+      insideKnown: green.insideKnown,
+    },
+  };
+}
+
+/** The `MechanicEvent.context` of a wave's Green.Spawn marker. */
+export function greenWaveContext(wave: ResolvedWave) {
+  return {
+    greenWave: {
+      phase: wave.phase,
+      wave: wave.wave,
+      failed: wave.failed,
+      greens: wave.greens.map((green) => ({
+        targetId: green.targetId,
+        label: green.label,
+        result: green.result,
+        inside: green.inside,
+        insideKnown: green.insideKnown,
+      })),
+    },
+  };
+}
