@@ -147,7 +147,11 @@ export async function loadProjectOverview(projectId: string, locale: Locale, wit
         kills,
         greenFailedCount,
         greenFailRate,
+        greensCast,
+        greensFailed,
         shockwaveHitRate,
+        shockwavesPlayed,
+        shockwavesHit,
         furthestPhase,
       };
     })

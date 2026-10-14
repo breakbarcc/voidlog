@@ -15,7 +15,13 @@ export interface TrendPoint {
   id: string;
   occurredAt: Date;
   greenFailRate: number | null;
+  /** Greens casts of the night / of those, the failed ones. */
+  greensCast: number;
+  greensFailed: number;
   shockwaveHitRate: number | null;
+  /** Shockwaves of the night / of those, the failed ones. */
+  shockwavesPlayed: number;
+  shockwavesHit: number;
 }
 
 function formatAxisDate(date: Date, locale: Locale): string {
@@ -26,6 +32,7 @@ function SingleLineChart({
   points,
   dataKey,
   valueOf,
+  countOf,
   color,
   label,
   formatValue,
@@ -35,6 +42,8 @@ function SingleLineChart({
   dataKey: string;
   /** null = no value for this night: the x-axis keeps the date, the line shows a gap. */
   valueOf: (p: TrendPoint) => number | null;
+  /** The absolute numbers behind the rate, shown as `x/y` in the tooltip. */
+  countOf: (p: TrendPoint) => { part: number; total: number };
   color: string;
   label: string;
   formatValue: (v: number) => string;
@@ -44,6 +53,7 @@ function SingleLineChart({
   const data = points.map((p) => ({
     date: formatAxisDate(p.occurredAt, locale),
     [dataKey]: valueOf(p),
+    counts: countOf(p),
   }));
 
   const config: ChartConfig = {
@@ -69,7 +79,17 @@ function SingleLineChart({
           tickFormatter={(v: number) => formatTick(v)}
         />
         <ChartTooltip
-          content={<ChartTooltipContent formatter={(value) => formatValue(Number(value))} />}
+          content={
+            <ChartTooltipContent
+              formatter={(value, _name, item) => {
+                const counts = (item?.payload as { counts?: { part: number; total: number } })
+                  ?.counts;
+                return counts
+                  ? `${formatValue(Number(value))} (${counts.part}/${counts.total})`
+                  : formatValue(Number(value));
+              }}
+            />
+          }
         />
         <Line
           dataKey={dataKey}
@@ -110,6 +130,7 @@ export function GreenFailTrendChart({ points }: Readonly<{ points: TrendPoint[] 
       points={points}
       dataKey="greenFail"
       valueOf={(p) => p.greenFailRate}
+      countOf={(p) => ({ part: p.greensFailed, total: p.greensCast })}
       color="var(--danger)"
       label={t("greenFailRate")}
       formatValue={(v) => `${Math.round(v)}%`}
@@ -124,6 +145,7 @@ export function ShockwaveTrendChart({ points }: Readonly<{ points: TrendPoint[] 
       points={points}
       dataKey="shockwave"
       valueOf={(p) => p.shockwaveHitRate}
+      countOf={(p) => ({ part: p.shockwavesHit, total: p.shockwavesPlayed })}
       color="var(--warning)"
       label={t("shockwaveRate")}
       formatValue={(v) => `${Math.round(v)}%`}
