@@ -20,6 +20,13 @@ export interface GreensConfig {
   failMechanic: string;
   /** A fail belongs to the cast whose marker is at most this far from it. */
   windowMs: number;
+  /**
+   * Who is meant to stand in which circle: circle label ("W", "SE", ...) → role
+   * name, per Greens phase as the worker records it (`context.green.phase`:
+   * the boss, with Soo-Won split into "Soo-Won 1"/"Soo-Won 2"). Fixed per
+   * phase, independent of the wave number.
+   */
+  roles?: Record<string, Record<string, string>>;
 }
 
 /**

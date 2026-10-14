@@ -374,7 +374,18 @@ export const harvestTemple: BossCuration = {
     MAIN_PHASE_NAMES.includes(phaseName) || phaseName.startsWith("Purification"),
   // "Green.Spawn" is clustered from S.Green/F.Green within 3 s (worker
   // cast-markers.ts), so a fail of the same wave is never further away.
-  greens: { castMechanic: "Green.Spawn", failMechanic: "F.Green", windowMs: 3000 },
+  greens: {
+    castMechanic: "Green.Spawn",
+    failMechanic: "F.Green",
+    windowMs: 3000,
+    roles: {
+      Jormag: { W: "HealKite", E: "Portal", SE: "BoonDPS" },
+      Primordus: { NW: "HealKite", N: "BoonDPS", NE: "Portal" },
+      Zhaitan: { NW: "HealKite", NE: "Portal", S: "BoonDPS" },
+      "Soo-Won 1": { S: "DPS", SE: "BoonDPS", NE: "Portal" },
+      "Soo-Won 2": { S: "BoonDPS", SE: "Portal", NE: "HealKite" },
+    },
+  },
   isTransitionPhase: (phaseName) => phaseName.startsWith("Purification") || phaseName === "Giants",
   phaseColor: (_order, phaseName) => {
     // "Giants" is an intermission like Purification (not itself a dragon),
