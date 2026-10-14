@@ -103,6 +103,7 @@
     "lastUpload": "Letzter Upload",
     "successRate": "Erfolgsquote",
     "furthestPhase": "Weiteste Phase",
+    "attemptsToFirstKill": "{count, plural, one {# Versuch bis zum ersten Kill} other {# Versuche bis zum ersten Kill}}",
     "empty": "Noch keine Projekte — leg oben eins an."
   },
   "createProjectDialog": {

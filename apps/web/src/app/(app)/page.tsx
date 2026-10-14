@@ -11,6 +11,12 @@ import { isMainPhase } from "@/lib/main-phases";
 import { requireSession } from "@/lib/session";
 import { formatDate } from "@/lib/utils";
 
+// Whole percent, but one decimal below 10% so rare kills stay visible.
+function formatPercent(value: number, locale: string): string {
+  const digits = value > 0 && value < 10 ? 1 : 0;
+  return `${value.toLocaleString(locale, { maximumFractionDigits: digits })}%`;
+}
+
 export default async function DashboardPage() {
   const session = await requireSession();
   const t = await getTranslations("dashboard");
@@ -33,6 +39,8 @@ export default async function DashboardPage() {
                 select: {
                   bossId: true,
                   success: true,
+                  recordedAt: true,
+                  createdAt: true,
                   phaseResults: { select: { name: true, order: true, reached: true } },
                 },
               },
@@ -50,10 +58,17 @@ export default async function DashboardPage() {
       .map((f) => f.encounterResult)
       .filter((e): e is NonNullable<typeof e> => e !== null);
 
+    const kills = encounters.filter((e) => e.success).length;
+    // Attempts in play order (recording time, upload time as a fallback); the
+    // attempt that killed the boss counts as the last one needed.
+    const chronological = [...encounters].sort(
+      (a, b) => (a.recordedAt ?? a.createdAt).getTime() - (b.recordedAt ?? b.createdAt).getTime(),
+    );
+    const firstKillIndex = chronological.findIndex((e) => e.success);
+    const attemptsToFirstKill = firstKillIndex >= 0 ? firstKillIndex + 1 : null;
+    // A single kill among hundreds of attempts must not round down to "0%".
     const successRate =
-      encounters.length > 0
-        ? Math.round((encounters.filter((e) => e.success).length / encounters.length) * 100)
-        : null;
+      encounters.length > 0 ? formatPercent((kills / encounters.length) * 100, locale) : null;
 
     let furthestPhase: { name: string; order: number; bossId: string } | null = null;
     for (const encounter of encounters) {
@@ -74,6 +89,9 @@ export default async function DashboardPage() {
       role: project.members[0]?.role ?? ProjectRole.VIEWER,
       lastBatchAt: project.uploadBatches[0]?.createdAt ?? null,
       successRate,
+      kills,
+      attempts: encounters.length,
+      attemptsToFirstKill,
       furthestPhase,
     };
   });
@@ -129,14 +147,28 @@ export default async function DashboardPage() {
                       {t("successRate")}
                     </div>
                     <div className="font-heading text-warning text-xl font-bold">
-                      {p.successRate === null ? tCommon("dash") : `${p.successRate}%`}
+                      {p.successRate === null ? tCommon("dash") : p.successRate}{" "}
+                      {p.successRate === null ? null : (
+                        <span className="text-muted text-sm font-medium">
+                          ({p.kills}/{p.attempts})
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="min-w-0">
                     <div className="text-muted mb-1 text-[11px] font-medium uppercase tracking-wide">
                       {t("furthestPhase")}
                     </div>
-                    {p.furthestPhase ? (
+                    {p.kills > 0 ? (
+                      <span className="inline-flex flex-wrap items-center gap-2">
+                        <Badge color="green">{tCommon("kill")}</Badge>
+                        {p.attemptsToFirstKill !== null ? (
+                          <span className="text-muted-strong text-xs">
+                            {t("attemptsToFirstKill", { count: p.attemptsToFirstKill })}
+                          </span>
+                        ) : null}
+                      </span>
+                    ) : p.furthestPhase ? (
                       <PhaseBadge
                         bossId={p.furthestPhase.bossId}
                         name={p.furthestPhase.name}
