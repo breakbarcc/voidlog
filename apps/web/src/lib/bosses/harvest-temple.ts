@@ -374,6 +374,7 @@ export const harvestTemple: BossCuration = {
   // "Green.Spawn" is clustered from S.Green/F.Green within 3 s (worker
   // cast-markers.ts), so a fail of the same wave is never further away.
   greens: { castMechanic: "Green.Spawn", failMechanic: "F.Green", windowMs: 3000 },
+  isTransitionPhase: (phaseName) => phaseName.startsWith("Purification") || phaseName === "Giants",
   phaseColor: (_order, phaseName) => {
     // "Giants" is an intermission like Purification (not itself a dragon),
     // so it gets the same neutral treatment rather than a dragon color.

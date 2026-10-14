@@ -104,7 +104,6 @@
     "successRate": "Erfolgsquote",
     "furthestPhase": "Weiteste Phase",
     "attemptsToFirstKill": "{count, plural, one {# Versuch bis zum ersten Kill} other {# Versuche bis zum ersten Kill}}",
-    "attemptsToFirstKill": "{count, plural, one {# Versuch bis zum ersten Kill} other {# Versuche bis zum ersten Kill}}",
     "empty": "Noch keine Projekte — leg oben eins an."
   },
   "createProjectDialog": {
@@ -194,7 +193,11 @@
     "title": "\"{project}\" beitreten",
     "text": "{inviter} hat dich als {role} in dieses Projekt eingeladen.",
     "unknownInviter": "Jemand",
-    "roles": { "ADMIN": "Administrator", "CONTRIBUTOR": "Contributor", "VIEWER": "Viewer" },
+    "roles": {
+      "ADMIN": "Administrator",
+      "CONTRIBUTOR": "Contributor",
+      "VIEWER": "Viewer"
+    },
     "roleHints": {
       "ADMIN": "Du darfst alles, auch Mitglieder verwalten und das Projekt löschen.",
       "CONTRIBUTOR": "Du darfst das Projekt ansehen, Logs hochladen und Logs und Batches löschen.",
@@ -373,10 +376,37 @@
   "logDetail": {
     "summary": "{result} bei {batchLabel} · Dauer {duration}s · {playerCount} Spieler",
     "openExternalReport": "Externen Report öffnen →",
+    "logName": "Log",
     "completed": "Abgeschlossen",
     "reached": "Erreicht",
     "notReached": "Nicht erreicht",
-    "aliveAtPhaseStart": "lebend zu Phasenbeginn: {alive}/{total}"
+    "aliveAtPhaseStart": "lebend zu Phasenbeginn: {alive}/{total}",
+    "attempt": "Versuch #{n}",
+    "subtitle": "{boss} · Dauer {duration} · {playerCount} Spieler",
+    "stats": {
+      "duration": "Dauer",
+      "fails": "Fehlgespielte Mechaniken",
+      "downs": "Downstates",
+      "deaths": "Tode"
+    },
+    "categories": {
+      "fail": "Fehler",
+      "info": "Mechanik",
+      "ok": "Erfolgreich",
+      "down": "Downstate",
+      "death": "Tod"
+    },
+    "overview": {
+      "title": "Kampfverlauf"
+    },
+    "filter": {
+      "all": "Alle Ereignisse",
+      "critical": "Nur Fehler, Downs, Tode"
+    },
+    "expandAll": "Alle ausklappen",
+    "collapseAll": "Alle einklappen",
+    "alive": "lebend: {alive} / {total}",
+    "noEvents": "Keine Ereignisse für diese Auswahl."
   },
   "batchDetail": {
     "totalAttempts": "Versuche gesamt",

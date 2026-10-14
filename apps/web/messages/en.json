@@ -104,7 +104,6 @@
     "successRate": "Success rate",
     "furthestPhase": "Furthest phase",
     "attemptsToFirstKill": "{count, plural, one {# attempt to first kill} other {# attempts to first kill}}",
-    "attemptsToFirstKill": "{count, plural, one {# attempt to first kill} other {# attempts to first kill}}",
     "empty": "No projects yet — create one above."
   },
   "createProjectDialog": {
@@ -194,7 +193,11 @@
     "title": "Join \"{project}\"",
     "text": "{inviter} invited you to this project as {role}.",
     "unknownInviter": "Someone",
-    "roles": { "ADMIN": "administrator", "CONTRIBUTOR": "contributor", "VIEWER": "viewer" },
+    "roles": {
+      "ADMIN": "administrator",
+      "CONTRIBUTOR": "contributor",
+      "VIEWER": "viewer"
+    },
     "roleHints": {
       "ADMIN": "You will be able to do everything, including managing members and deleting the project.",
       "CONTRIBUTOR": "You will be able to view the project, upload logs and delete logs and batches.",
@@ -373,10 +376,37 @@
   "logDetail": {
     "summary": "{result} at {batchLabel} · Duration {duration}s · {playerCount} players",
     "openExternalReport": "Open external report →",
+    "logName": "Log",
     "completed": "Completed",
     "reached": "Reached",
     "notReached": "Not reached",
-    "aliveAtPhaseStart": "alive at phase start: {alive}/{total}"
+    "aliveAtPhaseStart": "alive at phase start: {alive}/{total}",
+    "attempt": "Attempt #{n}",
+    "subtitle": "{boss} · Duration {duration} · {playerCount} players",
+    "stats": {
+      "duration": "Duration",
+      "fails": "Failed mechanics",
+      "downs": "Downstates",
+      "deaths": "Deaths"
+    },
+    "categories": {
+      "fail": "Failure",
+      "info": "Mechanic",
+      "ok": "Success",
+      "down": "Downstate",
+      "death": "Death"
+    },
+    "overview": {
+      "title": "Fight progress"
+    },
+    "filter": {
+      "all": "All events",
+      "critical": "Only fails, downs, deaths"
+    },
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
+    "alive": "alive: {alive} / {total}",
+    "noEvents": "No events for this selection."
   },
   "batchDetail": {
     "totalAttempts": "Total attempts",

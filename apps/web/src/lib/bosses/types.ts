@@ -46,6 +46,12 @@ export interface BossCuration {
    */
   isMainPhase: (phaseName: string) => boolean;
   /**
+   * True for main phases that are intermissions rather than the boss
+   * fight itself (e.g. HTCM's Purification/Giants) — views draw them
+   * muted. Omitted = every phase counts as a fight phase.
+   */
+  isTransitionPhase?: (phaseName: string) => boolean;
+  /**
    * Every main phase of the encounter in fight order, including the ones
    * nobody reached. Persisted PhaseResult rows only exist for phases an
    * attempt got to, so views that must show the *whole* progression (e.g. the

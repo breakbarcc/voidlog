@@ -60,3 +60,8 @@ export function impliedReachedPhases(bossId: string, reached: Iterable<string>):
   for (const name of order.slice(0, deepest + 1)) names.add(name);
   return names;
 }
+
+/** Whether `phaseName` is an intermission rather than a fight phase — see `BossCuration.isTransitionPhase`. */
+export function isTransitionPhase(bossId: string, phaseName: string): boolean {
+  return getBossCuration(bossId)?.isTransitionPhase?.(phaseName) ?? false;
+}
