@@ -253,7 +253,16 @@
     "breadcrumb": "Statistiken",
     "title": "Statistiken",
     "subtitle": "Schaden, Fortschritt und Mechanik-Trends über alle Raid-Abende",
-    "empty": "Noch nicht genug ausgewertete Logs für Statistiken."
+    "empty": "Noch nicht genug ausgewertete Logs für Statistiken.",
+    "greensByRole": {
+      "title": "Greens nach Rolle",
+      "hint": "Wie oft ein Green die Welle gefailed hat, weil zu wenige Spieler darin standen. Ein Green, das nur mitgefailed wurde, zählt nicht. Nur Logs mit erfassten Green-Details.",
+      "phase": "Phase",
+      "circle": "Green",
+      "role": "Rolle",
+      "failed": "Gefailed",
+      "rate": "Quote"
+    }
   },
   "roster": {
     "breadcrumb": "Roster",

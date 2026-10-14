@@ -63,3 +63,61 @@ export function readGreenDetail(bossId: string, context: unknown): GreenDetail |
 export function greenCircleName(detail: Pick<GreenDetail, "phase" | "label">): string {
   return detail.label ? `${detail.phase} ${detail.label}` : detail.phase;
 }
+
+/** One wave of Greens as recorded on its Green.Spawn marker (`context.greenWave`). */
+export interface GreenWaveDetail {
+  phase: string;
+  wave: number;
+  failed: boolean;
+  circles: { label: string | null; result: GreenResult }[];
+}
+
+export function readGreenWave(context: unknown): GreenWaveDetail | null {
+  if (!isRecord(context) || !isRecord(context.greenWave)) return null;
+  const w = context.greenWave;
+  if (typeof w.phase !== "string" || typeof w.wave !== "number" || !Array.isArray(w.greens)) {
+    return null;
+  }
+  return {
+    phase: w.phase,
+    wave: w.wave,
+    failed: w.failed === true,
+    circles: w.greens
+      .filter(isRecord)
+      .flatMap((g) =>
+        isResult(g.result)
+          ? [{ label: typeof g.label === "string" ? g.label : null, result: g.result }]
+          : [],
+      ),
+  };
+}
+
+/** Played/failed per circle ("Soo-Won 2" + "SE") across any number of Green.Spawn rows. */
+export interface CircleStat {
+  phase: string;
+  label: string;
+  /** Waves this circle took part in. */
+  played: number;
+  /** Waves in which it was the circle that was short on players. */
+  failed: number;
+}
+
+export function addCircleStats(into: Map<string, CircleStat>, contexts: Iterable<unknown>): void {
+  for (const context of contexts) {
+    const wave = readGreenWave(context);
+    if (!wave) continue;
+    for (const circle of wave.circles) {
+      if (circle.label === null) continue;
+      const key = `${wave.phase}|${circle.label}`;
+      const stat = into.get(key) ?? {
+        phase: wave.phase,
+        label: circle.label,
+        played: 0,
+        failed: 0,
+      };
+      stat.played += 1;
+      if (circle.result === "failed") stat.failed += 1;
+      into.set(key, stat);
+    }
+  }
+}

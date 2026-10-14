@@ -253,7 +253,16 @@
     "breadcrumb": "Statistics",
     "title": "Statistics",
     "subtitle": "Damage, progress and mechanic trends across all raid nights",
-    "empty": "Not enough evaluated logs for statistics yet."
+    "empty": "Not enough evaluated logs for statistics yet.",
+    "greensByRole": {
+      "title": "Greens by role",
+      "hint": "How often a Green failed its wave because too few players stood in it. A Green that was only flagged along with it does not count. Only logs with recorded Green details.",
+      "phase": "Phase",
+      "circle": "Green",
+      "role": "Role",
+      "failed": "Failed",
+      "rate": "Rate"
+    }
   },
   "roster": {
     "breadcrumb": "Roster",

@@ -4,6 +4,7 @@ import type { Locale } from "@/i18n/locale";
 import { batchTitle } from "@/lib/batch-title";
 import type { DpsNight } from "@/lib/dps-model";
 import { damagePhases, impliedReachedPhases, isMainPhase, progressPhases } from "@/lib/main-phases";
+import { addCircleStats, type CircleStat } from "@/lib/green-details";
 import { greenPercent, greenMechanicNames, squadGreens } from "@/lib/green-stats";
 import { loadPhaseDamageByBatch } from "@/lib/phase-damage";
 import { shockwaveMechanicNames, shockwavePercent, squadShockwaves } from "@/lib/shockwave-stats";
@@ -40,7 +41,13 @@ export async function loadProjectOverview(projectId: string, locale: Locale, wit
                   // of events, most of them irrelevant here.
                   mechanicEvents: {
                     where: { mechanicName: { in: OVERVIEW_MECHANIC_NAMES } },
-                    select: { mechanicName: true, timeMs: true, playerResultId: true },
+                    select: {
+                      mechanicName: true,
+                      timeMs: true,
+                      playerResultId: true,
+                      // Green.Spawn wave details (which circle failed) — null on the rest.
+                      context: true,
+                    },
                   },
                 },
               },
@@ -51,6 +58,25 @@ export async function loadProjectOverview(projectId: string, locale: Locale, wit
       },
     },
   });
+
+  // Per Green circle (phase + position), over the whole project: how often it
+  // was played and how often it was the one that failed. Only logs parsed
+  // with the circle details contribute (see `pnpm backfill:greens`).
+  const circlesByBoss = new Map<string, Map<string, CircleStat>>();
+  for (const batch of rawBatches) {
+    for (const file of batch.logFiles) {
+      const encounter = file.encounterResult;
+      if (!encounter) continue;
+      const circles = circlesByBoss.get(encounter.bossId) ?? new Map<string, CircleStat>();
+      addCircleStats(
+        circles,
+        encounter.phaseResults.flatMap((phase) =>
+          phase.mechanicEvents.filter((e) => e.context !== null).map((e) => e.context),
+        ),
+      );
+      circlesByBoss.set(encounter.bossId, circles);
+    }
+  }
 
   const batches = rawBatches
     .map((batch) => {
@@ -198,8 +224,13 @@ export async function loadProjectOverview(projectId: string, locale: Locale, wit
     phases: damageByBatch.get(night.id) ?? {},
   }));
 
+  const greenCircles = progressBossId
+    ? [...(circlesByBoss.get(progressBossId)?.values() ?? [])]
+    : [];
+
   return {
     batches,
+    greenCircles,
     trendPoints,
     allTrendPoints,
     progressBossId,

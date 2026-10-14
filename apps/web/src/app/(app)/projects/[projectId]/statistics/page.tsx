@@ -6,6 +6,7 @@ import { loadProjectOverview } from "@/lib/project-overview";
 import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import { DpsPhaseChart } from "../dps-phase-chart";
+import { GreensByRole } from "../greens-by-role";
 import { PhaseProgressTrend } from "../phase-progress-trend";
 import { GreenFailTrendChart, ShockwaveTrendChart } from "../trend-chart";
 
@@ -28,6 +29,7 @@ export default async function ProjectStatisticsPage(
   const {
     trendPoints,
     allTrendPoints,
+    greenCircles,
     progressBossId,
     progressPhaseNames,
     progressNights,
@@ -75,6 +77,10 @@ export default async function ProjectStatisticsPage(
             <ShockwaveTrendChart points={allTrendPoints} />
           </Card>
         </div>
+      ) : null}
+
+      {progressBossId ? (
+        <GreensByRole bossId={progressBossId} circles={greenCircles} locale={locale} />
       ) : null}
 
       {progressBossId && dpsPhaseNames && dpsNights.length > 0 ? (
