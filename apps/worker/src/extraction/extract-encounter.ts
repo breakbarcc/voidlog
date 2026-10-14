@@ -3,6 +3,7 @@ import type { Readable } from "node:stream";
 // not reliably expose its `.parser` property as a named export, so this
 // must be a default import, not `import { parser } from "stream-json"`.
 import createTokenParser from "stream-json";
+import { GREENS_BY_BOSS } from "../boss-configs/greens";
 import type { EiPlayer, EiRoot, EiTarget } from "./ei-json-shape";
 import { type JsonToken, type JsonValue, SkipTracker, ValueBuilder } from "./value-builder";
 
@@ -28,6 +29,9 @@ const ROOT_KEEP_WHOLE = new Set([
   // Small (tens of KB): id -> name lookup for the skill ids in `targets[].rotation`.
   "skillMap",
   "timeStartStd",
+  // Tiny ({pollingRate, sizes, maps}) — the sample interval of the replay
+  // positions the Greens resolution reads.
+  "combatReplayMetaData",
 ]);
 
 // "rotation"/"buffUptimesActive" are transient inputs for the stealth-phase
@@ -59,6 +63,13 @@ const TARGET_KEEP_WHOLE = new Set([
   "totalHealth",
   "lastAware",
 ]);
+
+// `combatReplayData` (position samples, ~2-3k per actor) is the bulk of each
+// player/target and only the Greens resolution reads it, so it is kept just
+// for bosses with a Greens config — for players always, for targets only the
+// Green circle actors themselves. In both cases the key comes after `id`
+// in EI's output, so the target's id is known when it is reached.
+const REPLAY_KEY = "combatReplayData";
 
 type State =
   | "expect-root-start"
@@ -118,6 +129,17 @@ export function extractEncounterFromStream(jsonStream: Readable): Promise<Extrac
     let targetBuilder: ValueBuilder | undefined;
     let targetSkip: SkipTracker | undefined;
     const targets: EiTarget[] = [];
+
+    function greensConfig() {
+      return typeof root.triggerID === "number" ? GREENS_BY_BOSS[String(root.triggerID)] : undefined;
+    }
+
+    function isGreenTarget(target: Record<string, JsonValue> | undefined): boolean {
+      const config = greensConfig();
+      return (
+        config !== undefined && typeof target?.id === "number" && target.id in config.targets
+      );
+    }
 
     function handleToken(token: JsonToken): void {
       switch (state) {
@@ -224,7 +246,7 @@ export function extractEncounterFromStream(jsonStream: Readable): Promise<Extrac
 
         case "player-value-dispatch": {
           const key = currentPlayerKey as string;
-          if (PLAYER_KEEP_WHOLE.has(key)) {
+          if (PLAYER_KEEP_WHOLE.has(key) || (key === REPLAY_KEY && greensConfig() !== undefined)) {
             playerBuilder = new ValueBuilder();
             playerBuilder.push(token);
             if (playerBuilder.done) {
@@ -292,7 +314,7 @@ export function extractEncounterFromStream(jsonStream: Readable): Promise<Extrac
 
         case "target-value-dispatch": {
           const key = currentTargetKey as string;
-          if (TARGET_KEEP_WHOLE.has(key)) {
+          if (TARGET_KEEP_WHOLE.has(key) || (key === REPLAY_KEY && isGreenTarget(currentTarget))) {
             targetBuilder = new ValueBuilder();
             targetBuilder.push(token);
             if (targetBuilder.done) {

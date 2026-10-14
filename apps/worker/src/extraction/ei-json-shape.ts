@@ -22,6 +22,8 @@ export interface EiPhase {
 export interface EiMechanicDataPoint {
   time: number;
   actor: string;
+  /** The actor's target/agent id — what tells apart the fake "Green" actors (see boss-configs/greens.ts). */
+  id?: number;
 }
 
 export interface EiMechanic {
@@ -34,6 +36,20 @@ export interface EiPlayerDpsAllEntry {
   dps?: number;
   /** Damage within this phase (not DPS). */
   damage?: number;
+}
+
+/**
+ * One actor's combat-replay track: a position sample every
+ * `combatReplayMetaData.pollingRate` ms from `start`, plus the intervals it
+ * was downed/dead. Kept transiently for the Greens resolution (see
+ * green-waves.ts) — the position arrays are the bulk of the JSON and are
+ * never persisted.
+ */
+export interface EiCombatReplay {
+  start?: number;
+  positions?: [number, number][];
+  down?: [number, number][];
+  dead?: [number, number][];
 }
 
 export interface EiPlayerDefensesEntry {
@@ -84,6 +100,8 @@ export interface EiPlayer {
    * persisted as-is.
    */
   buffUptimesActive?: EiPlayerBuffUptimeActiveEntry[];
+  /** Only kept for bosses with a Greens config. */
+  combatReplayData?: EiCombatReplay;
   // statsAll, support, deathRecap, consumables, activeTimes are read by
   // dps.report/EI too but not needed for the step-2 minimal extraction.
 }
@@ -115,6 +133,8 @@ export interface EiTarget {
   totalHealth?: number;
   /** When the target was last active, in ms from fight start — its death, or the fight's end if it survived. */
   lastAware?: number;
+  /** Only kept for the Green circle actors (boss-configs/greens.ts). */
+  combatReplayData?: EiCombatReplay;
 }
 
 export interface EiSkillMapEntry {
@@ -140,6 +160,8 @@ export interface EiRoot {
    * offset). Use `parseEiTimestamp` below, not `new Date()` directly.
    */
   timeStartStd?: string;
+  /** Sample interval of every `combatReplayData.positions`, in ms. */
+  combatReplayMetaData?: { pollingRate?: number };
 }
 
 /** Converts EI's non-ISO `timeStartStd` into a Date, or undefined if absent/unparseable. */
