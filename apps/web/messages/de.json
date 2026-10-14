@@ -104,6 +104,7 @@
     "successRate": "Erfolgsquote",
     "furthestPhase": "Weiteste Phase",
     "attemptsToFirstKill": "{count, plural, one {# Versuch bis zum ersten Kill} other {# Versuche bis zum ersten Kill}}",
+    "attemptsToFirstKill": "{count, plural, one {# Versuch bis zum ersten Kill} other {# Versuche bis zum ersten Kill}}",
     "empty": "Noch keine Projekte — leg oben eins an."
   },
   "createProjectDialog": {
@@ -381,6 +382,7 @@
     "totalAttempts": "Versuche gesamt",
     "reveals": "Mit Reveal erreicht",
     "greenMissed": "Green verfehlt",
+    "greenMissedHint": "Von der Gruppe gespielte Greens. Ein Green gilt als gefailed, sobald mindestens ein Spieler es verfehlt hat.",
     "shockwavesHit": "Schockwellen getroffen",
     "shockwavesHitHint": "Von der Gruppe gespielte Schockwellen. Eine gilt als gefailed, sobald mindestens ein Spieler getroffen wurde.",
     "furthestPhase": "Weiteste Phase",

@@ -104,6 +104,7 @@
     "successRate": "Success rate",
     "furthestPhase": "Furthest phase",
     "attemptsToFirstKill": "{count, plural, one {# attempt to first kill} other {# attempts to first kill}}",
+    "attemptsToFirstKill": "{count, plural, one {# attempt to first kill} other {# attempts to first kill}}",
     "empty": "No projects yet — create one above."
   },
   "createProjectDialog": {
@@ -381,6 +382,7 @@
     "totalAttempts": "Total attempts",
     "reveals": "Reveals reached",
     "greenMissed": "Green missed",
+    "greenMissedHint": "Greens cast against the squad. A Green counts as failed as soon as at least one player missed it.",
     "shockwavesHit": "Shockwaves hit",
     "shockwavesHitHint": "Shockwaves played by the squad. One counts as failed as soon as at least one player was hit.",
     "furthestPhase": "Furthest phase",

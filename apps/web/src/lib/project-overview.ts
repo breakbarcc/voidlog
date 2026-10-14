@@ -4,21 +4,11 @@ import type { Locale } from "@/i18n/locale";
 import { batchTitle } from "@/lib/batch-title";
 import type { DpsNight } from "@/lib/dps-model";
 import { damagePhases, impliedReachedPhases, isMainPhase, progressPhases } from "@/lib/main-phases";
+import { greenPercent, greenMechanicNames, squadGreens } from "@/lib/green-stats";
 import { loadPhaseDamageByBatch } from "@/lib/phase-damage";
 import { shockwaveMechanicNames, shockwavePercent, squadShockwaves } from "@/lib/shockwave-stats";
 
-type MechanicEncounter = {
-  phaseResults: { mechanicEvents: { mechanicName: string }[] }[];
-};
-
-function hasMechanic(encounter: MechanicEncounter, mechanicName: string): boolean {
-  return encounter.phaseResults.some((phase) =>
-    phase.mechanicEvents.some((event) => event.mechanicName === mechanicName),
-  );
-}
-
-// "F.Green" is HTCM's raw EI mechanic code for a failed Green stack.
-const OVERVIEW_MECHANIC_NAMES = ["F.Green", ...shockwaveMechanicNames()];
+const OVERVIEW_MECHANIC_NAMES = [...greenMechanicNames(), ...shockwaveMechanicNames()];
 
 /**
  * Everything the project's history and statistics pages draw from, derived
@@ -70,12 +60,20 @@ export async function loadProjectOverview(projectId: string, locale: Locale, wit
 
       const kills = encounters.filter((e) => e.success).length;
 
-      // "F.Green" is HTCM's raw EI mechanic code for a failed Green stack
-      // (see harvest-temple.ts) — hardcoded like the same stat on the batch
-      // detail page, pending a boss-pluggable stat system.
-      const greenFailedCount = encounters.filter((e) => hasMechanic(e, "F.Green")).length;
-      const greenFailRate =
-        encounters.length > 0 ? Math.round((greenFailedCount / encounters.length) * 100) : null;
+      // Share of the squad's Greens casts that failed (at least one player),
+      // over all attempts — see lib/green-stats.ts.
+      let greensCast = 0;
+      let greensFailed = 0;
+      for (const encounter of encounters) {
+        const greens = squadGreens(
+          encounter.bossId,
+          encounter.phaseResults.flatMap((phase) => phase.mechanicEvents),
+        );
+        greensCast += greens.played;
+        greensFailed += greens.failed;
+      }
+      const greenFailedCount = greensFailed;
+      const greenFailRate = greenPercent({ played: greensCast, failed: greensFailed });
 
       // "ShckWv.H" is Mordremoth's raw EI code for a Schockwelle hit — same
       // hardcoded-stat treatment as the Green-fail count above.

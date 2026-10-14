@@ -13,6 +13,7 @@ import {
   progressPhases,
   showsBossHealth,
 } from "@/lib/main-phases";
+import { squadGreens } from "@/lib/green-stats";
 import { encounterShockwaves, squadShockwaves } from "@/lib/shockwave-stats";
 import { translateMechanicName } from "@/lib/mechanic-names";
 import {
@@ -729,14 +730,18 @@ export default async function BatchDetailPage(
       p.mechanicEvents.some((m) => m.category === MechanicCategory.REVEAL),
     ),
   ).length;
-  // "F.Green" is HTCM's raw EI mechanic code for a failed Green stack (see
-  // harvest-temple.ts) — hardcoded like the timeline's attack glyphs
-  // elsewhere in this batch view, pending a boss-pluggable stat-card system.
-  const greenFailedCount = encounters.filter((e) =>
-    e.encounter.phaseResults.some((p) =>
-      p.mechanicEvents.some((m) => m.mechanicName === "F.Green"),
-    ),
-  ).length;
+  // Greens card: the squad's Greens casts over all attempts — a cast is
+  // failed as soon as one player failed it (lib/green-stats.ts).
+  let greensCast = 0;
+  let greensFailed = 0;
+  for (const { encounter } of encounters) {
+    const greens = squadGreens(
+      encounter.bossId,
+      encounter.phaseResults.flatMap((phase) => phase.mechanicEvents),
+    );
+    greensCast += greens.played;
+    greensFailed += greens.failed;
+  }
 
   // Assumes one boss per batch (true for every real batch so far) — used
   // for the aggregate phase cards and the client-side timeline component,
@@ -810,7 +815,10 @@ export default async function BatchDetailPage(
 
       <div className="mb-6 grid grid-cols-2 gap-3.5 lg:grid-cols-5">
         <Card size="2" className="border-line bg-surface border">
-          <div className="text-muted mb-1.5 text-[11px] font-medium uppercase tracking-wide">
+          <div
+            className="text-muted mb-1.5 text-[11px] font-medium uppercase tracking-wide"
+            title={t("greenMissedHint")}
+          >
             {t("totalAttempts")}
           </div>
           <div className="font-heading text-foreground text-xl font-bold">{attempts}</div>
@@ -831,9 +839,9 @@ export default async function BatchDetailPage(
             {t("greenMissed")}
           </div>
           <div className="font-heading text-danger text-xl font-bold">
-            {greenFailedCount}{" "}
+            {greensCast > 0 ? `${Math.round((greensFailed / greensCast) * 100)}%` : tCommon("dash")}{" "}
             <span className="text-muted text-sm font-medium">
-              ({attempts > 0 ? Math.round((greenFailedCount / attempts) * 100) : 0}%)
+              ({greensFailed}/{greensCast})
             </span>
           </div>
         </Card>

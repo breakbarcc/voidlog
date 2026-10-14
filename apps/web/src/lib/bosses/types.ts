@@ -13,6 +13,15 @@ export interface ShockwaveConfig {
   hitWindowMs: number;
 }
 
+export interface GreensConfig {
+  /** Synthetic marker (worker cast-markers.ts) — one event per Greens cast. */
+  castMechanic: string;
+  /** Raw EI mechanic of a player failing a Green. */
+  failMechanic: string;
+  /** A fail belongs to the cast whose marker is at most this far from it. */
+  windowMs: number;
+}
+
 /**
  * Everything hand-curated about a single boss encounter, in one place.
  * One file per boss (see harvest-temple.ts) instead of one file per
@@ -55,6 +64,11 @@ export interface BossCuration {
    * lib/shockwave-stats.ts). Omitted = no shockwave statistics for this boss.
    */
   shockwave?: ShockwaveConfig;
+  /**
+   * The boss's Greens mechanic, counted per cast (see lib/green-stats.ts).
+   * Omitted = no Greens statistics for this boss.
+   */
+  greens?: GreensConfig;
   /**
    * Whether the remaining boss health recorded for an attempt that ended in
    * `phaseName` is worth showing. The worker stores the health of the last
