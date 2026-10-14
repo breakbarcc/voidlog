@@ -5,6 +5,9 @@ import { greensConfig } from "./green-stats";
  * of an S.Green / F.Green row, see worker extraction/green-waves.ts) —
  * absent on logs parsed before it existed (`pnpm backfill:greens`).
  */
+/** Players a circle needs to hold — the rule the worker resolved the circles with. */
+export const GREEN_MIN_PLAYERS = 2;
+
 export type GreenResult = "ok" | "failed" | "collateral";
 
 export interface GreenDetail {

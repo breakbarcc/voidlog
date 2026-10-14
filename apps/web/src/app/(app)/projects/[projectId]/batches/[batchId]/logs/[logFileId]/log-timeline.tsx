@@ -23,6 +23,8 @@ export interface LogEvent {
   /** Raw mechanic name — events of one type are grouped on it. */
   type: string;
   label: string;
+  /** Extra line of context shown after the label, e.g. which Green circle failed. */
+  detail?: string;
   category: EventCategory;
   playerId: string | null;
 }
@@ -409,7 +411,12 @@ export function LogTimeline({ data }: Readonly<{ data: LogTimelineData }>) {
                                 </span>
                               </span>
                               <EventIcon type={e.type} category={e.category} />
-                              <span className="text-foreground">{e.label}</span>
+                              <span className="text-foreground">
+                                {e.label}
+                                {e.detail ? (
+                                  <span className="text-muted ml-2 text-xs">{e.detail}</span>
+                                ) : null}
+                              </span>
                               <span
                                 className={`text-sm ${
                                   isDeath

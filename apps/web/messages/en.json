@@ -389,6 +389,7 @@
       "downs": "Downstates",
       "deaths": "Deaths"
     },
+    "greenInside": "{count} of {min} in the circle",
     "categories": {
       "fail": "Failure",
       "info": "Mechanic",

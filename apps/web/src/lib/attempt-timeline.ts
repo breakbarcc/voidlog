@@ -1,5 +1,6 @@
 import type { Locale } from "@/i18n/locale";
 import { isMainPhase } from "@/lib/main-phases";
+import { greenCircleName, readGreenDetail } from "@/lib/green-details";
 import { translateMechanicName } from "@/lib/mechanic-names";
 import {
   DOWNED_MECHANIC_NAME,
@@ -159,18 +160,33 @@ export function buildAttemptTimelineData(
         .filter(
           (m) =>
             m.mechanicName !== "Dead" &&
+            // A failed wave flags all three circles, only the one that was
+            // short on players is the actual failure (see worker green-waves.ts).
+            readGreenDetail(encounter.bossId, m.context)?.result !== "collateral" &&
             !isNoiseMechanic(encounter.bossId, m.mechanicName) &&
             !isContextualNoiseMechanic(encounter.bossId, m, p.mechanicEvents),
         )
-        .map((m) => ({
-          timeMs: m.timeMs,
-          name: translateMechanicName(encounter.bossId, locale, m.mechanicName, m.displayName),
-          mechanicName: m.mechanicName,
-          player: m.playerResult?.characterName ?? null,
-          msSincePhaseEnd: readMsSincePhaseEnd(m.context),
-          msSinceInvisCast: readMsSinceInvisCast(m.context),
-          causes: downCauses(encounter, m, locale),
-        })),
+        .map((m) => {
+          const green = readGreenDetail(encounter.bossId, m.context);
+          const name = translateMechanicName(
+            encounter.bossId,
+            locale,
+            m.mechanicName,
+            m.displayName,
+          );
+          return {
+            timeMs: m.timeMs,
+            // A failed circle is named with its position and role.
+            name: green
+              ? `${name} · ${greenCircleName(green)}${green.role ? ` (${green.role})` : ""}`
+              : name,
+            mechanicName: m.mechanicName,
+            player: m.playerResult?.characterName ?? null,
+            msSincePhaseEnd: readMsSincePhaseEnd(m.context),
+            msSinceInvisCast: readMsSinceInvisCast(m.context),
+            causes: downCauses(encounter, m, locale),
+          };
+        }),
     ),
   };
 }

@@ -12,6 +12,12 @@ import {
   progressPhases,
 } from "@/lib/main-phases";
 import { buildAttemptTimelineData } from "@/lib/attempt-timeline";
+import {
+  GREEN_MIN_PLAYERS,
+  greenCircleName,
+  readGreenDetail,
+  type GreenDetail,
+} from "@/lib/green-details";
 import { translateMechanicName } from "@/lib/mechanic-names";
 import {
   DOWNED_MECHANIC_NAME,
@@ -51,6 +57,7 @@ interface RawEvent {
   displayName: string;
   timeMs: number;
   playerResultId: string | null;
+  context: unknown;
 }
 
 function categorize(bossId: string, event: RawEvent, all: RawEvent[]): EventCategory | null {
@@ -65,10 +72,27 @@ function categorize(bossId: string, event: RawEvent, all: RawEvent[]): EventCate
     );
     return failed ? null : "ok";
   }
+  // A failed wave flags all three circles as failed — only the one that was
+  // short on players is the failure, the others were dragged along.
+  if (readGreenDetail(bossId, event.context)?.result === "collateral") return null;
   if (isNoiseMechanic(bossId, event.mechanicName)) return null;
   if (isContextualNoiseMechanic(bossId, event, all)) return null;
   if (isVisibleCastMarker(bossId, event.mechanicName)) return "info";
   return "fail";
+}
+
+/** "Soo-Won 2 SE · BoonDPS · 1/2 im Kreis: Name" — which circle, whose job, who was in it. */
+function greenFailDetail(
+  green: GreenDetail,
+  tInside: (count: number, min: number) => string,
+): string {
+  const parts = [greenCircleName(green)];
+  if (green.role) parts.push(green.role);
+  if (green.insideKnown) {
+    const inside = tInside(green.inside.length, GREEN_MIN_PLAYERS);
+    parts.push(green.inside.length > 0 ? `${inside}: ${green.inside.join(", ")}` : inside);
+  }
+  return parts.join(" · ");
 }
 
 export default async function LogAnalysisPage(
@@ -152,11 +176,15 @@ export default async function LogAnalysisPage(
         : category === "down"
           ? t("categories.down")
           : translateMechanicName(bossId, locale, raw.mechanicName, raw.displayName);
+    const green = category === "fail" ? readGreenDetail(bossId, raw.context) : null;
     events.push({
       id: raw.id,
       timeMs: raw.timeMs,
       type: raw.mechanicName,
       label,
+      detail: green
+        ? greenFailDetail(green, (count, min) => t("greenInside", { count, min }))
+        : undefined,
       category,
       playerId: raw.playerResultId,
     });

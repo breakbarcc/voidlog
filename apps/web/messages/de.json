@@ -389,6 +389,7 @@
       "downs": "Downstates",
       "deaths": "Tode"
     },
+    "greenInside": "{count} von {min} im Kreis",
     "categories": {
       "fail": "Fehler",
       "info": "Mechanik",
