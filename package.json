@@ -16,7 +16,8 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc -p tsconfig.json --noEmit && pnpm --recursive run typecheck",
     "test:e2e": "dotenv -e .env -- tsx scripts/test-e2e.ts",
-    "seed:test-session": "dotenv -e .env -- tsx scripts/seed-test-session.ts"
+    "seed:test-session": "dotenv -e .env -- tsx scripts/seed-test-session.ts",
+    "backfill:greens": "dotenv -e .env -- tsx scripts/backfill-greens.ts"
   },
   "dependencies": {
     "@voidlog/db": "workspace:*",
