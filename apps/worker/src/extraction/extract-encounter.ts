@@ -131,14 +131,14 @@ export function extractEncounterFromStream(jsonStream: Readable): Promise<Extrac
     const targets: EiTarget[] = [];
 
     function greensConfig() {
-      return typeof root.triggerID === "number" ? GREENS_BY_BOSS[String(root.triggerID)] : undefined;
+      return typeof root.triggerID === "number"
+        ? GREENS_BY_BOSS[String(root.triggerID)]
+        : undefined;
     }
 
     function isGreenTarget(target: Record<string, JsonValue> | undefined): boolean {
       const config = greensConfig();
-      return (
-        config !== undefined && typeof target?.id === "number" && target.id in config.targets
-      );
+      return config !== undefined && typeof target?.id === "number" && target.id in config.targets;
     }
 
     function handleToken(token: JsonToken): void {
