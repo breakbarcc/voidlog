@@ -334,6 +334,7 @@ const NOISE_MECHANIC_NAMES = new Set([
   "Grav.Cru.H", // Gravity Crush — unavoidable
   "MagHail.H", // Magic Hail — unavoidable, only named on a downstate (downCauses below)
   "Lckt", // Targeted (presumed) — just a targeting marker, not a fail
+  "Firebomb.H", // Firebomb — hit, treated as unavoidable
 ]);
 
 // The handful of boss-cast markers (see cast-markers.ts on the worker)
