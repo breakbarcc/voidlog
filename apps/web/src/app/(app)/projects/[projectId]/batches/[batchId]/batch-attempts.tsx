@@ -1292,7 +1292,7 @@ export function BatchAttempts({
               <Table.Row key={a.logFileId}>
                 <Table.Cell className="text-muted">{a.n}</Table.Cell>
                 <Table.Cell className="text-muted-strong tabular-nums">
-                  {formatDateTime(a.recordedAt, locale, { timeStyle: "medium" })}
+                  {formatDateTime(a.recordedAt, locale, { timeStyle: "short" })}
                 </Table.Cell>
                 <Table.Cell className="text-muted-strong tabular-nums">
                   {logSuffix(a.fileName)}
