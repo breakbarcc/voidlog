@@ -117,9 +117,8 @@
     "raidNightsTracked": "{count} Raid-Abende getrackt",
     "uploadBatch": "+ Batch hochladen",
     "deletePrompt": "Projekt \"{name}\" löschen? Das entfernt dauerhaft alle Batches, Logs und Ergebnisse.",
-    "greenFailRate": "Greens-Fail-Rate · letzte {count} Abende",
-    "shockwaveRate": "Schockwellen-Rate · letzte {count} Abende",
-    "shockwaveRateAll": "Schockwellen-Rate · alle {count} Abende",
+    "greenFailRateAll": "Greens-Fail-Rate · alle {count} Batches",
+    "shockwaveRateAll": "Schockwellen-Rate · alle {count} Batches",
     "raidNights": "Raid-Abende",
     "table": {
       "raidNight": "Raid-Abend",

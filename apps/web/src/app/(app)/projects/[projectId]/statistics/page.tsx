@@ -27,7 +27,6 @@ export default async function ProjectStatisticsPage(
   const tSidebar = await getTranslations("sidebar");
 
   const {
-    trendPoints,
     allTrendPoints,
     greenCircles,
     progressBossId,
@@ -66,9 +65,9 @@ export default async function ProjectStatisticsPage(
         <div className="mb-6 grid grid-cols-1 gap-3.5 lg:grid-cols-2">
           <Card size="3" className="border-line bg-surface border">
             <div className="text-muted-strong mb-3.5 text-xs font-medium uppercase tracking-wide">
-              {tProject("greenFailRate", { count: trendPoints.length })}
+              {tProject("greenFailRateAll", { count: allTrendPoints.length })}
             </div>
-            <GreenFailTrendChart points={trendPoints} />
+            <GreenFailTrendChart points={allTrendPoints} />
           </Card>
           <Card size="3" className="border-line bg-surface border">
             <div className="text-muted-strong mb-3.5 text-xs font-medium uppercase tracking-wide">
