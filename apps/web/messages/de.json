@@ -255,7 +255,7 @@
     "empty": "Noch nicht genug ausgewertete Logs für Statistiken.",
     "greensByRole": {
       "title": "Greens nach Phase und Rolle",
-      "hint": "Wie oft ein Green die Welle gefailed hat, weil zu wenige Spieler darin standen. Ein Green, das nur mitgefailed wurde, zählt nicht. Nur Logs mit erfassten Green-Details.",
+      "hint": "Wie oft ein Green-Cast gefailed wurde, weil zu wenige Spieler in einem Green standen. Ein Green, das nur mitgefailed wurde, zählt nicht. Nur Logs mit erfassten Green-Details.",
       "views": {
         "heatmap": "Heatmap",
         "bars": "Balken je Phase",
@@ -267,7 +267,7 @@
         "bars": "Gemeinsame Skala über alle Phasen: Balkenlängen sind direkt vergleichbar, die Phasenreihenfolge des Kampfes bleibt erhalten.",
         "ranking": "Beantwortet „Was zuerst üben?“: alle Greens nach Quote sortiert, Phase und Rolle als Spalten."
       },
-      "waves": "{count} Wellen",
+      "waves": "{count} Green-Casts",
       "mostFrequent": "Häufigster Fail",
       "columns": {
         "phase": "Phase",

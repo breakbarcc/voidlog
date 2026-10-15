@@ -255,7 +255,7 @@
     "empty": "Not enough evaluated logs for statistics yet.",
     "greensByRole": {
       "title": "Greens by phase and role",
-      "hint": "How often a Green failed its wave because too few players stood in it. A Green that was only flagged along with it does not count. Only logs with recorded Green details.",
+      "hint": "How often a Green cast failed because too few players stood in one of its Greens. A Green that was only flagged along with it does not count. Only logs with recorded Green details.",
       "views": {
         "heatmap": "Heatmap",
         "bars": "Bars per phase",
@@ -267,7 +267,7 @@
         "bars": "One shared scale across all phases: bar lengths are directly comparable, the fight's phase order is kept.",
         "ranking": "Answers “What to practise first?”: every Green sorted by rate, phase and role as columns."
       },
-      "waves": "{count} waves",
+      "waves": "{count} Green casts",
       "mostFrequent": "Most frequent fail",
       "columns": {
         "phase": "Phase",
