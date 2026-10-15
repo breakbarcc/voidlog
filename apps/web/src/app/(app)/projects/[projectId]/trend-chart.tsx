@@ -97,6 +97,9 @@ function SingleLineChart({
           stroke={`var(--color-${dataKey})`}
           strokeWidth={2}
           connectNulls={false}
+          // The draw-in animation restarts whenever the chart re-renders and was
+          // seen stuck at its first frame (line invisible) — draw the line outright.
+          isAnimationActive={false}
           // A night between two gaps has no line segment to carry it, so
           // it gets a dot of its own; connected nights stay dot-free.
           dot={(props: { index?: number; cx?: number; cy?: number; payload?: unknown }) => {
