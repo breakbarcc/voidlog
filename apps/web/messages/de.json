@@ -274,7 +274,8 @@
         "circleRole": "Green · Rolle",
         "rate": "Quote",
         "failed": "Gefailed"
-      }
+      },
+      "empty": "Noch keine Logs mit erfassten Green-Details. Neue Uploads werden automatisch erfasst, ältere Logs erscheinen hier nach dem Nachladen."
     }
   },
   "roster": {
