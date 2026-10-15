@@ -254,13 +254,27 @@
     "subtitle": "Schaden, Fortschritt und Mechanik-Trends über alle Raid-Abende",
     "empty": "Noch nicht genug ausgewertete Logs für Statistiken.",
     "greensByRole": {
-      "title": "Greens nach Rolle",
+      "title": "Greens nach Phase und Rolle",
       "hint": "Wie oft ein Green die Welle gefailed hat, weil zu wenige Spieler darin standen. Ein Green, das nur mitgefailed wurde, zählt nicht. Nur Logs mit erfassten Green-Details.",
-      "phase": "Phase",
-      "circle": "Green",
-      "role": "Rolle",
-      "failed": "Gefailed",
-      "rate": "Quote"
+      "views": {
+        "heatmap": "Heatmap",
+        "bars": "Balken je Phase",
+        "ranking": "Rangliste"
+      },
+      "roleHint": "Rollen-Kachel anklicken, um sie in der Auswertung hervorzuheben.",
+      "viewHint": {
+        "heatmap": "Kompakt: alle Greens auf einen Blick, Farbintensität zeigt die Quote. Sortiert je Phase nach Häufigkeit, die Position (NE, SE ...) wechselt daher zwischen den Phasen.",
+        "bars": "Gemeinsame Skala über alle Phasen: Balkenlängen sind direkt vergleichbar, die Phasenreihenfolge des Kampfes bleibt erhalten.",
+        "ranking": "Beantwortet „Was zuerst üben?“: alle Greens nach Quote sortiert, Phase und Rolle als Spalten."
+      },
+      "waves": "{count} Wellen",
+      "mostFrequent": "Häufigster Fail",
+      "columns": {
+        "phase": "Phase",
+        "circleRole": "Green · Rolle",
+        "rate": "Quote",
+        "failed": "Gefailed"
+      }
     }
   },
   "roster": {

@@ -254,13 +254,27 @@
     "subtitle": "Damage, progress and mechanic trends across all raid nights",
     "empty": "Not enough evaluated logs for statistics yet.",
     "greensByRole": {
-      "title": "Greens by role",
+      "title": "Greens by phase and role",
       "hint": "How often a Green failed its wave because too few players stood in it. A Green that was only flagged along with it does not count. Only logs with recorded Green details.",
-      "phase": "Phase",
-      "circle": "Green",
-      "role": "Role",
-      "failed": "Failed",
-      "rate": "Rate"
+      "views": {
+        "heatmap": "Heatmap",
+        "bars": "Bars per phase",
+        "ranking": "Ranking"
+      },
+      "roleHint": "Click a role tile to highlight it in the view.",
+      "viewHint": {
+        "heatmap": "Compact: every Green at a glance, color intensity shows the rate. Sorted by frequency within each phase, so the position (NE, SE ...) changes between phases.",
+        "bars": "One shared scale across all phases: bar lengths are directly comparable, the fight's phase order is kept.",
+        "ranking": "Answers “What to practise first?”: every Green sorted by rate, phase and role as columns."
+      },
+      "waves": "{count} waves",
+      "mostFrequent": "Most frequent fail",
+      "columns": {
+        "phase": "Phase",
+        "circleRole": "Green · role",
+        "rate": "Rate",
+        "failed": "Failed"
+      }
     }
   },
   "roster": {

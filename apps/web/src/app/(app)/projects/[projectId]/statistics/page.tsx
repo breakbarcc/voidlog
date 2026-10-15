@@ -78,9 +78,7 @@ export default async function ProjectStatisticsPage(
         </div>
       ) : null}
 
-      {progressBossId ? (
-        <GreensByRole bossId={progressBossId} circles={greenCircles} locale={locale} />
-      ) : null}
+      {progressBossId ? <GreensByRole bossId={progressBossId} circles={greenCircles} /> : null}
 
       {progressBossId && dpsPhaseNames && dpsNights.length > 0 ? (
         <DpsPhaseChart
