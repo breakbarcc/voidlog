@@ -2,9 +2,11 @@ import { Card } from "@radix-ui/themes";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/locale";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { ChompsChartCard } from "@/components/chomps-chart";
 import { loadProjectOverview } from "@/lib/project-overview";
 import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
+import { formatDate } from "@/lib/utils";
 import { DpsPhaseChart } from "../dps-phase-chart";
 import { GreensByRole } from "../greens-by-role";
 import { PhaseProgressTrend } from "../phase-progress-trend";
@@ -24,6 +26,7 @@ export default async function ProjectStatisticsPage(
   const locale = (await getLocale()) as Locale;
   const t = await getTranslations("statistics");
   const tProject = await getTranslations("project");
+  const tChomps = await getTranslations("chomps");
   const tSidebar = await getTranslations("sidebar");
 
   const {
@@ -35,6 +38,14 @@ export default async function ProjectStatisticsPage(
     dpsPhaseNames,
     dpsNights,
   } = await loadProjectOverview(projectId, locale, true);
+
+  // One point per night, average kills per attempt that reached Primordus's
+  // attacks (nights without such an attempt leave a gap).
+  const chompPoints = allTrendPoints.map((b) => ({
+    label: formatDate(b.occurredAt, locale, { day: "2-digit", month: "2-digit" }),
+    slam: b.chompAttempts > 0 ? Math.round((b.chompSlam / b.chompAttempts) * 100) / 100 : null,
+    jaws: b.chompAttempts > 0 ? Math.round((b.chompJaws / b.chompAttempts) * 100) / 100 : null,
+  }));
 
   const hasContent =
     allTrendPoints.length >= 2 ||
@@ -75,6 +86,12 @@ export default async function ProjectStatisticsPage(
             </div>
             <ShockwaveTrendChart points={allTrendPoints} />
           </Card>
+        </div>
+      ) : null}
+
+      {chompPoints.some((p) => p.slam !== null) ? (
+        <div className="mb-6 grid grid-cols-1 gap-3.5 lg:grid-cols-2">
+          <ChompsChartCard title={tChomps("squadTitle")} points={chompPoints} unit="average" />
         </div>
       ) : null}
 

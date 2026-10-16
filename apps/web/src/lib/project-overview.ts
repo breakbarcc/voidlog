@@ -4,12 +4,17 @@ import type { Locale } from "@/i18n/locale";
 import { batchTitle } from "@/lib/batch-title";
 import type { DpsNight } from "@/lib/dps-model";
 import { damagePhases, impliedReachedPhases, isMainPhase, progressPhases } from "@/lib/main-phases";
+import { chompMechanicNames, countChomps, hasChompCasts } from "@/lib/chomp-stats";
 import { addCircleStats, type CircleStat } from "@/lib/green-details";
 import { greenPercent, greenMechanicNames, squadGreens } from "@/lib/green-stats";
 import { loadPhaseDamageByBatch } from "@/lib/phase-damage";
 import { shockwaveMechanicNames, shockwavePercent, squadShockwaves } from "@/lib/shockwave-stats";
 
-const OVERVIEW_MECHANIC_NAMES = [...greenMechanicNames(), ...shockwaveMechanicNames()];
+const OVERVIEW_MECHANIC_NAMES = [
+  ...greenMechanicNames(),
+  ...shockwaveMechanicNames(),
+  ...chompMechanicNames(),
+];
 
 /**
  * Everything the project's history and statistics pages draw from, derived
@@ -123,6 +128,19 @@ export async function loadProjectOverview(projectId: string, locale: Locale, wit
         shockwavesHit += squad.hit;
       }
       const shockwaveHitRate = shockwavePercent({ played: shockwavesPlayed, hit: shockwavesHit });
+      // Primordus Chomps: kills of the whole squad over the attempts that got
+      // as far as the boss casting the attacks.
+      let chompAttempts = 0;
+      let chompSlam = 0;
+      let chompJaws = 0;
+      for (const encounter of encounters) {
+        const events = encounter.phaseResults.flatMap((phase) => phase.mechanicEvents);
+        if (!hasChompCasts(encounter.bossId, events)) continue;
+        const chomps = countChomps(encounter.bossId, events);
+        chompAttempts += 1;
+        chompSlam += chomps.slam;
+        chompJaws += chomps.jaws;
+      }
       let furthestPhase: { name: string; order: number; bossId: string } | null = null;
       for (const encounter of encounters) {
         for (const phase of encounter.phaseResults) {
@@ -178,6 +196,9 @@ export async function loadProjectOverview(projectId: string, locale: Locale, wit
         shockwaveHitRate,
         shockwavesPlayed,
         shockwavesHit,
+        chompAttempts,
+        chompSlam,
+        chompJaws,
         furthestPhase,
       };
     })

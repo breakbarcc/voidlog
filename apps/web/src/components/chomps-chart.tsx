@@ -46,9 +46,9 @@ export function ChompsChartCard({
 
   return (
     <Card size="3" className="border-line bg-surface border">
-      <div className="mb-3.5 flex items-start justify-between gap-3">
+      <div className="mb-3.5 space-y-2">
         <div className="text-muted-strong text-xs font-medium uppercase tracking-wide">{title}</div>
-        <label className="text-muted flex shrink-0 items-center gap-2 text-xs">
+        <label className="text-muted flex w-fit items-center gap-2 text-xs">
           <Switch size="1" checked={withJaws} onCheckedChange={setWithJaws} />
           {t("includeJaws")}
         </label>
