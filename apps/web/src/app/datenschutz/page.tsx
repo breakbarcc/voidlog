@@ -4,12 +4,15 @@ import { getLocale } from "next-intl/server";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import type { Locale } from "@/i18n/locale";
 import { PRIVACY } from "@/lib/legal/privacy";
+import { shareMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as Locale;
+  const title = `${PRIVACY[locale].title} | voidlog`;
   return {
-    title: `${PRIVACY[locale].title} | voidlog`,
+    title,
     robots: { index: true, follow: true },
+    ...shareMetadata({ title, path: "/datenschutz", locale }),
   };
 }
 

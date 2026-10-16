@@ -6,6 +6,7 @@ import { auth } from "@/auth";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import type { Locale } from "@/i18n/locale";
 import { PRIVACY } from "@/lib/legal/privacy";
+import { shareMetadata } from "@/lib/seo";
 import { safeRedirectPath } from "@/lib/redirect";
 import { SignInButton } from "./sign-in-button";
 
@@ -19,13 +20,12 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("metaTitle"),
     description: t("metaDescription"),
-    alternates: { canonical: "/login" },
-    openGraph: {
+    ...shareMetadata({
       title: t("metaTitle"),
       description: t("metaDescription"),
-      type: "website",
-      siteName: "voidlog",
-    },
+      path: "/login",
+      locale: (await getLocale()) as Locale,
+    }),
   };
 }
 
