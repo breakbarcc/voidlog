@@ -50,12 +50,16 @@ export function ChompsChartCard({
 
   const data = points.map((p) => {
     let chomps: number | null = null;
+    let attempts = 0;
     if (p.slam !== null) {
+      attempts = (withJaws ? p.attemptsAny : p.attemptsSlam) ?? 0;
       chomps = showAttempts
-        ? ((withJaws ? p.attemptsAny : p.attemptsSlam) ?? 0)
+        ? p.reached
+          ? Math.round((attempts / p.reached) * 100)
+          : null
         : Math.round((p.slam + (withJaws ? (p.jaws ?? 0) : 0)) * 100) / 100;
     }
-    return { label: p.label, chomps, reached: p.reached };
+    return { label: p.label, chomps, attempts, reached: p.reached };
   });
   const config: ChartConfig = {
     chomps: { label: showAttempts ? t("seriesAttempts") : t("series"), color: "var(--danger)" },
@@ -91,14 +95,20 @@ export function ChompsChartCard({
             interval="preserveStartEnd"
             minTickGap={12}
           />
-          <YAxis tickLine={false} axisLine={false} width={44} allowDecimals={!showAttempts && unit === "average"} />
+          <YAxis
+            tickLine={false}
+            axisLine={false}
+            width={44}
+            allowDecimals={!showAttempts && unit === "average"}
+            tickFormatter={showAttempts ? (v: number) => `${v}%` : undefined}
+          />
           <ChartTooltip
             content={
               <ChartTooltipContent
                 formatter={(value, _name, item) => {
-                  const reached = (item?.payload as { reached?: number } | undefined)?.reached;
-                  return showAttempts && reached !== undefined
-                    ? t("ofAttempts", { value: Number(value), total: reached })
+                  const row = item?.payload as { attempts: number; reached?: number } | undefined;
+                  return showAttempts && row?.reached !== undefined
+                    ? t("ofAttempts", { percent: Number(value), value: row.attempts, total: row.reached })
                     : String(value);
                 }}
               />

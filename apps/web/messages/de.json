@@ -522,10 +522,10 @@
   },
   "chomps": {
     "series": "Primordus Chomps",
-    "seriesAttempts": "Versuche mit Chomp",
-    "metricAttempts": "Versuche mit Chomp",
+    "seriesAttempts": "Anteil Versuche mit Chomp",
+    "metricAttempts": "% Versuche mit Chomp",
     "metricAverage": "Ø pro Versuch",
-    "ofAttempts": "{value} von {total} Versuchen",
+    "ofAttempts": "{percent}% ({value}/{total} Versuche)",
     "includeJaws": "Kiefer der Zerstörung einbeziehen",
     "statsLabel": "Primordus Chomps",
     "statsHint": "Tode durch Lava Slam und Kiefer der Zerstörung zusammen; im Diagramm lässt sich der Kiefer abschalten",

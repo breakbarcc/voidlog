@@ -522,10 +522,10 @@
   },
   "chomps": {
     "series": "Primordus Chomps",
-    "seriesAttempts": "Attempts with a Chomp",
-    "metricAttempts": "Attempts with a Chomp",
+    "seriesAttempts": "Share of attempts with a Chomp",
+    "metricAttempts": "% attempts with a Chomp",
     "metricAverage": "Avg per attempt",
-    "ofAttempts": "{value} of {total} attempts",
+    "ofAttempts": "{percent}% ({value}/{total} attempts)",
     "includeJaws": "Include Jaws of Destruction",
     "statsLabel": "Primordus Chomps",
     "statsHint": "Deaths from Lava Slam and Jaws of Destruction combined; the chart can hide the Jaws",
