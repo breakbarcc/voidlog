@@ -519,5 +519,21 @@
     "emptyText": "Neu hochgeladene Logs enthalten sie automatisch.",
     "emptyFewTitle": "Zu wenig Phasendaten für eine Auswertung",
     "emptyFewText": "Ein Punkt braucht am selben Abend mindestens zwei Phasen mit je fünf Durchläufen."
+  },
+  "playerDetail": {
+    "axisHint": "Die x-Achse zeigt die Nummer des Versuchs im Batch. Lücken bedeuten, dass der Spieler nicht dabei war.",
+    "stats": {
+      "attempts": "Teilgenommen",
+      "avgDps": "Ø DPS",
+      "reveals": "Zu früh aufgedeckt",
+      "revealsHint": "Aufdeckungen während des Unsichtbarkeitsfensters, die nicht Teil eines Gruppen-Angriffs waren",
+      "shockwaves": "Schockwellen getroffen",
+      "shockwavesHint": "% der gespielten Schockwellen mit Treffer"
+    },
+    "charts": {
+      "dps": "DPS pro Versuch",
+      "reveals": "Zu früh aufgedeckt pro Versuch",
+      "shockwavesHit": "Schockwellen getroffen pro Versuch"
+    }
   }
 }

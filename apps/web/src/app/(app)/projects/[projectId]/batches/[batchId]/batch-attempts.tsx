@@ -1110,7 +1110,12 @@ export function BatchAttempts({
                   <div className="flex items-center gap-2.5">
                     <span className="bg-line h-[22px] w-[22px] shrink-0 rounded-full" />
                     <div>
-                      <div className="text-foreground font-semibold">{entry.account}</div>
+                      <Link
+                        href={`/projects/${projectId}/batches/${batchId}/players/${encodeURIComponent(entry.account)}`}
+                        className="text-foreground font-semibold hover:underline"
+                      >
+                        {entry.account}
+                      </Link>
                       <div className="text-muted text-xs">{entry.characterNames}</div>
                     </div>
                   </div>

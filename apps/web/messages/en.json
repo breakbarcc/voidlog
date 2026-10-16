@@ -519,5 +519,21 @@
     "emptyText": "Newly uploaded logs include it automatically.",
     "emptyFewTitle": "Not enough phase data to evaluate",
     "emptyFewText": "A point needs at least two phases with five runs each on the same night."
+  },
+  "playerDetail": {
+    "axisHint": "The x-axis is the attempt number in the batch. Gaps mean the player was not there.",
+    "stats": {
+      "attempts": "Took part",
+      "avgDps": "Avg DPS",
+      "reveals": "Revealed too early",
+      "revealsHint": "Reveals during the invisibility window that were not part of a group attack call",
+      "shockwaves": "Shockwaves hit",
+      "shockwavesHint": "% of played shockwaves that hit"
+    },
+    "charts": {
+      "dps": "DPS per attempt",
+      "reveals": "Revealed too early per attempt",
+      "shockwavesHit": "Shockwaves hit per attempt"
+    }
   }
 }
