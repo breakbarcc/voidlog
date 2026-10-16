@@ -174,6 +174,12 @@ export default async function ProjectPlayerPage(
         </StatCard>
       </div>
 
+      <Link
+        href={`/projects/${projectId}/players`}
+        className="text-accent mb-3 inline-block text-sm hover:underline"
+      >
+        {t("backToRoster")}
+      </Link>
       <p className="text-muted mb-3.5 text-xs">{t("axisHintProject")}</p>
       <div className="grid gap-4 lg:grid-cols-2">
         <ChartCard title={t("chartsProject.dps")}>
@@ -186,12 +192,6 @@ export default async function ProjectPlayerPage(
           <PlayerShockwaveChart points={points} />
         </ChartCard>
       </div>
-      <Link
-        href={`/projects/${projectId}/players`}
-        className="text-accent mt-5 inline-block text-sm hover:underline"
-      >
-        {t("backToRoster")}
-      </Link>
     </div>
   );
 }
