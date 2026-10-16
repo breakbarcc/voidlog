@@ -139,6 +139,9 @@ export default async function ProjectPlayerPage(
       label: points[i]!.label,
       slam: withAttacks.length > 0 ? avg((c) => c.slam) : null,
       jaws: withAttacks.length > 0 ? avg((c) => c.jaws) : null,
+      reached: withAttacks.length,
+      attemptsSlam: withAttacks.filter((c) => c.slam > 0).length,
+      attemptsAny: withAttacks.filter((c) => c.slam + c.jaws > 0).length,
     };
   });
 

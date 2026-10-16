@@ -45,6 +45,9 @@ export default async function ProjectStatisticsPage(
     label: formatDate(b.occurredAt, locale, { day: "2-digit", month: "2-digit" }),
     slam: b.chompAttempts > 0 ? Math.round((b.chompSlam / b.chompAttempts) * 100) / 100 : null,
     jaws: b.chompAttempts > 0 ? Math.round((b.chompJaws / b.chompAttempts) * 100) / 100 : null,
+    reached: b.chompAttempts,
+    attemptsSlam: b.chompAttemptsSlam,
+    attemptsAny: b.chompAttemptsAny,
   }));
 
   const hasContent =
@@ -73,26 +76,25 @@ export default async function ProjectStatisticsPage(
       ) : null}
 
       {allTrendPoints.length >= 2 ? (
-        <div className="mb-6 grid grid-cols-1 gap-3.5 lg:grid-cols-2">
-          <Card size="3" className="border-line bg-surface border">
+        <>
+          <div className="mb-3.5 grid grid-cols-1 gap-3.5 lg:grid-cols-2">
+            <Card size="3" className="border-line bg-surface border">
+              <div className="text-muted-strong mb-3.5 text-xs font-medium uppercase tracking-wide">
+                {tProject("shockwaveRateAll", { count: allTrendPoints.length })}
+              </div>
+              <ShockwaveTrendChart points={allTrendPoints} />
+            </Card>
+            {chompPoints.some((p) => p.slam !== null) ? (
+              <ChompsChartCard title={tChomps("squadTitle")} points={chompPoints} unit="average" />
+            ) : null}
+          </div>
+          <Card size="3" className="border-line bg-surface mb-3.5 border">
             <div className="text-muted-strong mb-3.5 text-xs font-medium uppercase tracking-wide">
               {tProject("greenFailRateAll", { count: allTrendPoints.length })}
             </div>
             <GreenFailTrendChart points={allTrendPoints} />
           </Card>
-          <Card size="3" className="border-line bg-surface border">
-            <div className="text-muted-strong mb-3.5 text-xs font-medium uppercase tracking-wide">
-              {tProject("shockwaveRateAll", { count: allTrendPoints.length })}
-            </div>
-            <ShockwaveTrendChart points={allTrendPoints} />
-          </Card>
-        </div>
-      ) : null}
-
-      {chompPoints.some((p) => p.slam !== null) ? (
-        <div className="mb-6 grid grid-cols-1 gap-3.5 lg:grid-cols-2">
-          <ChompsChartCard title={tChomps("squadTitle")} points={chompPoints} unit="average" />
-        </div>
+        </>
       ) : null}
 
       {progressBossId ? <GreensByRole bossId={progressBossId} circles={greenCircles} /> : null}

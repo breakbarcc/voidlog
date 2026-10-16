@@ -522,11 +522,15 @@
   },
   "chomps": {
     "series": "Primordus Chomps",
+    "seriesAttempts": "Versuche mit Chomp",
+    "metricAttempts": "Versuche mit Chomp",
+    "metricAverage": "Ø pro Versuch",
+    "ofAttempts": "{value} von {total} Versuchen",
     "includeJaws": "Kiefer der Zerstörung einbeziehen",
     "statsLabel": "Primordus Chomps",
     "statsHint": "Tode durch Lava Slam und Kiefer der Zerstörung zusammen; im Diagramm lässt sich der Kiefer abschalten",
     "statsSplit": "{slam} Slam · {jaws} Kiefer",
-    "squadTitle": "Primordus Chomps pro Versuch (Ø je Batch)"
+    "squadTitle": "Primordus Chomps pro Batch"
   },
   "playerDetail": {
     "axisHint": "Die x-Achse zeigt die Nummer des Versuchs im Batch. Eine Lücke heißt: der Spieler war nicht dabei (DPS, Revealed), es wurde keine Schockwelle gespielt, weil der Versuch vorher endete (Schockwellen-Quote), bzw. der Versuch kam nie bis zu Primordus' Angriffen (Chomps).",
@@ -550,7 +554,7 @@
       "dps": "Ø DPS pro Batch",
       "reveals": "Zu früh aufgedeckt pro Versuch (Ø je Batch)",
       "shockwavesHit": "Schockwellen-Trefferquote pro Batch",
-      "chomps": "Primordus Chomps pro Versuch (Ø je Batch)"
+      "chomps": "Primordus Chomps pro Batch"
     },
     "backToRoster": "← Zurück zum Roster"
   }

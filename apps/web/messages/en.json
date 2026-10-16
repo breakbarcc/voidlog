@@ -522,11 +522,15 @@
   },
   "chomps": {
     "series": "Primordus Chomps",
+    "seriesAttempts": "Attempts with a Chomp",
+    "metricAttempts": "Attempts with a Chomp",
+    "metricAverage": "Avg per attempt",
+    "ofAttempts": "{value} of {total} attempts",
     "includeJaws": "Include Jaws of Destruction",
     "statsLabel": "Primordus Chomps",
     "statsHint": "Deaths from Lava Slam and Jaws of Destruction combined; the chart can hide the Jaws",
     "statsSplit": "{slam} Slam · {jaws} Jaws",
-    "squadTitle": "Primordus Chomps per attempt (avg per batch)"
+    "squadTitle": "Primordus Chomps per batch"
   },
   "playerDetail": {
     "axisHint": "The x-axis is the attempt number in the batch. A gap means the player was not there (DPS, Revealed), no shockwave was played because the attempt ended before them (shockwave rate), or the attempt never reached Primordus's attacks (Chomps).",
@@ -550,7 +554,7 @@
       "dps": "Avg DPS per batch",
       "reveals": "Revealed too early per attempt (avg per batch)",
       "shockwavesHit": "Shockwave hit rate per batch",
-      "chomps": "Primordus Chomps per attempt (avg per batch)"
+      "chomps": "Primordus Chomps per batch"
     },
     "backToRoster": "← Back to roster"
   }

@@ -133,6 +133,8 @@ export async function loadProjectOverview(projectId: string, locale: Locale, wit
       let chompAttempts = 0;
       let chompSlam = 0;
       let chompJaws = 0;
+      let chompAttemptsSlam = 0;
+      let chompAttemptsAny = 0;
       for (const encounter of encounters) {
         const events = encounter.phaseResults.flatMap((phase) => phase.mechanicEvents);
         if (!hasChompCasts(encounter.bossId, events)) continue;
@@ -140,6 +142,8 @@ export async function loadProjectOverview(projectId: string, locale: Locale, wit
         chompAttempts += 1;
         chompSlam += chomps.slam;
         chompJaws += chomps.jaws;
+        if (chomps.slam > 0) chompAttemptsSlam += 1;
+        if (chomps.slam + chomps.jaws > 0) chompAttemptsAny += 1;
       }
       let furthestPhase: { name: string; order: number; bossId: string } | null = null;
       for (const encounter of encounters) {
@@ -199,6 +203,8 @@ export async function loadProjectOverview(projectId: string, locale: Locale, wit
         chompAttempts,
         chompSlam,
         chompJaws,
+        chompAttemptsSlam,
+        chompAttemptsAny,
         furthestPhase,
       };
     })
