@@ -1,6 +1,7 @@
 "use client";
 
 import { Table } from "@radix-ui/themes";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { SortableColumnHeader } from "@/components/sortable-column-header";
@@ -89,7 +90,10 @@ function compareRows(a: RosterRow, b: RosterRow, key: SortKey): number {
   }
 }
 
-export function RosterTable({ roster }: Readonly<{ roster: RosterRow[] }>) {
+export function RosterTable({
+  projectId,
+  roster,
+}: Readonly<{ projectId: string; roster: RosterRow[] }>) {
   const t = useTranslations("roster");
   const locale = useLocale() as Locale;
   const [sortKey, setSortKey] = useState<SortKey>("encounters");
@@ -151,7 +155,12 @@ export function RosterTable({ roster }: Readonly<{ roster: RosterRow[] }>) {
               <div className="flex items-center gap-2.5">
                 <span className="bg-line h-[22px] w-[22px] shrink-0 rounded-full" />
                 <div>
-                  <div className="text-foreground font-semibold">{entry.account}</div>
+                  <Link
+                    href={`/projects/${projectId}/players/${encodeURIComponent(entry.account)}`}
+                    className="text-foreground font-semibold hover:underline"
+                  >
+                    {entry.account}
+                  </Link>
                   <div className="text-muted text-xs">{entry.characterNames}</div>
                 </div>
               </div>

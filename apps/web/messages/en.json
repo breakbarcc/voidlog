@@ -528,12 +528,20 @@
       "reveals": "Revealed too early",
       "revealsHint": "Reveals during the invisibility window that were not part of a group attack call",
       "shockwaves": "Shockwaves hit",
-      "shockwavesHint": "% of played shockwaves that hit"
+      "shockwavesHint": "% of played shockwaves that hit",
+      "batches": "{count} batches"
     },
     "charts": {
       "dps": "DPS per attempt",
       "reveals": "Revealed too early per attempt",
       "shockwavesHit": "Shockwaves hit per attempt"
-    }
+    },
+    "axisHintProject": "One point per batch (date). DPS is the average, the other values are the sum over the attempts the player took part in.",
+    "chartsProject": {
+      "dps": "Avg DPS per batch",
+      "reveals": "Revealed too early per batch",
+      "shockwavesHit": "Shockwaves hit per batch"
+    },
+    "backToRoster": "← Back to roster"
   }
 }

@@ -528,12 +528,20 @@
       "reveals": "Zu früh aufgedeckt",
       "revealsHint": "Aufdeckungen während des Unsichtbarkeitsfensters, die nicht Teil eines Gruppen-Angriffs waren",
       "shockwaves": "Schockwellen getroffen",
-      "shockwavesHint": "% der gespielten Schockwellen mit Treffer"
+      "shockwavesHint": "% der gespielten Schockwellen mit Treffer",
+      "batches": "{count} Batches"
     },
     "charts": {
       "dps": "DPS pro Versuch",
       "reveals": "Zu früh aufgedeckt pro Versuch",
       "shockwavesHit": "Schockwellen getroffen pro Versuch"
-    }
+    },
+    "axisHintProject": "Ein Punkt pro Batch (Datum). Bei DPS der Schnitt, bei den anderen Werten die Summe der Versuche, an denen der Spieler teilgenommen hat.",
+    "chartsProject": {
+      "dps": "Ø DPS pro Batch",
+      "reveals": "Zu früh aufgedeckt pro Batch",
+      "shockwavesHit": "Schockwellen getroffen pro Batch"
+    },
+    "backToRoster": "← Zurück zum Roster"
   }
 }

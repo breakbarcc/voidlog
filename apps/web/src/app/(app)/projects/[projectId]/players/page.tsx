@@ -149,7 +149,7 @@ export default async function RosterPage(
       <h1 className="font-heading text-foreground-strong text-2xl font-bold">{t("title")}</h1>
       <p className="text-muted mb-6 mt-1 text-sm">{t("subtitle")}</p>
 
-      <RosterTable roster={roster} />
+      <RosterTable projectId={projectId} roster={roster} />
     </div>
   );
 }
