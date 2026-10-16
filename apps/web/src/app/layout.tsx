@@ -3,6 +3,7 @@ import { Chakra_Petch, Inter } from "next/font/google";
 import { Theme } from "@radix-ui/themes";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const inter = Inter({
@@ -19,6 +20,9 @@ const chakraPetch = Chakra_Petch({
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("metadata");
   return {
+    // Makes relative URLs in metadata (e.g. the login page's canonical link)
+    // absolute — a bare "/login" is not a valid canonical.
+    metadataBase: new URL(SITE_URL),
     title: t("title"),
     description: t("description"),
   };
