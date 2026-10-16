@@ -117,7 +117,12 @@ export default async function ProjectPlayerPage(
     return {
       label: formatDate(night.date, locale, { day: "2-digit", month: "2-digit" }),
       dps: took > 0 ? Math.round(sum((s) => s.dps) / took) : null,
-      revealCount: took > 0 ? sum((s) => s.revealCount) : null,
+      // Average per attempt, so batches with more attempts stay comparable.
+      revealCount: took > 0 ? Math.round((sum((s) => s.revealCount) / took) * 100) / 100 : null,
+      shockwaveRate:
+        sum((s) => s.shockwavesPlayed) > 0
+          ? Math.round((sum((s) => s.shockwavesHit) / sum((s) => s.shockwavesPlayed)) * 100)
+          : null,
       shockwavesPlayed: took > 0 ? sum((s) => s.shockwavesPlayed) : null,
       shockwavesHit: took > 0 ? sum((s) => s.shockwavesHit) : null,
     };

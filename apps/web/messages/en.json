@@ -534,13 +534,13 @@
     "charts": {
       "dps": "DPS per attempt",
       "reveals": "Revealed too early per attempt",
-      "shockwavesHit": "Shockwaves hit per attempt"
+      "shockwavesHit": "Shockwave hit rate per attempt"
     },
-    "axisHintProject": "One point per batch (date). DPS is the average, the other values are the sum over the attempts the player took part in.",
+    "axisHintProject": "One point per batch (date). DPS and Revealed are averages per attempt, the shockwave rate is the share of shockwaves that hit. Only attempts the player took part in count.",
     "chartsProject": {
       "dps": "Avg DPS per batch",
-      "reveals": "Revealed too early per batch",
-      "shockwavesHit": "Shockwaves hit per batch"
+      "reveals": "Revealed too early per attempt (avg per batch)",
+      "shockwavesHit": "Shockwave hit rate per batch"
     },
     "backToRoster": "← Back to roster"
   }

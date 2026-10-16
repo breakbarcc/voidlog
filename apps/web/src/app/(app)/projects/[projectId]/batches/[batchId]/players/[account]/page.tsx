@@ -110,6 +110,8 @@ export default async function BatchPlayerPage(
     label: `#${s.n}`,
     dps: s.dps,
     revealCount: s.revealCount,
+    shockwaveRate:
+      s.shockwavesPlayed ? Math.round(((s.shockwavesHit ?? 0) / s.shockwavesPlayed) * 100) : null,
     shockwavesPlayed: s.shockwavesPlayed,
     shockwavesHit: s.shockwavesHit,
   }));

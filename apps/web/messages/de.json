@@ -534,13 +534,13 @@
     "charts": {
       "dps": "DPS pro Versuch",
       "reveals": "Zu früh aufgedeckt pro Versuch",
-      "shockwavesHit": "Schockwellen getroffen pro Versuch"
+      "shockwavesHit": "Schockwellen-Trefferquote pro Versuch"
     },
-    "axisHintProject": "Ein Punkt pro Batch (Datum). Bei DPS der Schnitt, bei den anderen Werten die Summe der Versuche, an denen der Spieler teilgenommen hat.",
+    "axisHintProject": "Ein Punkt pro Batch (Datum). DPS und Revealed sind Durchschnitte pro Versuch, die Schockwellen-Quote ist der Anteil getroffener Schockwellen. Es zählen nur Versuche, an denen der Spieler teilgenommen hat.",
     "chartsProject": {
       "dps": "Ø DPS pro Batch",
-      "reveals": "Zu früh aufgedeckt pro Batch",
-      "shockwavesHit": "Schockwellen getroffen pro Batch"
+      "reveals": "Zu früh aufgedeckt pro Versuch (Ø je Batch)",
+      "shockwavesHit": "Schockwellen-Trefferquote pro Batch"
     },
     "backToRoster": "← Zurück zum Roster"
   }

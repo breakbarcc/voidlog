@@ -1,6 +1,6 @@
 "use client";
 
-import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { useTranslations } from "next-intl";
 import {
   ChartContainer,
@@ -15,6 +15,8 @@ export interface PlayerChartPoint {
   label: string;
   dps: number | null;
   revealCount: number | null;
+  /** Hit share in percent of the shockwaves played; null when none were played. */
+  shockwaveRate: number | null;
   shockwavesPlayed: number | null;
   shockwavesHit: number | null;
 }
@@ -22,7 +24,10 @@ export interface PlayerChartPoint {
 const CHART_HEIGHT = "aspect-auto h-[180px] w-full";
 const MARGIN = { left: 0, right: 8, top: 8, bottom: 0 };
 
-function Axes({ formatTick }: Readonly<{ formatTick?: (v: number) => string }>) {
+function Axes({
+  formatTick,
+  allowDecimals = false,
+}: Readonly<{ formatTick?: (v: number) => string; allowDecimals?: boolean }>) {
   return (
     <>
       <CartesianGrid vertical={false} />
@@ -38,7 +43,7 @@ function Axes({ formatTick }: Readonly<{ formatTick?: (v: number) => string }>) 
         tickLine={false}
         axisLine={false}
         width={44}
-        allowDecimals={false}
+        allowDecimals={allowDecimals}
         tickFormatter={formatTick}
       />
     </>
@@ -74,11 +79,19 @@ export function PlayerRevealChart({ points }: Readonly<{ points: PlayerChartPoin
   };
   return (
     <ChartContainer config={config} className={CHART_HEIGHT}>
-      <BarChart data={points} margin={MARGIN}>
-        <Axes />
+      <LineChart data={points} margin={MARGIN}>
+        <Axes allowDecimals />
         <ChartTooltip content={<ChartTooltipContent />} />
-        <Bar dataKey="revealCount" fill="var(--color-revealCount)" radius={2} />
-      </BarChart>
+        <Line
+          dataKey="revealCount"
+          type="monotone"
+          stroke="var(--color-revealCount)"
+          strokeWidth={2}
+          connectNulls={false}
+          isAnimationActive={false}
+          dot={{ r: 3, fill: "var(--color-revealCount)" }}
+        />
+      </LineChart>
     </ChartContainer>
   );
 }
@@ -86,25 +99,34 @@ export function PlayerRevealChart({ points }: Readonly<{ points: PlayerChartPoin
 export function PlayerShockwaveChart({ points }: Readonly<{ points: PlayerChartPoint[] }>) {
   const t = useTranslations("playerDetail");
   const config: ChartConfig = {
-    shockwavesHit: { label: t("charts.shockwavesHit"), color: "var(--danger)" },
+    shockwaveRate: { label: t("charts.shockwavesHit"), color: "var(--danger)" },
   };
   return (
     <ChartContainer config={config} className={CHART_HEIGHT}>
-      <BarChart data={points} margin={MARGIN}>
-        <Axes />
+      <LineChart data={points} margin={MARGIN}>
+        <Axes formatTick={(v) => `${v}%`} />
         <ChartTooltip
           content={
             <ChartTooltipContent
-              
               formatter={(value, _name, item) => {
-                const played = (item?.payload as PlayerChartPoint | undefined)?.shockwavesPlayed;
-                return played == null ? String(value) : `${String(value)}/${played}`;
+                const p = item?.payload as PlayerChartPoint | undefined;
+                return p?.shockwavesPlayed == null
+                  ? `${String(value)}%`
+                  : `${String(value)}% (${p.shockwavesHit}/${p.shockwavesPlayed})`;
               }}
             />
           }
         />
-        <Bar dataKey="shockwavesHit" fill="var(--color-shockwavesHit)" radius={2} />
-      </BarChart>
+        <Line
+          dataKey="shockwaveRate"
+          type="monotone"
+          stroke="var(--color-shockwaveRate)"
+          strokeWidth={2}
+          connectNulls={false}
+          isAnimationActive={false}
+          dot={{ r: 3, fill: "var(--color-shockwaveRate)" }}
+        />
+      </LineChart>
     </ChartContainer>
   );
 }
