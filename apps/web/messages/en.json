@@ -521,7 +521,7 @@
     "emptyFewText": "A point needs at least two phases with five runs each on the same night."
   },
   "playerDetail": {
-    "axisHint": "The x-axis is the attempt number in the batch. Gaps mean the player was not there.",
+    "axisHint": "The x-axis is the attempt number in the batch. A gap means the player was not there (DPS, Revealed) or no shockwave was played because the attempt ended before them (shockwave rate).",
     "stats": {
       "attempts": "Took part",
       "avgDps": "Avg DPS",
@@ -536,7 +536,7 @@
       "reveals": "Revealed too early per attempt",
       "shockwavesHit": "Shockwave hit rate per attempt"
     },
-    "axisHintProject": "One point per batch (date). DPS and Revealed are averages per attempt, the shockwave rate is the share of shockwaves that hit. Only attempts the player took part in count.",
+    "axisHintProject": "One point per batch (date). DPS and Revealed are averages per attempt, the shockwave rate is the share of shockwaves that hit. Only attempts the player took part in count; without a shockwave played there is no rate.",
     "chartsProject": {
       "dps": "Avg DPS per batch",
       "reveals": "Revealed too early per attempt (avg per batch)",
