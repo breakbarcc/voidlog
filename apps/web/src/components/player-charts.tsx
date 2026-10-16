@@ -11,7 +11,8 @@ import {
 
 /** Chart-ready attempt (plain data, serializable from the server page). */
 export interface PlayerChartPoint {
-  n: number;
+  /** x-axis label: the attempt number (batch page) or the night (project page). */
+  label: string;
   dps: number | null;
   revealCount: number | null;
   shockwavesPlayed: number | null;
@@ -26,7 +27,7 @@ function Axes({ formatTick }: Readonly<{ formatTick?: (v: number) => string }>) 
     <>
       <CartesianGrid vertical={false} />
       <XAxis
-        dataKey="n"
+        dataKey="label"
         tickLine={false}
         axisLine={false}
         tickMargin={8}
@@ -51,7 +52,7 @@ export function PlayerDpsChart({ points }: Readonly<{ points: PlayerChartPoint[]
     <ChartContainer config={config} className={CHART_HEIGHT}>
       <LineChart data={points} margin={MARGIN}>
         <Axes />
-        <ChartTooltip content={<ChartTooltipContent labelFormatter={(n) => `#${String(n)}`} />} />
+        <ChartTooltip content={<ChartTooltipContent />} />
         <Line
           dataKey="dps"
           type="monotone"
@@ -75,7 +76,7 @@ export function PlayerRevealChart({ points }: Readonly<{ points: PlayerChartPoin
     <ChartContainer config={config} className={CHART_HEIGHT}>
       <BarChart data={points} margin={MARGIN}>
         <Axes />
-        <ChartTooltip content={<ChartTooltipContent labelFormatter={(n) => `#${String(n)}`} />} />
+        <ChartTooltip content={<ChartTooltipContent />} />
         <Bar dataKey="revealCount" fill="var(--color-revealCount)" radius={2} />
       </BarChart>
     </ChartContainer>
@@ -94,7 +95,7 @@ export function PlayerShockwaveChart({ points }: Readonly<{ points: PlayerChartP
         <ChartTooltip
           content={
             <ChartTooltipContent
-              labelFormatter={(n) => `#${String(n)}`}
+              
               formatter={(value, _name, item) => {
                 const played = (item?.payload as PlayerChartPoint | undefined)?.shockwavesPlayed;
                 return played == null ? String(value) : `${String(value)}/${played}`;

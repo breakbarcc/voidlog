@@ -9,7 +9,7 @@ import { PLAYER_STAT_MECHANICS, playerAttemptStats } from "@/lib/player-attempts
 import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import { formatNumber } from "@/lib/utils";
-import { PlayerDpsChart, PlayerRevealChart, PlayerShockwaveChart } from "./player-charts";
+import { PlayerDpsChart, PlayerRevealChart, PlayerShockwaveChart } from "@/components/player-charts";
 
 function StatCard({
   label,
@@ -107,7 +107,7 @@ export default async function BatchPlayerPage(
 
   const title = (await loadBatchTitles([batch], locale)).get(batch.id) ?? batch.label;
   const points = stats.map((s) => ({
-    n: s.n,
+    label: `#${s.n}`,
     dps: s.dps,
     revealCount: s.revealCount,
     shockwavesPlayed: s.shockwavesPlayed,
