@@ -9,6 +9,7 @@ import { PLAYER_STAT_MECHANICS, playerAttemptStats } from "@/lib/player-attempts
 import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import { formatNumber } from "@/lib/utils";
+import { ChompsChartCard } from "@/components/chomps-chart";
 import { PlayerDpsChart, PlayerRevealChart, PlayerShockwaveChart } from "@/components/player-charts";
 
 function StatCard({
@@ -50,6 +51,7 @@ export default async function BatchPlayerPage(
   const membership = await requireProjectMembership(projectId, session.user.id);
   const locale = (await getLocale()) as Locale;
   const t = await getTranslations("playerDetail");
+  const tChomps = await getTranslations("chomps");
   const tCommon = await getTranslations("common");
   const tSidebar = await getTranslations("sidebar");
 
@@ -104,6 +106,13 @@ export default async function BatchPlayerPage(
   const reveals = played.reduce((sum, s) => sum + (s.revealCount ?? 0), 0);
   const swPlayed = played.reduce((sum, s) => sum + (s.shockwavesPlayed ?? 0), 0);
   const swHit = played.reduce((sum, s) => sum + (s.shockwavesHit ?? 0), 0);
+  const chompSlam = played.reduce((sum, s) => sum + (s.chomps?.slam ?? 0), 0);
+  const chompJaws = played.reduce((sum, s) => sum + (s.chomps?.jaws ?? 0), 0);
+  const chompPoints = stats.map((s) => ({
+    label: `#${s.n}`,
+    slam: s.chomps?.slam ?? null,
+    jaws: s.chomps?.jaws ?? null,
+  }));
 
   const title = (await loadBatchTitles([batch], locale)).get(batch.id) ?? batch.label;
   const points = stats.map((s) => ({
@@ -134,7 +143,7 @@ export default async function BatchPlayerPage(
         </div>
       </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-3.5 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-3.5 lg:grid-cols-5">
         <StatCard label={t("stats.attempts")}>
           {played.length}{" "}
           <span className="text-muted text-sm font-medium">/ {stats.length}</span>
@@ -151,6 +160,12 @@ export default async function BatchPlayerPage(
             </span>
           </span>
         </StatCard>
+        <StatCard label={tChomps("statsLabel")} hint={tChomps("statsHint")}>
+          <span className="text-danger">{chompSlam + chompJaws}</span>
+          <div className="text-muted text-xs font-medium">
+            {tChomps("statsSplit", { slam: chompSlam, jaws: chompJaws })}
+          </div>
+        </StatCard>
       </div>
 
       <p className="text-muted mb-3.5 text-xs">{t("axisHint")}</p>
@@ -164,6 +179,7 @@ export default async function BatchPlayerPage(
         <ChartCard title={t("charts.shockwavesHit")}>
           <PlayerShockwaveChart points={points} />
         </ChartCard>
+        <ChompsChartCard title={t("charts.chomps")} points={chompPoints} />
       </div>
     </div>
   );

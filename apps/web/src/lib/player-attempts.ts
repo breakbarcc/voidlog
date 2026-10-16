@@ -1,3 +1,4 @@
+import { chompMechanicNames, countChomps, hasChompCasts, type ChompCount } from "./chomp-stats";
 import { encounterShockwaves, shockwaveMechanicNames } from "./shockwave-stats";
 
 /**
@@ -15,11 +16,16 @@ export interface PlayerAttemptStat {
   revealCount: number | null;
   shockwavesPlayed: number | null;
   shockwavesHit: number | null;
+  /**
+   * Primordus Chomps (Slam / Jaws kills). null when the player was absent or
+   * the attempt never got to the attacks.
+   */
+  chomps: ChompCount | null;
 }
 
 /** Mechanic names the player statistics read, for narrowing the database query. */
 export const PLAYER_STAT_MECHANICS: readonly string[] = [
-  ...new Set([...shockwaveMechanicNames(), "Revealed"]),
+  ...new Set([...shockwaveMechanicNames(), ...chompMechanicNames(), "Revealed"]),
 ];
 
 interface EventLike {
@@ -60,6 +66,7 @@ export function playerAttemptStats(
         revealCount: null,
         shockwavesPlayed: null,
         shockwavesHit: null,
+        chomps: null,
       };
     }
     const events = encounter.phaseResults.flatMap((phase) => phase.mechanicEvents);
@@ -80,6 +87,12 @@ export function playerAttemptStats(
       ).length,
       shockwavesPlayed: shockwaves?.played ?? 0,
       shockwavesHit: shockwaves?.hit ?? 0,
+      chomps: hasChompCasts(encounter.bossId, events)
+        ? countChomps(
+            encounter.bossId,
+            events.filter((e) => e.playerResult?.account === account),
+          )
+        : null,
     };
   });
 }

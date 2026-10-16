@@ -520,8 +520,16 @@
     "emptyFewTitle": "Zu wenig Phasendaten für eine Auswertung",
     "emptyFewText": "Ein Punkt braucht am selben Abend mindestens zwei Phasen mit je fünf Durchläufen."
   },
+  "chomps": {
+    "series": "Primordus Chomps",
+    "includeJaws": "Kiefer der Zerstörung einbeziehen",
+    "statsLabel": "Primordus Chomps",
+    "statsHint": "Tode durch Lava Slam und Kiefer der Zerstörung zusammen; im Diagramm lässt sich der Kiefer abschalten",
+    "statsSplit": "{slam} Slam · {jaws} Kiefer",
+    "squadTitle": "Primordus Chomps pro Versuch (Ø je Batch)"
+  },
   "playerDetail": {
-    "axisHint": "Die x-Achse zeigt die Nummer des Versuchs im Batch. Eine Lücke heißt: der Spieler war nicht dabei (DPS, Revealed) bzw. es wurde keine Schockwelle gespielt, weil der Versuch vorher endete (Schockwellen-Quote).",
+    "axisHint": "Die x-Achse zeigt die Nummer des Versuchs im Batch. Eine Lücke heißt: der Spieler war nicht dabei (DPS, Revealed), es wurde keine Schockwelle gespielt, weil der Versuch vorher endete (Schockwellen-Quote), bzw. der Versuch kam nie bis zu Primordus' Angriffen (Chomps).",
     "stats": {
       "attempts": "Teilgenommen",
       "avgDps": "Ø DPS",
@@ -534,13 +542,15 @@
     "charts": {
       "dps": "DPS pro Versuch",
       "reveals": "Zu früh aufgedeckt pro Versuch",
-      "shockwavesHit": "Schockwellen-Trefferquote pro Versuch"
+      "shockwavesHit": "Schockwellen-Trefferquote pro Versuch",
+      "chomps": "Primordus Chomps pro Versuch"
     },
-    "axisHintProject": "Ein Punkt pro Batch (Datum). DPS und Revealed sind Durchschnitte pro Versuch, die Schockwellen-Quote ist der Anteil getroffener Schockwellen. Es zählen nur Versuche, an denen der Spieler teilgenommen hat; ohne gespielte Schockwelle gibt es keine Quote.",
+    "axisHintProject": "Ein Punkt pro Batch (Datum). DPS, Revealed und Chomps sind Durchschnitte pro Versuch, die Schockwellen-Quote ist der Anteil getroffener Schockwellen. Es zählen nur Versuche, an denen der Spieler teilgenommen hat (Chomps: die bis zu Primordus' Angriffen kamen); ohne gespielte Schockwelle gibt es keine Quote.",
     "chartsProject": {
       "dps": "Ø DPS pro Batch",
       "reveals": "Zu früh aufgedeckt pro Versuch (Ø je Batch)",
-      "shockwavesHit": "Schockwellen-Trefferquote pro Batch"
+      "shockwavesHit": "Schockwellen-Trefferquote pro Batch",
+      "chomps": "Primordus Chomps pro Versuch (Ø je Batch)"
     },
     "backToRoster": "← Zurück zum Roster"
   }

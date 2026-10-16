@@ -426,6 +426,13 @@ export const harvestTemple: BossCuration = {
   // Mordremoth's shockwave. Measured on real logs: a hit lands 0.7-1.5 s
   // after its cast, casts of one wave are >= 1.9 s apart.
   shockwave: { castMechanic: "ShckWv.Cast", hitMechanic: "ShckWv.H", hitWindowMs: 1900 },
+  // Lava Slam ("Primordus Chomps") kills the hit player outright; Jaws of
+  // Destruction does so only sometimes. One hit event per kill (verified).
+  chomps: {
+    slamHit: "Slam.H",
+    jawsHit: "Jaws.H",
+    castMechanics: ["Slam.Cast", "Jaws.Cast"],
+  },
   // Only dragon phases (incl. Soo-Won 1/2) have a boss HP worth showing. In
   // the intermissions the target is an invulnerable orb at a constant 100%
   // (Purification 1-3) or a group of adds ("Giants"), so the stored value

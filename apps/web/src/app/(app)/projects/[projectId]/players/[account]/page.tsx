@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/locale";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { ChompsChartCard, type ChompChartPoint } from "@/components/chomps-chart";
 import {
   PlayerDpsChart,
   PlayerRevealChart,
@@ -56,6 +57,7 @@ export default async function ProjectPlayerPage(
   const locale = (await getLocale()) as Locale;
   const t = await getTranslations("playerDetail");
   const tRoster = await getTranslations("roster");
+  const tChomps = await getTranslations("chomps");
   const tCommon = await getTranslations("common");
   const tSidebar = await getTranslations("sidebar");
 
@@ -128,11 +130,25 @@ export default async function ProjectPlayerPage(
     };
   });
 
+  // Chomps: averaged over the attempts that reached Primordus's attacks.
+  const chompPoints: ChompChartPoint[] = nights.map((night, i) => {
+    const withAttacks = night.played.flatMap((s) => (s.chomps ? [s.chomps] : []));
+    const avg = (pick: (c: { slam: number; jaws: number }) => number) =>
+      Math.round((withAttacks.reduce((sum, c) => sum + pick(c), 0) / withAttacks.length) * 100) / 100;
+    return {
+      label: points[i]!.label,
+      slam: withAttacks.length > 0 ? avg((c) => c.slam) : null,
+      jaws: withAttacks.length > 0 ? avg((c) => c.jaws) : null,
+    };
+  });
+
   const allPlayed = nights.flatMap((n) => n.played);
   const avgDps = Math.round(allPlayed.reduce((sum, s) => sum + (s.dps ?? 0), 0) / own.length);
   const reveals = allPlayed.reduce((sum, s) => sum + (s.revealCount ?? 0), 0);
   const swPlayed = allPlayed.reduce((sum, s) => sum + (s.shockwavesPlayed ?? 0), 0);
   const swHit = allPlayed.reduce((sum, s) => sum + (s.shockwavesHit ?? 0), 0);
+  const chompSlam = allPlayed.reduce((sum, s) => sum + (s.chomps?.slam ?? 0), 0);
+  const chompJaws = allPlayed.reduce((sum, s) => sum + (s.chomps?.jaws ?? 0), 0);
 
   const characterNames = [...new Set(own.map((p) => p.characterName))].join(", ");
   const roleCounts = new Map<string, number>();
@@ -157,7 +173,7 @@ export default async function ProjectPlayerPage(
         </div>
       </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-3.5 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-3.5 lg:grid-cols-5">
         <StatCard label={t("stats.attempts")}>
           {allPlayed.length}{" "}
           <span className="text-muted text-sm font-medium">/ {encounters.length}</span>
@@ -176,6 +192,12 @@ export default async function ProjectPlayerPage(
               ({swHit}/{swPlayed})
             </span>
           </span>
+        </StatCard>
+        <StatCard label={tChomps("statsLabel")} hint={tChomps("statsHint")}>
+          <span className="text-danger">{chompSlam + chompJaws}</span>
+          <div className="text-muted text-xs font-medium">
+            {tChomps("statsSplit", { slam: chompSlam, jaws: chompJaws })}
+          </div>
         </StatCard>
       </div>
 
@@ -196,6 +218,7 @@ export default async function ProjectPlayerPage(
         <ChartCard title={t("chartsProject.shockwavesHit")}>
           <PlayerShockwaveChart points={points} />
         </ChartCard>
+        <ChompsChartCard title={t("chartsProject.chomps")} points={chompPoints} unit="average" />
       </div>
     </div>
   );

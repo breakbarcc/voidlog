@@ -13,6 +13,15 @@ export interface ShockwaveConfig {
   hitWindowMs: number;
 }
 
+export interface ChompsConfig {
+  /** Raw EI mechanic of a player hit by the instant-kill Slam ("Primordus Chomps"). */
+  slamHit: string;
+  /** Raw EI mechanic of a player hit by the Jaws, which sometimes kills as well. */
+  jawsHit: string;
+  /** Synthetic boss cast markers — an attempt only "had" the mechanic if one was cast. */
+  castMechanics: readonly string[];
+}
+
 export interface GreensConfig {
   /** Synthetic marker (worker cast-markers.ts) — one event per Greens cast. */
   castMechanic: string;
@@ -77,6 +86,11 @@ export interface BossCuration {
    * lib/shockwave-stats.ts). Omitted = no shockwave statistics for this boss.
    */
   shockwave?: ShockwaveConfig;
+  /**
+   * The boss's one-hit-kill attacks, counted per player (see
+   * lib/chomp-stats.ts). Omitted = no chomp statistics for this boss.
+   */
+  chomps?: ChompsConfig;
   /**
    * The boss's Greens mechanic, counted per cast (see lib/green-stats.ts).
    * Omitted = no Greens statistics for this boss.

@@ -520,8 +520,16 @@
     "emptyFewTitle": "Not enough phase data to evaluate",
     "emptyFewText": "A point needs at least two phases with five runs each on the same night."
   },
+  "chomps": {
+    "series": "Primordus Chomps",
+    "includeJaws": "Include Jaws of Destruction",
+    "statsLabel": "Primordus Chomps",
+    "statsHint": "Deaths from Lava Slam and Jaws of Destruction combined; the chart can hide the Jaws",
+    "statsSplit": "{slam} Slam · {jaws} Jaws",
+    "squadTitle": "Primordus Chomps per attempt (avg per batch)"
+  },
   "playerDetail": {
-    "axisHint": "The x-axis is the attempt number in the batch. A gap means the player was not there (DPS, Revealed) or no shockwave was played because the attempt ended before them (shockwave rate).",
+    "axisHint": "The x-axis is the attempt number in the batch. A gap means the player was not there (DPS, Revealed), no shockwave was played because the attempt ended before them (shockwave rate), or the attempt never reached Primordus's attacks (Chomps).",
     "stats": {
       "attempts": "Took part",
       "avgDps": "Avg DPS",
@@ -534,13 +542,15 @@
     "charts": {
       "dps": "DPS per attempt",
       "reveals": "Revealed too early per attempt",
-      "shockwavesHit": "Shockwave hit rate per attempt"
+      "shockwavesHit": "Shockwave hit rate per attempt",
+      "chomps": "Primordus Chomps per attempt"
     },
-    "axisHintProject": "One point per batch (date). DPS and Revealed are averages per attempt, the shockwave rate is the share of shockwaves that hit. Only attempts the player took part in count; without a shockwave played there is no rate.",
+    "axisHintProject": "One point per batch (date). DPS, Revealed and Chomps are averages per attempt, the shockwave rate is the share of shockwaves that hit. Only attempts the player took part in count (Chomps: those that reached Primordus's attacks); without a shockwave played there is no rate.",
     "chartsProject": {
       "dps": "Avg DPS per batch",
       "reveals": "Revealed too early per attempt (avg per batch)",
-      "shockwavesHit": "Shockwave hit rate per batch"
+      "shockwavesHit": "Shockwave hit rate per batch",
+      "chomps": "Primordus Chomps per attempt (avg per batch)"
     },
     "backToRoster": "← Back to roster"
   }
