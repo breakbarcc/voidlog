@@ -14,6 +14,11 @@ export interface PlayerAttemptStat {
   dps: number | null;
   /** "Revealed" events: isolated early reveals during the stealth window. */
   revealCount: number | null;
+  /**
+   * Stealth windows of the attempt (one per Mass Invisibility cast, whoever
+   * cast it) — a player can be revealed at most once per window.
+   */
+  stealthWindows: number | null;
   /** "Debilitated" (Geschwächt) stacks the player received. */
   debilitatedCount: number | null;
   shockwavesPlayed: number | null;
@@ -25,9 +30,22 @@ export interface PlayerAttemptStat {
   chomps: ChompCount | null;
 }
 
+/**
+ * Mass Invisibility cast that opens a stealth window (worker
+ * boss-configs/stealth-phases.ts). Recorded on the casting player, so queries
+ * must load it for every player, not just the one the page is about.
+ */
+export const STEALTH_CAST_MECHANIC = "Invis.Cast";
+
 /** Mechanic names the player statistics read, for narrowing the database query. */
 export const PLAYER_STAT_MECHANICS: readonly string[] = [
-  ...new Set([...shockwaveMechanicNames(), ...chompMechanicNames(), "Revealed", "Debilitated"]),
+  ...new Set([
+    ...shockwaveMechanicNames(),
+    ...chompMechanicNames(),
+    "Revealed",
+    "Debilitated",
+    STEALTH_CAST_MECHANIC,
+  ]),
 ];
 
 interface EventLike {
@@ -66,6 +84,7 @@ export function playerAttemptStats(
         ...base,
         dps: null,
         revealCount: null,
+        stealthWindows: null,
         debilitatedCount: null,
         shockwavesPlayed: null,
         shockwavesHit: null,
@@ -88,6 +107,7 @@ export function playerAttemptStats(
       revealCount: events.filter(
         (e) => e.mechanicName === "Revealed" && e.playerResult?.account === account,
       ).length,
+      stealthWindows: events.filter((e) => e.mechanicName === STEALTH_CAST_MECHANIC).length,
       debilitatedCount: events.filter(
         (e) => e.mechanicName === "Debilitated" && e.playerResult?.account === account,
       ).length,

@@ -5,7 +5,11 @@ import { getLocale, getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/locale";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { loadBatchTitles } from "@/lib/batch-title";
-import { PLAYER_STAT_MECHANICS, playerAttemptStats } from "@/lib/player-attempts";
+import {
+  PLAYER_STAT_MECHANICS,
+  STEALTH_CAST_MECHANIC,
+  playerAttemptStats,
+} from "@/lib/player-attempts";
 import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import { formatNumber } from "@/lib/utils";
@@ -81,7 +85,11 @@ export default async function BatchPlayerPage(
           mechanicEvents: {
             where: {
               mechanicName: { in: [...PLAYER_STAT_MECHANICS] },
-              OR: [{ playerResult: { is: null } }, { playerResult: { is: { account } } }],
+              OR: [
+                { playerResult: { is: null } },
+                { playerResult: { is: { account } } },
+                { mechanicName: STEALTH_CAST_MECHANIC },
+              ],
             },
             select: {
               mechanicName: true,
@@ -109,6 +117,7 @@ export default async function BatchPlayerPage(
   const played = stats.filter((s) => s.dps !== null);
   const avgDps = Math.round(played.reduce((sum, s) => sum + (s.dps ?? 0), 0) / played.length);
   const reveals = played.reduce((sum, s) => sum + (s.revealCount ?? 0), 0);
+  const stealthWindows = played.reduce((sum, s) => sum + (s.stealthWindows ?? 0), 0);
   const swPlayed = played.reduce((sum, s) => sum + (s.shockwavesPlayed ?? 0), 0);
   const swHit = played.reduce((sum, s) => sum + (s.shockwavesHit ?? 0), 0);
   const chompSlam = played.reduce((sum, s) => sum + (s.chomps?.slam ?? 0), 0);
@@ -156,7 +165,14 @@ export default async function BatchPlayerPage(
         </StatCard>
         <StatCard label={t("stats.avgDps")}>{formatNumber(avgDps, locale)}</StatCard>
         <StatCard label={t("stats.reveals")} hint={t("stats.revealsHint")}>
-          <span className="text-warning">{reveals}</span>
+          <span className="text-warning">
+            {stealthWindows > 0
+              ? `${Math.round((reveals / stealthWindows) * 100)}%`
+              : tCommon("dash")}{" "}
+            <span className="text-muted text-sm font-medium">
+              ({reveals}/{stealthWindows})
+            </span>
+          </span>
         </StatCard>
         <StatCard label={t("stats.shockwaves")} hint={t("stats.shockwavesHint")}>
           <span className="text-danger">

@@ -540,7 +540,7 @@
       "attempts": "Took part",
       "avgDps": "Avg DPS",
       "reveals": "Revealed too early",
-      "revealsHint": "Reveals during the invisibility window that were not part of a group attack call",
+      "revealsHint": "% of the invisibility windows the player was in where they got revealed too early (group attack calls excluded)",
       "shockwaves": "Shockwaves hit",
       "shockwavesHint": "% of played shockwaves that hit",
       "batches": "{count} batches"

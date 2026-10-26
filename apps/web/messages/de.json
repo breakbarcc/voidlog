@@ -540,7 +540,7 @@
       "attempts": "Teilgenommen",
       "avgDps": "Ø DPS",
       "reveals": "Zu früh aufgedeckt",
-      "revealsHint": "Aufdeckungen während des Unsichtbarkeitsfensters, die nicht Teil eines Gruppen-Angriffs waren",
+      "revealsHint": "% der erlebten Unsichtbarkeitsfenster, in denen der Spieler zu früh aufgedeckt wurde (ohne Gruppen-Angriffe)",
       "shockwaves": "Schockwellen getroffen",
       "shockwavesHint": "% der gespielten Schockwellen mit Treffer",
       "batches": "{count} Batches"
