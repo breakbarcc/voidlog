@@ -15,6 +15,10 @@ export interface ChompEvent {
   mechanicName: string;
 }
 
+export interface TimedChompEvent extends ChompEvent {
+  timeMs: number;
+}
+
 export interface ChompCount {
   slam: number;
   jaws: number;
@@ -31,7 +35,8 @@ export function chompMechanicNames(): string[] {
     if (!boss.chomps) continue;
     names.add(boss.chomps.slamHit);
     names.add(boss.chomps.jawsHit);
-    for (const cast of boss.chomps.castMechanics) names.add(cast);
+    names.add(boss.chomps.slamCast);
+    names.add(boss.chomps.jawsCast);
   }
   return [...names];
 }
@@ -40,7 +45,43 @@ export function chompMechanicNames(): string[] {
 export function hasChompCasts(bossId: string, events: readonly ChompEvent[]): boolean {
   const config = chompsConfig(bossId);
   if (!config) return false;
-  return events.some((e) => config.castMechanics.includes(e.mechanicName));
+  return events.some(
+    (e) => e.mechanicName === config.slamCast || e.mechanicName === config.jawsCast,
+  );
+}
+
+/**
+ * The squad's chomp attacks in one encounter, counted per cast like the
+ * shockwaves and Greens: `played` casts, of which `hit` hit at least one
+ * player. Jaws casts only count when `withJaws`. Pass all of the
+ * encounter's events.
+ */
+export function squadChomps(
+  bossId: string,
+  events: readonly TimedChompEvent[],
+  withJaws: boolean,
+): { played: number; hit: number } {
+  const config = chompsConfig(bossId);
+  if (!config) return { played: 0, hit: 0 };
+  const attacks = [{ cast: config.slamCast, hit: config.slamHit }];
+  if (withJaws) attacks.push({ cast: config.jawsCast, hit: config.jawsHit });
+  let played = 0;
+  let hit = 0;
+  for (const attack of attacks) {
+    const casts = events
+      .filter((e) => e.mechanicName === attack.cast)
+      .map((e) => e.timeMs)
+      .sort((a, b) => a - b);
+    const hitCasts = new Set<number>();
+    for (const e of events) {
+      if (e.mechanicName !== attack.hit) continue;
+      const cast = casts.findLast((t) => t <= e.timeMs);
+      if (cast !== undefined) hitCasts.add(cast);
+    }
+    played += casts.length;
+    hit += hitCasts.size;
+  }
+  return { played, hit };
 }
 
 /**

@@ -18,8 +18,13 @@ export interface ChompsConfig {
   slamHit: string;
   /** Raw EI mechanic of a player hit by the Jaws, which sometimes kills as well. */
   jawsHit: string;
-  /** Synthetic boss cast markers — an attempt only "had" the mechanic if one was cast. */
-  castMechanics: readonly string[];
+  /**
+   * Synthetic boss cast markers (worker cast-markers.ts), one per Slam / Jaws
+   * cast — an attempt only "had" the mechanic if one was cast. A hit belongs
+   * to the latest cast of its attack before it.
+   */
+  slamCast: string;
+  jawsCast: string;
 }
 
 export interface GreensConfig {

@@ -13,7 +13,9 @@ import {
   progressPhases,
   showsBossHealth,
 } from "@/lib/main-phases";
+import { countChomps, hasChompCasts, squadChomps } from "@/lib/chomp-stats";
 import { squadGreens } from "@/lib/green-stats";
+import { STEALTH_CAST_MECHANIC } from "@/lib/player-attempts";
 import { encounterShockwaves, squadShockwaves } from "@/lib/shockwave-stats";
 import { buildAttemptTimelineData } from "@/lib/attempt-timeline";
 import { translateMechanicName } from "@/lib/mechanic-names";
@@ -363,6 +365,12 @@ interface RosterAccumulator {
   shockwavesHit: number;
   debilitatedHits: number;
   revealCount: number;
+  /** Stealth windows (Mass Invisibility casts) of the attempts the player took part in. */
+  stealthWindows: number;
+  // Attempts that reached Primordus's chomp attacks / in which the player got
+  // chomped (Slam or Jaws) at least once (lib/chomp-stats.ts).
+  chompAttempts: number;
+  chompedAttempts: number;
 }
 
 // Same fail definition as the phase-aggregation stats above: everything
@@ -415,6 +423,13 @@ function computeBatchRoster(encounters: Encounters): BatchRosterRow[] {
       ),
       encounter.playerResults.map((p) => p.account),
     );
+    const events = encounter.phaseResults.flatMap((phase) => phase.mechanicEvents);
+    // Only attempts that reached Primordus's attacks count, same rule as the
+    // project roster and the chomp charts.
+    const chompsInPlay = hasChompCasts(encounter.bossId, events);
+    // One stealth window per Mass Invisibility cast, whoever cast it — a
+    // player can be revealed at most once per window.
+    const stealthWindows = events.filter((e) => e.mechanicName === STEALTH_CAST_MECHANIC).length;
     for (const p of encounter.playerResults) {
       const entry = rosterByAccount.get(p.account) ?? {
         characterNames: new Set<string>(),
@@ -428,6 +443,9 @@ function computeBatchRoster(encounters: Encounters): BatchRosterRow[] {
         shockwavesHit: 0,
         debilitatedHits: 0,
         revealCount: 0,
+        stealthWindows: 0,
+        chompAttempts: 0,
+        chompedAttempts: 0,
       };
       entry.characterNames.add(p.characterName);
       entry.encounters += 1;
@@ -439,6 +457,15 @@ function computeBatchRoster(encounters: Encounters): BatchRosterRow[] {
       if (shockwaveCount) {
         entry.shockwavesPlayed += shockwaveCount.played;
         entry.shockwavesHit += shockwaveCount.hit;
+      }
+      entry.stealthWindows += stealthWindows;
+      if (chompsInPlay) {
+        const chomps = countChomps(
+          encounter.bossId,
+          events.filter((e) => e.playerResult?.account === p.account),
+        );
+        entry.chompAttempts += 1;
+        if (chomps.slam + chomps.jaws > 0) entry.chompedAttempts += 1;
       }
       rosterByAccount.set(p.account, entry);
     }
@@ -458,6 +485,9 @@ function computeBatchRoster(encounters: Encounters): BatchRosterRow[] {
       shockwavesHit: entry.shockwavesHit,
       debilitatedHits: entry.debilitatedHits,
       revealCount: entry.revealCount,
+      stealthWindows: entry.stealthWindows,
+      chompAttempts: entry.chompAttempts,
+      chompedAttempts: entry.chompedAttempts,
     }))
     .sort((a, b) => b.failedMechanics - a.failedMechanics);
 }
@@ -615,11 +645,28 @@ export default async function BatchDetailPage(
   const failedLogFiles = batch.logFiles.filter((f) => f.status === LogFileStatus.FAILED);
 
   const attempts = encounters.length;
-  const revealReached = encounters.filter((e) =>
-    e.encounter.phaseResults.some((p) =>
-      p.mechanicEvents.some((m) => m.category === MechanicCategory.REVEAL),
-    ),
-  ).length;
+  // Reveal card: the squad's stealth windows (one per Mass Invisibility
+  // cast) over all attempts — like a Greens cast or a shockwave, a window is
+  // failed as soon as anybody got revealed in it, however many players it was.
+  let stealthWindows = 0;
+  let revealedWindows = 0;
+  for (const { encounter } of encounters) {
+    const events = encounter.phaseResults.flatMap((phase) => phase.mechanicEvents);
+    const casts = events
+      .filter((m) => m.mechanicName === STEALTH_CAST_MECHANIC)
+      .map((m) => m.timeMs)
+      .sort((a, b) => a - b);
+    // Reveals are only persisted inside a window, so each belongs to the
+    // latest cast before it.
+    const revealed = new Set<number>();
+    for (const m of events) {
+      if (m.category !== MechanicCategory.REVEAL) continue;
+      const cast = casts.findLast((t) => t <= m.timeMs);
+      if (cast !== undefined) revealed.add(cast);
+    }
+    stealthWindows += casts.length;
+    revealedWindows += revealed.size;
+  }
   // Greens card: the squad's Greens casts over all attempts — a cast is
   // failed as soon as one player failed it (lib/green-stats.ts).
   let greensCast = 0;
@@ -660,6 +707,19 @@ export default async function BatchDetailPage(
     );
     shockwavesPlayed += squad.played;
     shockwavesHit += squad.hit;
+  }
+  // Chomps card: Primordus's Slam and Jaws casts over all attempts — a cast
+  // is failed as soon as it hit anybody (lib/chomp-stats.ts).
+  let chompsPlayed = 0;
+  let chompsHit = 0;
+  for (const { encounter } of encounters) {
+    const squad = squadChomps(
+      encounter.bossId,
+      encounter.phaseResults.flatMap((phase) => phase.mechanicEvents),
+      true,
+    );
+    chompsPlayed += squad.played;
+    chompsHit += squad.hit;
   }
   const attemptRows: AttemptRow[] = encounters.map((entry, i) => buildAttemptRow(entry, i, locale));
   const first = encounters[0]?.encounter;
@@ -703,7 +763,7 @@ export default async function BatchDetailPage(
         ) : null}
       </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-3.5 lg:grid-cols-5">
+      <div className="mb-6 grid grid-cols-2 gap-3.5 lg:grid-cols-6">
         <Card size="2" className="border-line bg-surface border">
           <div className="text-muted mb-1.5 text-[11px] font-medium uppercase tracking-wide">
             {t("totalAttempts")}
@@ -711,13 +771,18 @@ export default async function BatchDetailPage(
           <div className="font-heading text-foreground text-xl font-bold">{attempts}</div>
         </Card>
         <Card size="2" className="border-line bg-surface border">
-          <div className="text-muted mb-1.5 text-[11px] font-medium uppercase tracking-wide">
+          <div
+            className="text-muted mb-1.5 text-[11px] font-medium uppercase tracking-wide"
+            title={t("revealsHint")}
+          >
             {t("reveals")}
           </div>
-          <div className="font-heading text-foreground text-xl font-bold">
-            {revealReached}{" "}
+          <div className="font-heading text-warning text-xl font-bold">
+            {stealthWindows > 0
+              ? `${Math.round((revealedWindows / stealthWindows) * 100)}%`
+              : tCommon("dash")}{" "}
             <span className="text-muted text-sm font-medium">
-              ({attempts > 0 ? Math.round((revealReached / attempts) * 100) : 0}%)
+              ({revealedWindows}/{stealthWindows})
             </span>
           </div>
         </Card>
@@ -748,6 +813,22 @@ export default async function BatchDetailPage(
               : tCommon("dash")}{" "}
             <span className="text-muted text-sm font-medium">
               ({shockwavesHit}/{shockwavesPlayed})
+            </span>
+          </div>
+        </Card>
+        <Card size="2" className="border-line bg-surface border">
+          <div
+            className="text-muted mb-1.5 text-[11px] font-medium uppercase tracking-wide"
+            title={t("chompsHitHint")}
+          >
+            {t("chompsHit")}
+          </div>
+          <div className="font-heading text-danger text-xl font-bold">
+            {chompsPlayed > 0
+              ? `${Math.round((chompsHit / chompsPlayed) * 100)}%`
+              : tCommon("dash")}{" "}
+            <span className="text-muted text-sm font-medium">
+              ({chompsHit}/{chompsPlayed})
             </span>
           </div>
         </Card>

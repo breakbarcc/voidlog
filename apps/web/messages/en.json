@@ -382,6 +382,9 @@
       "shockwavesHint": "% of played shockwaves that hit",
       "debilitated": "Debilitated received",
       "revealed": "Revealed too early",
+      "revealedHint": "% of invisibility windows with a reveal",
+      "chomps": "Primordus Chomps",
+      "chompsHint": "% of attempts reaching Primordus's attacks with a chomp",
       "empty": "No evaluated logs yet."
     },
     "progress": {
@@ -436,11 +439,14 @@
   },
   "batchDetail": {
     "totalAttempts": "Total attempts",
-    "reveals": "Reveals reached",
+    "reveals": "Reveals",
+    "revealsHint": "% of invisibility phases in which at least one player got revealed too early",
     "greenMissed": "Green missed",
     "greenMissedHint": "Greens cast against the squad. A Green counts as failed as soon as at least one player missed it.",
     "shockwavesHit": "Shockwaves hit",
     "shockwavesHitHint": "Shockwaves played by the squad. One counts as failed as soon as at least one player was hit.",
+    "chompsHit": "Primordus Chomps",
+    "chompsHitHint": "Lava Slams and Jaws of Destruction Primordus cast against the squad. One counts as failed as soon as it hit at least one player.",
     "furthestPhase": "Furthest phase",
     "failedUploads": "Failed uploads"
   },

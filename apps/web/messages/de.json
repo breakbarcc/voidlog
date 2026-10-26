@@ -382,6 +382,9 @@
       "shockwavesHint": "% der gespielten Schockwellen mit Treffer",
       "debilitated": "Geschwächt erhalten",
       "revealed": "Zu früh aufgedeckt",
+      "revealedHint": "% der Unsichtbarkeitsfenster mit Aufdeckung",
+      "chomps": "Primordus Chomps",
+      "chompsHint": "% der Versuche bis Primordus' Angriffen mit Chomp",
       "empty": "Noch keine ausgewerteten Logs."
     },
     "progress": {
@@ -436,11 +439,14 @@
   },
   "batchDetail": {
     "totalAttempts": "Versuche gesamt",
-    "reveals": "Mit Reveal erreicht",
+    "reveals": "Reveals",
+    "revealsHint": "% der Unsichtbarkeitsphasen, in denen mindestens ein Spieler zu früh aufgedeckt wurde",
     "greenMissed": "Green verfehlt",
     "greenMissedHint": "Von der Gruppe gespielte Greens. Ein Green gilt als gefailed, sobald mindestens ein Spieler es verfehlt hat.",
     "shockwavesHit": "Schockwellen getroffen",
     "shockwavesHitHint": "Von der Gruppe gespielte Schockwellen. Eine gilt als gefailed, sobald mindestens ein Spieler getroffen wurde.",
+    "chompsHit": "Primordus Chomps",
+    "chompsHitHint": "Lava Slam und Kiefer der Zerstörung, die Primordus gegen die Gruppe gewirkt hat. Ein Angriff gilt als gefailed, sobald er mindestens einen Spieler getroffen hat.",
     "furthestPhase": "Weiteste Phase",
     "failedUploads": "Fehlgeschlagene Uploads"
   },

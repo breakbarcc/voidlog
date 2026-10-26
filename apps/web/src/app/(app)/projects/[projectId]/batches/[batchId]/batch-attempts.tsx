@@ -97,6 +97,12 @@ export interface BatchRosterRow {
   shockwavesHit: number;
   debilitatedHits: number;
   revealCount: number;
+  /** Stealth windows the player was in — the denominator of the reveal share. */
+  stealthWindows: number;
+  /** Attempts that reached Primordus's attacks — the denominator of the chomp share. */
+  chompAttempts: number;
+  /** Of those, the ones in which the player got chomped (Slam or Jaws). */
+  chompedAttempts: number;
 }
 
 type RosterSortKey =
@@ -109,7 +115,8 @@ type RosterSortKey =
   | "failedMechanics"
   | "shockwaves"
   | "debilitatedHits"
-  | "revealCount";
+  | "revealCount"
+  | "chomps";
 
 // Same convention as the project-wide roster table (roster-table.tsx): text
 // columns default ascending, numeric performance stats default descending
@@ -126,6 +133,7 @@ const ROSTER_DEFAULT_DIRECTION: Record<RosterSortKey, "asc" | "desc"> = {
   shockwaves: "desc",
   debilitatedHits: "desc",
   revealCount: "desc",
+  chomps: "desc",
 };
 
 // Share of the shockwaves the player played that hit them; null when they
@@ -133,6 +141,20 @@ const ROSTER_DEFAULT_DIRECTION: Record<RosterSortKey, "asc" | "desc"> = {
 function shockwaveShare(row: BatchRosterRow): number | null {
   if (row.shockwavesPlayed === 0) return null;
   return row.shockwavesHit / row.shockwavesPlayed;
+}
+
+// Share of the attempts reaching Primordus's attacks in which the player got
+// chomped; null when they reached none (sorts below 0%).
+function chompShare(row: BatchRosterRow): number | null {
+  if (row.chompAttempts === 0) return null;
+  return row.chompedAttempts / row.chompAttempts;
+}
+
+// Share of the stealth windows in which the player got revealed too early;
+// null when they were in none (sorts below 0%).
+function revealShare(row: BatchRosterRow): number | null {
+  if (row.stealthWindows === 0) return null;
+  return row.revealCount / row.stealthWindows;
 }
 
 function compareRosterRows(a: BatchRosterRow, b: BatchRosterRow, key: RosterSortKey): number {
@@ -156,7 +178,9 @@ function compareRosterRows(a: BatchRosterRow, b: BatchRosterRow, key: RosterSort
     case "debilitatedHits":
       return a.debilitatedHits - b.debilitatedHits;
     case "revealCount":
-      return a.revealCount - b.revealCount;
+      return (revealShare(a) ?? -1) - (revealShare(b) ?? -1);
+    case "chomps":
+      return (chompShare(a) ?? -1) - (chompShare(b) ?? -1);
   }
 }
 
@@ -1100,7 +1124,8 @@ export function BatchAttempts({
               {rosterHeader("failedMechanics", t("roster.failedMechanics"))}
               {rosterHeader("shockwaves", t("roster.shockwaves"), t("roster.shockwavesHint"))}
               {rosterHeader("debilitatedHits", t("roster.debilitated"))}
-              {rosterHeader("revealCount", t("roster.revealed"))}
+              {rosterHeader("revealCount", t("roster.revealed"), t("roster.revealedHint"))}
+              {rosterHeader("chomps", t("roster.chomps"), t("roster.chompsHint"))}
             </Table.Row>
           </Table.Header>
           <Table.Body>
@@ -1139,12 +1164,27 @@ export function BatchAttempts({
                 <Table.Cell className="text-warning font-semibold">
                   {entry.debilitatedHits}
                 </Table.Cell>
-                <Table.Cell className="text-warning font-semibold">{entry.revealCount}</Table.Cell>
+                <Table.Cell className="text-warning font-semibold">
+                  {entry.stealthWindows > 0
+                    ? `${Math.round((entry.revealCount / entry.stealthWindows) * 100)}%`
+                    : tCommon("dash")}{" "}
+                  <span className="text-muted text-sm font-medium">
+                    ({entry.revealCount}/{entry.stealthWindows})
+                  </span>
+                </Table.Cell>
+                <Table.Cell className="text-warning font-semibold">
+                  {entry.chompAttempts > 0
+                    ? `${Math.round((entry.chompedAttempts / entry.chompAttempts) * 100)}%`
+                    : tCommon("dash")}{" "}
+                  <span className="text-muted text-sm font-medium">
+                    ({entry.chompedAttempts}/{entry.chompAttempts})
+                  </span>
+                </Table.Cell>
               </Table.Row>
             ))}
             {roster.length === 0 ? (
               <Table.Row>
-                <Table.Cell colSpan={10} className="text-muted">
+                <Table.Cell colSpan={11} className="text-muted">
                   {t("roster.empty")}
                 </Table.Cell>
               </Table.Row>

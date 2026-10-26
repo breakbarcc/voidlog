@@ -222,8 +222,8 @@ const MECHANIC_NAMES_EN: Record<string, string> = {
   "Red.H": "Red Hit",
   "Spread.H": "Spread Hit",
   "Orb Push": "Orb pushed",
-  "NopeRopes.Achiv.L": "\"Nope Ropes\" achievement missed",
-  "NopeRopes.Achiv.K": "\"Nope Ropes\" achievement kept",
+  "NopeRopes.Achiv.L": '"Nope Ropes" achievement missed',
+  "NopeRopes.Achiv.K": '"Nope Ropes" achievement kept',
   "VoidExp.H": "Void Explosion — hit",
   "VoidExp.Champ.H": "Void Explosion (Champion) — hit",
   "MagicDisc.H": "Magic Discharge — hit",
@@ -428,10 +428,13 @@ export const harvestTemple: BossCuration = {
   shockwave: { castMechanic: "ShckWv.Cast", hitMechanic: "ShckWv.H", hitWindowMs: 1900 },
   // Lava Slam ("Primordus Chomps") kills the hit player outright; Jaws of
   // Destruction does so only sometimes. One hit event per kill (verified).
+  // Measured on real logs: a Slam hit lands with its cast, a Jaws hit up to
+  // 12 s after it; casts of one attack are >= 12.6 s (Slam) / 54 s (Jaws) apart.
   chomps: {
     slamHit: "Slam.H",
     jawsHit: "Jaws.H",
-    castMechanics: ["Slam.Cast", "Jaws.Cast"],
+    slamCast: "Slam.Cast",
+    jawsCast: "Jaws.Cast",
   },
   // Only dragon phases (incl. Soo-Won 1/2) have a boss HP worth showing. In
   // the intermissions the target is an invulnerable orb at a constant 100%
