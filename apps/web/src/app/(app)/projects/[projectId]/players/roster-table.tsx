@@ -4,6 +4,7 @@ import { Table } from "@radix-ui/themes";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { RoleSelect } from "@/components/role-select";
 import { SortableColumnHeader } from "@/components/sortable-column-header";
 import type { Locale } from "@/i18n/locale";
 import { formatDate } from "@/lib/utils";
@@ -11,7 +12,8 @@ import { formatDate } from "@/lib/utils";
 export interface RosterRow {
   account: string;
   characterNames: string;
-  role: string;
+  /** Role assigned for the project in this table; null when none is. */
+  role: string | null;
   encounters: number;
   kills: number;
   avgDps: number;
@@ -75,7 +77,7 @@ function compareRows(a: RosterRow, b: RosterRow, key: SortKey): number {
     case "account":
       return a.account.localeCompare(b.account);
     case "role":
-      return a.role.localeCompare(b.role);
+      return (a.role ?? "").localeCompare(b.role ?? "");
     case "encounters":
       return a.encounters - b.encounters;
     case "kills":
@@ -105,7 +107,16 @@ function compareRows(a: RosterRow, b: RosterRow, key: SortKey): number {
 export function RosterTable({
   projectId,
   roster,
-}: Readonly<{ projectId: string; roster: RosterRow[] }>) {
+  roles,
+  canEdit,
+}: Readonly<{
+  projectId: string;
+  roster: RosterRow[];
+  /** Roles a player can be assigned (lib/player-roles.ts). */
+  roles: readonly string[];
+  /** Contributors and admins may assign roles; viewers only read. */
+  canEdit: boolean;
+}>) {
   const t = useTranslations("roster");
   const locale = useLocale() as Locale;
   const [sortKey, setSortKey] = useState<SortKey>("encounters");
@@ -178,7 +189,15 @@ export function RosterTable({
                 </div>
               </div>
             </Table.Cell>
-            <Table.Cell className="text-muted-strong">{entry.role}</Table.Cell>
+            <Table.Cell>
+              <RoleSelect
+                endpoint={`/api/projects/${projectId}/player-roles`}
+                account={entry.account}
+                role={entry.role}
+                roles={roles}
+                canEdit={canEdit}
+              />
+            </Table.Cell>
             <Table.Cell className="text-muted-strong">{entry.encounters}</Table.Cell>
             <Table.Cell className="text-muted-strong">{entry.kills}</Table.Cell>
             <Table.Cell className="text-muted-strong">{entry.avgDps}</Table.Cell>

@@ -6,7 +6,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/locale";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { ChompsChartCard, type ChompChartPoint } from "@/components/chomps-chart";
-import { FailedMechanicsTable } from "@/components/failed-mechanics-table";
+import { FailedMechanicsCard } from "@/components/failed-mechanics-table";
 import {
   PlayerDebilitatedChart,
   PlayerDpsChart,
@@ -251,12 +251,8 @@ export default async function ProjectPlayerPage(
         </ChartCard>
       </div>
 
-      <div className="mt-8">
-        <FailedMechanicsTable
-          mechanics={failed.mechanics}
-          attempts={failed.attempts}
-          scope="player"
-        />
+      <div className="mt-4">
+        <FailedMechanicsCard scope="player" all={failed} />
       </div>
     </div>
   );

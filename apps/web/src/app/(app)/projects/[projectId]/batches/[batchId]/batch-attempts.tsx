@@ -26,6 +26,7 @@ import {
 } from "@/components/mechanic-hover-card";
 import { AttemptTimeline } from "@/components/attempt-timeline";
 import { PhaseBadge, phaseColor, readableHeadingColor } from "@/components/phase-badge";
+import { RoleSelect } from "@/components/role-select";
 import { SortableColumnHeader } from "@/components/sortable-column-header";
 import type { Locale } from "@/i18n/locale";
 import { DOWNED_MECHANIC_NAME, isVisibleCastMarker } from "@/lib/mechanics";
@@ -85,7 +86,10 @@ export interface BatchPhaseStat {
 export interface BatchRosterRow {
   account: string;
   characterNames: string;
-  role: string;
+  /** Role set for this batch only; null when the project's role counts. */
+  roleOverride: string | null;
+  /** Role assigned for the whole project; null when none is. */
+  projectRole: string | null;
   encounters: number;
   kills: number;
   avgDps: number;
@@ -162,7 +166,9 @@ function compareRosterRows(a: BatchRosterRow, b: BatchRosterRow, key: RosterSort
     case "account":
       return a.account.localeCompare(b.account);
     case "role":
-      return a.role.localeCompare(b.role);
+      return (a.roleOverride ?? a.projectRole ?? "").localeCompare(
+        b.roleOverride ?? b.projectRole ?? "",
+      );
     case "encounters":
       return a.encounters - b.encounters;
     case "kills":
@@ -624,6 +630,7 @@ export function BatchAttempts({
   wipesByPhase,
   previousProgress,
   roster,
+  roles,
   canEdit,
 }: Readonly<{
   projectId: string;
@@ -637,6 +644,8 @@ export function BatchAttempts({
   wipesByPhase: Record<string, number>;
   previousProgress: PreviousPhaseProgress | null;
   roster: BatchRosterRow[];
+  /** Roles a player can be assigned (lib/player-roles.ts). */
+  roles: readonly string[];
 }>) {
   const t = useTranslations("batchAttempts");
   const tTimeline = useTranslations("batchAttempts.timeline");
@@ -1145,7 +1154,16 @@ export function BatchAttempts({
                     </div>
                   </div>
                 </Table.Cell>
-                <Table.Cell className="text-muted-strong">{entry.role}</Table.Cell>
+                <Table.Cell>
+                  <RoleSelect
+                    endpoint={`/api/batches/${batchId}/player-roles`}
+                    account={entry.account}
+                    role={entry.roleOverride}
+                    inheritedRole={entry.projectRole}
+                    roles={roles}
+                    canEdit={canEdit}
+                  />
+                </Table.Cell>
                 <Table.Cell className="text-muted-strong">{entry.encounters}</Table.Cell>
                 <Table.Cell className="text-muted-strong">{entry.kills}</Table.Cell>
                 <Table.Cell className="text-muted-strong">{entry.avgDps}</Table.Cell>

@@ -582,6 +582,17 @@
     "project": {
       "hint": "Across all attempts of the project and all players. Deaths, downs, conditions (void debuff, Debilitated, Infirmity), boss casts and unavoidable hits don't count.",
       "attemptsHint": "% of attempts with at least one fail of this mechanic"
-    }
+    },
+    "roleFilter": "Role",
+    "allRoles": "All roles",
+    "roleHint": "Only the fails of the players holding {role} count, over the attempts in which it was held.",
+    "emptyRole": "No failed mechanics for {role}."
+  },
+  "roleSelect": {
+    "none": "No role",
+    "projectDefault": "Project default ({role})",
+    "overridden": "(batch)",
+    "overriddenHint": "Set for this batch, differs from the project",
+    "error": "Role could not be saved ({status})"
   }
 }

@@ -97,6 +97,11 @@ export interface BossCuration {
    */
   chomps?: ChompsConfig;
   /**
+   * The squad roles players can be assigned in the rosters for this boss
+   * (lib/player-roles.ts). Omitted = no role assignment for this boss.
+   */
+  squadRoles?: readonly string[];
+  /**
    * The boss's Greens mechanic, counted per cast (see lib/green-stats.ts).
    * Omitted = no Greens statistics for this boss.
    */

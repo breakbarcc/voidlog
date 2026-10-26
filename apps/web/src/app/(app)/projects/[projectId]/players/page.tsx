@@ -1,8 +1,9 @@
-import { prisma } from "@voidlog/db";
+import { ProjectRole, prisma } from "@voidlog/db";
 import { getTranslations } from "next-intl/server";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { chompMechanicNames, countChomps, hasChompCasts } from "@/lib/chomp-stats";
-import { requireProjectMembership } from "@/lib/projects";
+import { assignableRoles, loadBossIds, loadProjectRoles } from "@/lib/player-roles";
+import { hasRole, requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import {
   countShockwaves,
@@ -19,7 +20,6 @@ interface RosterEntry {
   totalDps: number;
   kills: number;
   totalDowns: number;
-  roleCounts: Map<string, number>;
   lastActive: Date;
   // Shockwaves the player was alive for / that hit them (lib/shockwave-stats.ts).
   shockwavesPlayed: number;
@@ -48,7 +48,6 @@ export default async function RosterPage(
       characterName: true,
       dps: true,
       downs: true,
-      role: true,
       encounterResult: {
         select: {
           success: true,
@@ -93,7 +92,6 @@ export default async function RosterPage(
       totalDps: 0,
       kills: 0,
       totalDowns: 0,
-      roleCounts: new Map<string, number>(),
       lastActive: p.encounterResult.createdAt,
       shockwavesPlayed: 0,
       shockwavesHit: 0,
@@ -109,7 +107,6 @@ export default async function RosterPage(
     if (p.encounterResult.success) entry.kills += 1;
     if (p.encounterResult.createdAt > entry.lastActive)
       entry.lastActive = p.encounterResult.createdAt;
-    if (p.role) entry.roleCounts.set(p.role, (entry.roleCounts.get(p.role) ?? 0) + 1);
     // Counted per shockwave (not per attempt), so a short attempt only weighs
     // in with the shockwaves it actually contained — see lib/shockwave-stats.ts.
     const bossEvents = p.encounterResult.phaseResults.flatMap((phase) => phase.mechanicEvents);
@@ -138,8 +135,10 @@ export default async function RosterPage(
     byAccount.set(p.account, entry);
   }
 
+  // Roles are assigned per project in this table (lib/player-roles.ts).
+  const projectRoles = await loadProjectRoles(projectId);
   const roster = [...byAccount.values()].map((entry) => {
-    const role = [...entry.roleCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "—";
+    const role = projectRoles.get(entry.account) ?? null;
     return {
       account: entry.account,
       characterNames: [...entry.characterNames].join(", "),
@@ -172,7 +171,12 @@ export default async function RosterPage(
       <h1 className="font-heading text-foreground-strong text-2xl font-bold">{t("title")}</h1>
       <p className="text-muted mb-6 mt-1 text-sm">{t("subtitle")}</p>
 
-      <RosterTable projectId={projectId} roster={roster} />
+      <RosterTable
+        projectId={projectId}
+        roster={roster}
+        roles={assignableRoles(await loadBossIds({ projectId }))}
+        canEdit={hasRole(membership.role, ProjectRole.CONTRIBUTOR)}
+      />
     </div>
   );
 }

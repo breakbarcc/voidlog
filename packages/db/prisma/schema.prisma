@@ -81,10 +81,11 @@ model Project {
   ownerId   String
   createdAt DateTime @default(now())
 
-  owner         User            @relation("ProjectOwner", fields: [ownerId], references: [id])
+  owner         User                @relation("ProjectOwner", fields: [ownerId], references: [id])
   members       ProjectMember[]
   invites       ProjectInvite[]
   uploadBatches UploadBatch[]
+  playerRoles   ProjectPlayerRole[]
 
   @@map("projects")
 }
@@ -138,11 +139,44 @@ model UploadBatch {
   label     String
   createdAt DateTime @default(now())
 
-  project  Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  logFiles LogFile[]
+  project     Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  logFiles    LogFile[]
+  playerRoles BatchPlayerRole[]
 
   @@index([projectId])
   @@map("upload_batches")
+}
+
+/// The squad role a player (by account, like the rosters) covers in a project,
+/// set in the project roster. Role names come from the boss curation's Greens
+/// roles (apps/web lib/player-roles.ts). A BatchPlayerRole overrides it for
+/// one batch.
+model ProjectPlayerRole {
+  id        String   @id @default(cuid())
+  projectId String
+  account   String
+  role      String
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, account])
+  @@map("project_player_roles")
+}
+
+/// A player's role for one batch only, set in the batch roster; wins over the
+/// project's ProjectPlayerRole for that batch.
+model BatchPlayerRole {
+  id        String   @id @default(cuid())
+  batchId   String
+  account   String
+  role      String
+  updatedAt DateTime @updatedAt
+
+  batch UploadBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@unique([batchId, account])
+  @@map("batch_player_roles")
 }
 
 enum LogFileStatus {

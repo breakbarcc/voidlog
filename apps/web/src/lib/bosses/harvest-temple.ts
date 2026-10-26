@@ -436,6 +436,9 @@ export const harvestTemple: BossCuration = {
     slamCast: "Slam.Cast",
     jawsCast: "Jaws.Cast",
   },
+  // The Greens roles (greens.roles above) plus the Venticator, who has no
+  // circle of their own.
+  squadRoles: ["HealKite", "Portal", "BoonDPS", "DPS", "Venticator"],
   // Only dragon phases (incl. Soo-Won 1/2) have a boss HP worth showing. In
   // the intermissions the target is an invulnerable orb at a constant 100%
   // (Purification 1-3) or a group of adds ("Giants"), so the stored value

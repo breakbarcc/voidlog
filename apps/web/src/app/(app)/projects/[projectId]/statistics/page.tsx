@@ -3,8 +3,9 @@ import { getLocale, getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/locale";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { ChompsChartCard } from "@/components/chomps-chart";
-import { FailedMechanicsTable } from "@/components/failed-mechanics-table";
-import { loadTopFailedMechanics } from "@/lib/failed-mechanics";
+import { FailedMechanicsCard } from "@/components/failed-mechanics-table";
+import { loadTopFailedMechanicsByRole } from "@/lib/failed-mechanics";
+import { assignableRoles, loadBossIds } from "@/lib/player-roles";
 import { loadProjectOverview } from "@/lib/project-overview";
 import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
@@ -40,7 +41,8 @@ export default async function ProjectStatisticsPage(
     dpsPhaseNames,
     dpsNights,
   } = await loadProjectOverview(projectId, locale, true);
-  const failed = await loadTopFailedMechanics(projectId, locale);
+  const failed = await loadTopFailedMechanicsByRole(projectId, locale);
+  const roles = assignableRoles(await loadBossIds({ projectId }));
 
   // One point per night, average kills per attempt that reached Primordus's
   // attacks (nights without such an attempt leave a gap).
@@ -110,12 +112,13 @@ export default async function ProjectStatisticsPage(
         />
       ) : null}
 
-      {failed.attempts > 0 ? (
+      {failed.all.attempts > 0 ? (
         <div className="mt-3.5">
-          <FailedMechanicsTable
-            mechanics={failed.mechanics}
-            attempts={failed.attempts}
+          <FailedMechanicsCard
             scope="project"
+            all={failed.all}
+            byRole={failed.byRole}
+            roles={roles}
           />
         </div>
       ) : null}

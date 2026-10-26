@@ -16,6 +16,7 @@ import {
 import { countChomps, hasChompCasts, squadChomps } from "@/lib/chomp-stats";
 import { squadGreens } from "@/lib/green-stats";
 import { STEALTH_CAST_MECHANIC } from "@/lib/player-attempts";
+import { assignableRoles, loadBatchRoles, type BatchRoles } from "@/lib/player-roles";
 import { encounterShockwaves, squadShockwaves } from "@/lib/shockwave-stats";
 import { buildAttemptTimelineData } from "@/lib/attempt-timeline";
 import { translateMechanicName } from "@/lib/mechanic-names";
@@ -358,7 +359,6 @@ interface RosterAccumulator {
   totalDps: number;
   kills: number;
   totalDowns: number;
-  roleCounts: Map<string, number>;
   failedMechanics: number;
   /** Shockwaves the player was alive for / of those, the ones that hit them — see lib/shockwave-stats.ts. */
   shockwavesPlayed: number;
@@ -408,7 +408,7 @@ function accumulateRosterFails(
 // account handle doesn't (ADR-009), same convention as the project roster.
 // Reuses the already-fetched encounters/phaseResults/mechanicEvents instead
 // of a separate query.
-function computeBatchRoster(encounters: Encounters): BatchRosterRow[] {
+function computeBatchRoster(encounters: Encounters, roles: BatchRoles): BatchRosterRow[] {
   const rosterByAccount = new Map<string, RosterAccumulator>();
   for (const { encounter } of encounters) {
     // Counted per shockwave, not per attempt — see lib/shockwave-stats.ts.
@@ -437,7 +437,6 @@ function computeBatchRoster(encounters: Encounters): BatchRosterRow[] {
         totalDps: 0,
         kills: 0,
         totalDowns: 0,
-        roleCounts: new Map<string, number>(),
         failedMechanics: 0,
         shockwavesPlayed: 0,
         shockwavesHit: 0,
@@ -452,7 +451,6 @@ function computeBatchRoster(encounters: Encounters): BatchRosterRow[] {
       entry.totalDps += p.dps;
       entry.totalDowns += p.downs;
       if (encounter.success) entry.kills += 1;
-      if (p.role) entry.roleCounts.set(p.role, (entry.roleCounts.get(p.role) ?? 0) + 1);
       const shockwaveCount = shockwaves.get(p.account);
       if (shockwaveCount) {
         entry.shockwavesPlayed += shockwaveCount.played;
@@ -475,7 +473,10 @@ function computeBatchRoster(encounters: Encounters): BatchRosterRow[] {
     .map(([account, entry]) => ({
       account,
       characterNames: [...entry.characterNames].join(", "),
-      role: [...entry.roleCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "—",
+      // Assigned in the rosters (lib/player-roles.ts): this batch's override,
+      // else the project's role.
+      roleOverride: roles.overrides.get(account) ?? null,
+      projectRole: roles.project.get(account) ?? null,
       encounters: entry.encounters,
       kills: entry.kills,
       avgDps: Math.round(entry.totalDps / entry.encounters),
@@ -688,7 +689,7 @@ export default async function BatchDetailPage(
   const furthestPhase = computeFurthestPhase(encounters);
   const batchPhaseStats = computeBatchPhaseStats(encounters, batchBossId, attempts, locale);
   const phaseProgress = computePhaseProgress(batchPhaseStats, encounters, batchBossId, attempts);
-  const batchRoster = computeBatchRoster(encounters);
+  const batchRoster = computeBatchRoster(encounters, await loadBatchRoles(projectId, batchId));
   // Shockwave card: the squad's shockwaves over all attempts — a wave is
   // failed as soon as it hit anybody (lib/shockwave-stats.ts).
   let shockwavesPlayed = 0;
@@ -885,6 +886,7 @@ export default async function BatchDetailPage(
         wipesByPhase={countWipesByPhase(attemptRows)}
         previousProgress={previousProgress}
         roster={batchRoster}
+        roles={assignableRoles([...new Set(encounters.map((e) => e.encounter.bossId))])}
       />
     </div>
   );

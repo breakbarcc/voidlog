@@ -1,25 +1,62 @@
-import { Table } from "@radix-ui/themes";
-import { getTranslations } from "next-intl/server";
-import { TOP_FAILED_MECHANICS, type FailedMechanic } from "@/lib/failed-mechanics";
+"use client";
+
+import { Card, Select, Table } from "@radix-ui/themes";
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { TOP_FAILED_MECHANICS, type FailedMechanicsView } from "@/lib/failed-mechanics-view";
+
+// Radix Select items can't have an empty value, so "every role" gets a sentinel.
+const ALL_ROLES = "__all";
 
 /**
  * Top fails of one player (`scope="player"`) or the whole squad
- * (`scope="project"`), see lib/failed-mechanics.ts. `attempts` is the number
- * of attempts the counts are taken over.
+ * (`scope="project"`), see lib/failed-mechanics.ts. With `roles`, a dropdown
+ * narrows the table to the fails of the players holding one role
+ * (`byRole`).
  */
-export async function FailedMechanicsTable({
-  mechanics,
-  attempts,
+export function FailedMechanicsCard({
   scope,
-}: Readonly<{ mechanics: FailedMechanic[]; attempts: number; scope: "player" | "project" }>) {
-  const t = await getTranslations("failedMechanics");
+  all,
+  byRole = {},
+  roles = [],
+}: Readonly<{
+  scope: "player" | "project";
+  all: FailedMechanicsView;
+  byRole?: Record<string, FailedMechanicsView>;
+  /** Roles to offer in the dropdown (lib/player-roles.ts); none = no dropdown. */
+  roles?: readonly string[];
+}>) {
+  const t = useTranslations("failedMechanics");
+  const [role, setRole] = useState(ALL_ROLES);
+  const view = role === ALL_ROLES ? all : (byRole[role] ?? { mechanics: [], attempts: 0 });
+  const { mechanics, attempts } = view;
+
   return (
-    <>
-      <h2 className="text-muted-strong mb-1 text-xs font-medium uppercase tracking-wide">
-        {t("title", { count: TOP_FAILED_MECHANICS })}
-      </h2>
-      <p className="text-muted mb-3.5 text-xs">{t(`${scope}.hint`)}</p>
-      <Table.Root variant="surface" className="border-line bg-surface border">
+    <Card size="3" className="border-line bg-surface border">
+      <div className="mb-1 flex items-center justify-between gap-3">
+        <div className="text-muted-strong text-xs font-medium uppercase tracking-wide">
+          {t("title", { count: TOP_FAILED_MECHANICS })}
+        </div>
+        {roles.length > 0 ? (
+          <Select.Root size="1" value={role} onValueChange={setRole}>
+            <Select.Trigger aria-label={t("roleFilter")} />
+            <Select.Content>
+              <Select.Item value={ALL_ROLES}>{t("allRoles")}</Select.Item>
+              <Select.Separator />
+              {roles.map((r) => (
+                <Select.Item key={r} value={r}>
+                  {r}
+                </Select.Item>
+              ))}
+            </Select.Content>
+          </Select.Root>
+        ) : null}
+      </div>
+      <p className="text-muted mb-3.5 text-xs">
+        {t(`${scope}.hint`)}
+        {role === ALL_ROLES ? null : ` ${t("roleHint", { role })}`}
+      </p>
+      <Table.Root variant="ghost">
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>#</Table.ColumnHeaderCell>
@@ -54,12 +91,12 @@ export async function FailedMechanicsTable({
           {mechanics.length === 0 ? (
             <Table.Row>
               <Table.Cell colSpan={5} className="text-muted">
-                {t("empty")}
+                {role === ALL_ROLES ? t("empty") : t("emptyRole", { role })}
               </Table.Cell>
             </Table.Row>
           ) : null}
         </Table.Body>
       </Table.Root>
-    </>
+    </Card>
   );
 }

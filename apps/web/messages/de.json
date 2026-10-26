@@ -582,6 +582,17 @@
     "project": {
       "hint": "Über alle Versuche des Projekts und alle Spieler. Tode, Downs, Zustände (Void-Debuff, Geschwächt, Gebrechlichkeit), Boss-Casts und unvermeidbare Treffer zählen nicht.",
       "attemptsHint": "% der Versuche mit mindestens einem Fehler dieser Mechanik"
-    }
+    },
+    "roleFilter": "Rolle",
+    "allRoles": "Alle Rollen",
+    "roleHint": "Gezählt werden nur die Fails der Spieler mit der Rolle {role}, über die Versuche, in denen sie besetzt war.",
+    "emptyRole": "Keine gefailten Mechaniken für {role}."
+  },
+  "roleSelect": {
+    "none": "Keine Rolle",
+    "projectDefault": "Wie im Projekt ({role})",
+    "overridden": "(Batch)",
+    "overriddenHint": "Für diesen Batch abweichend vom Projekt gesetzt",
+    "error": "Rolle konnte nicht gespeichert werden ({status})"
   }
 }
