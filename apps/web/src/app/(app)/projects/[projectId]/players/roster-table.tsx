@@ -22,6 +22,8 @@ export interface RosterRow {
   debilitatedHitsPerEncounter: string;
   revealCount: number;
   revealCountPerEncounter: string;
+  chompAttempts: number;
+  chompedAttempts: number;
   lastActive: Date;
 }
 
@@ -35,6 +37,7 @@ type SortKey =
   | "shockwaves"
   | "debilitatedHits"
   | "revealCount"
+  | "chomps"
   | "lastActive";
 
 // Text/date columns read more naturally starting ascending (A→Z, oldest
@@ -51,6 +54,7 @@ const DEFAULT_DIRECTION: Record<SortKey, "asc" | "desc"> = {
   shockwaves: "desc",
   debilitatedHits: "desc",
   revealCount: "desc",
+  chomps: "desc",
   lastActive: "desc",
 };
 
@@ -58,6 +62,12 @@ const DEFAULT_DIRECTION: Record<SortKey, "asc" | "desc"> = {
 // none (sorts below 0%).
 function shockwaveShare(row: RosterRow): number | null {
   return row.shockwavesPlayed > 0 ? row.shockwavesHit / row.shockwavesPlayed : null;
+}
+
+// Share of the attempts reaching Primordus's attacks in which the player got
+// chomped; null when they reached none (sorts below 0%).
+function chompShare(row: RosterRow): number | null {
+  return row.chompAttempts > 0 ? row.chompedAttempts / row.chompAttempts : null;
 }
 
 function compareRows(a: RosterRow, b: RosterRow, key: SortKey): number {
@@ -85,6 +95,8 @@ function compareRows(a: RosterRow, b: RosterRow, key: SortKey): number {
       return (
         Number.parseFloat(a.revealCountPerEncounter) - Number.parseFloat(b.revealCountPerEncounter)
       );
+    case "chomps":
+      return (chompShare(a) ?? -1) - (chompShare(b) ?? -1);
     case "lastActive":
       return a.lastActive.getTime() - b.lastActive.getTime();
   }
@@ -145,6 +157,7 @@ export function RosterTable({
           {header("shockwaves", t("columns.shockwaves"), t("columns.shockwavesHint"))}
           {header("debilitatedHits", t("columns.debilitated"), t("columns.perFightHint"))}
           {header("revealCount", t("columns.revealed"), t("columns.perFightHint"))}
+          {header("chomps", t("columns.chomps"), t("columns.chompsHint"))}
           {header("lastActive", t("columns.lastActive"))}
         </Table.Row>
       </Table.Header>
@@ -186,6 +199,14 @@ export function RosterTable({
               {entry.revealCountPerEncounter}{" "}
               <span className="text-muted text-sm font-medium">({entry.revealCount})</span>
             </Table.Cell>
+            <Table.Cell className="text-warning font-semibold">
+              {entry.chompAttempts > 0
+                ? `${Math.round((entry.chompedAttempts / entry.chompAttempts) * 100)}%`
+                : "—"}{" "}
+              <span className="text-muted text-sm font-medium">
+                ({entry.chompedAttempts}/{entry.chompAttempts})
+              </span>
+            </Table.Cell>
             <Table.Cell className="text-muted text-sm">
               {formatDate(entry.lastActive, locale)}
             </Table.Cell>
@@ -193,7 +214,7 @@ export function RosterTable({
         ))}
         {sorted.length === 0 ? (
           <Table.Row>
-            <Table.Cell colSpan={10} className="text-muted">
+            <Table.Cell colSpan={11} className="text-muted">
               {t("empty")}
             </Table.Cell>
           </Table.Row>

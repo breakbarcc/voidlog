@@ -292,9 +292,11 @@
       "shockwaves": "Shockwaves hit",
       "debilitated": "Debilitated received",
       "revealed": "Revealed too early",
+      "chomps": "Primordus Chomps",
       "lastActive": "Last active",
       "perFightHint": "avg per fight (total)",
-      "shockwavesHint": "% of played shockwaves that hit"
+      "shockwavesHint": "% of played shockwaves that hit",
+      "chompsHint": "% of attempts reaching Primordus's attacks with a chomp"
     },
     "empty": "No evaluated logs yet."
   },

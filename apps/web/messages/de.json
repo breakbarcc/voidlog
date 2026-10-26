@@ -292,9 +292,11 @@
       "shockwaves": "Schockwellen getroffen",
       "debilitated": "Geschwächt erhalten",
       "revealed": "Zu früh aufgedeckt",
+      "chomps": "Primordus Chomps",
       "lastActive": "Zuletzt aktiv",
       "perFightHint": "Ø pro Kampf (gesamt)",
-      "shockwavesHint": "% der gespielten Schockwellen mit Treffer"
+      "shockwavesHint": "% der gespielten Schockwellen mit Treffer",
+      "chompsHint": "% der Versuche bis Primordus' Angriffen mit Chomp"
     },
     "empty": "Noch keine ausgewerteten Logs."
   },

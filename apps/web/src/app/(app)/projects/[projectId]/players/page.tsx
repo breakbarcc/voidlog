@@ -1,6 +1,7 @@
 import { prisma } from "@voidlog/db";
 import { getTranslations } from "next-intl/server";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { chompMechanicNames, countChomps, hasChompCasts } from "@/lib/chomp-stats";
 import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import {
@@ -25,6 +26,10 @@ interface RosterEntry {
   shockwavesHit: number;
   debilitatedHits: number;
   revealCount: number;
+  // Attempts that reached Primordus's chomp attacks / in which the player got
+  // chomped (Slam or Jaws) at least once (lib/chomp-stats.ts).
+  chompAttempts: number;
+  chompedAttempts: number;
 }
 
 export default async function RosterPage(
@@ -49,11 +54,15 @@ export default async function RosterPage(
           success: true,
           createdAt: true,
           bossId: true,
-          // Boss-side events only (no player) — carries the shockwave casts.
+          // Boss-side events only (no player) — carries the shockwave and
+          // chomp casts.
           phaseResults: {
             select: {
               mechanicEvents: {
-                where: { playerResultId: null, mechanicName: { in: shockwaveCastMechanicNames() } },
+                where: {
+                  playerResultId: null,
+                  mechanicName: { in: [...shockwaveCastMechanicNames(), ...chompMechanicNames()] },
+                },
                 select: { mechanicName: true, timeMs: true },
               },
             },
@@ -61,9 +70,13 @@ export default async function RosterPage(
         },
       },
       // Only the events the roster counts: Geschwächt, Revealed and what the
-      // shockwave statistics read. The rest is most of the table.
+      // shockwave and chomp statistics read. The rest is most of the table.
       mechanicEvents: {
-        where: { mechanicName: { in: ["Debilitated", "Revealed", ...shockwaveMechanicNames()] } },
+        where: {
+          mechanicName: {
+            in: ["Debilitated", "Revealed", ...shockwaveMechanicNames(), ...chompMechanicNames()],
+          },
+        },
         select: { mechanicName: true, timeMs: true },
       },
     },
@@ -86,6 +99,8 @@ export default async function RosterPage(
       shockwavesHit: 0,
       debilitatedHits: 0,
       revealCount: 0,
+      chompAttempts: 0,
+      chompedAttempts: 0,
     };
     entry.characterNames.add(p.characterName);
     entry.encounters += 1;
@@ -97,10 +112,8 @@ export default async function RosterPage(
     if (p.role) entry.roleCounts.set(p.role, (entry.roleCounts.get(p.role) ?? 0) + 1);
     // Counted per shockwave (not per attempt), so a short attempt only weighs
     // in with the shockwaves it actually contained — see lib/shockwave-stats.ts.
-    const castTimes = shockwaveCastTimes(
-      p.encounterResult.bossId,
-      p.encounterResult.phaseResults.flatMap((phase) => phase.mechanicEvents),
-    );
+    const bossEvents = p.encounterResult.phaseResults.flatMap((phase) => phase.mechanicEvents);
+    const castTimes = shockwaveCastTimes(p.encounterResult.bossId, bossEvents);
     const shockwaves = countShockwaves(p.encounterResult.bossId, castTimes, p.mechanicEvents);
     entry.shockwavesPlayed += shockwaves.played;
     entry.shockwavesHit += shockwaves.hit;
@@ -114,6 +127,14 @@ export default async function RosterPage(
     // filtered out entirely — see stealth-phases.ts on the worker), so
     // every occurrence here is already a genuine early-reveal mistake.
     entry.revealCount += p.mechanicEvents.filter((m) => m.mechanicName === "Revealed").length;
+    // Only attempts that reached Primordus's attacks count, so early wipes
+    // don't dilute the share (same rule as the chomp charts). Slam and Jaws
+    // together, matching the player page's Chomps total.
+    if (hasChompCasts(p.encounterResult.bossId, bossEvents)) {
+      const chomps = countChomps(p.encounterResult.bossId, p.mechanicEvents);
+      entry.chompAttempts += 1;
+      if (chomps.slam + chomps.jaws > 0) entry.chompedAttempts += 1;
+    }
     byAccount.set(p.account, entry);
   }
 
@@ -134,6 +155,8 @@ export default async function RosterPage(
       debilitatedHitsPerEncounter: (entry.debilitatedHits / entry.encounters).toFixed(2),
       revealCount: entry.revealCount,
       revealCountPerEncounter: (entry.revealCount / entry.encounters).toFixed(2),
+      chompAttempts: entry.chompAttempts,
+      chompedAttempts: entry.chompedAttempts,
     };
   });
 
