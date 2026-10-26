@@ -560,16 +560,22 @@
       "chomps": "Primordus Chomps pro Batch",
       "debilitated": "Geschwächt erhalten pro Versuch (Ø je Batch)"
     },
-    "failedMechanics": {
-      "title": "Top {count} gefailte Mechaniken",
-      "hint": "Über alle Versuche des Spielers im Projekt. Tode, Downs, Zustände (Void-Debuff, Geschwächt, Gebrechlichkeit), Boss-Casts und unvermeidbare Treffer zählen nicht.",
-      "mechanic": "Mechanik",
-      "count": "Anzahl",
-      "perAttempt": "Ø pro Versuch",
-      "attempts": "Versuche betroffen",
-      "attemptsHint": "% der Versuche des Spielers mit mindestens einem Fehler dieser Mechanik",
-      "empty": "Keine gefailten Mechaniken."
-    },
     "backToRoster": "← Zurück zum Roster"
+  },
+  "failedMechanics": {
+    "title": "Top {count} gefailte Mechaniken",
+    "mechanic": "Mechanik",
+    "count": "Anzahl",
+    "perAttempt": "Ø pro Versuch",
+    "attempts": "Versuche betroffen",
+    "empty": "Keine gefailten Mechaniken.",
+    "player": {
+      "hint": "Über alle Versuche des Spielers im Projekt. Tode, Downs, Zustände (Void-Debuff, Geschwächt, Gebrechlichkeit), Boss-Casts und unvermeidbare Treffer zählen nicht.",
+      "attemptsHint": "% der Versuche des Spielers mit mindestens einem Fehler dieser Mechanik"
+    },
+    "project": {
+      "hint": "Über alle Versuche des Projekts und alle Spieler. Tode, Downs, Zustände (Void-Debuff, Geschwächt, Gebrechlichkeit), Boss-Casts und unvermeidbare Treffer zählen nicht.",
+      "attemptsHint": "% der Versuche mit mindestens einem Fehler dieser Mechanik"
+    }
   }
 }

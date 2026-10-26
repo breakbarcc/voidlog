@@ -1,11 +1,12 @@
 import { prisma } from "@voidlog/db";
-import { Card, Table } from "@radix-ui/themes";
+import { Card } from "@radix-ui/themes";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/locale";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { ChompsChartCard, type ChompChartPoint } from "@/components/chomps-chart";
+import { FailedMechanicsTable } from "@/components/failed-mechanics-table";
 import {
   PlayerDebilitatedChart,
   PlayerDpsChart,
@@ -13,20 +14,12 @@ import {
   PlayerShockwaveChart,
   type PlayerChartPoint,
 } from "@/components/player-charts";
-import { translateMechanicName } from "@/lib/mechanic-names";
-import {
-  DOWNED_MECHANIC_NAME,
-  GENERIC_CAST_MARKER_NAME_PART,
-  isContextualNoiseMechanic,
-  isNoiseMechanic,
-  isVisibleCastMarker,
-  unusedMechanicNames,
-} from "@/lib/mechanics";
 import {
   PLAYER_STAT_MECHANICS,
   STEALTH_CAST_MECHANIC,
   playerAttemptStats,
 } from "@/lib/player-attempts";
+import { loadTopFailedMechanics } from "@/lib/failed-mechanics";
 import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import { formatDate, formatNumber } from "@/lib/utils";
@@ -58,72 +51,6 @@ function ChartCard({ title, children }: Readonly<{ title: string; children: Reac
       {children}
     </Card>
   );
-}
-
-const TOP_FAILED_MECHANICS = 5;
-
-// Conditions another mechanic puts on the player (Void.D from the void
-// pools, Debilitated/Infirmity from hits), so the hit itself is the fail.
-const STATUS_EFFECT_MECHANICS = new Set(["Void.D", "Debilitated", "Infirmity"]);
-
-interface FailedMechanic {
-  bossId: string;
-  mechanicName: string;
-  displayName: string;
-  count: number;
-  attempts: number;
-}
-
-/**
- * The player's most frequent fails over all their attempts. Same fail
- * definition as the batch page's phase and roster stats (everything except
- * deaths, curated cast markers and (contextual) noise mechanics), minus
- * downstates and status effects: both are the outcome of a hit, not a
- * mechanic of their own, and would otherwise top most players' lists.
- */
-function topFailedMechanics(
-  encounters: readonly {
-    bossId: string;
-    mechanicEvents: { mechanicName: string; displayName: string; timeMs: number }[];
-  }[],
-  locale: Locale,
-): FailedMechanic[] {
-  const byName = new Map<string, FailedMechanic>();
-  for (const encounter of encounters) {
-    const seen = new Set<string>();
-    for (const event of encounter.mechanicEvents) {
-      if (
-        event.mechanicName === "Dead" ||
-        event.mechanicName === DOWNED_MECHANIC_NAME ||
-        STATUS_EFFECT_MECHANICS.has(event.mechanicName) ||
-        isVisibleCastMarker(encounter.bossId, event.mechanicName) ||
-        isNoiseMechanic(encounter.bossId, event.mechanicName) ||
-        isContextualNoiseMechanic(encounter.bossId, event, encounter.mechanicEvents)
-      )
-        continue;
-      // Raw names aren't unique across bosses, so they're kept apart per boss.
-      const key = `${encounter.bossId}:${event.mechanicName}`;
-      const entry = byName.get(key) ?? {
-        bossId: encounter.bossId,
-        mechanicName: event.mechanicName,
-        displayName: translateMechanicName(
-          encounter.bossId,
-          locale,
-          event.mechanicName,
-          event.displayName,
-        ),
-        count: 0,
-        attempts: 0,
-      };
-      entry.count += 1;
-      if (!seen.has(key)) entry.attempts += 1;
-      seen.add(key);
-      byName.set(key, entry);
-    }
-  }
-  return [...byName.values()]
-    .sort((a, b) => b.count - a.count || b.attempts - a.attempts)
-    .slice(0, TOP_FAILED_MECHANICS);
 }
 
 /** Statistics of one player over every batch of the project, one point per batch. */
@@ -176,26 +103,7 @@ export default async function ProjectPlayerPage(
   const own = encounters.flatMap((e) => e.playerResults.filter((p) => p.account === account));
   if (own.length === 0) notFound();
 
-  // The player's own events for the fail table, minus what no view reads
-  // (noise such as "Orb Push" and the bulk-captured casts are most rows).
-  const bossIds = [...new Set(encounters.map((e) => e.bossId))];
-  const ownResults = await prisma.playerResult.findMany({
-    where: { account, encounterResult: { logFile: { batch: { projectId } } } },
-    select: {
-      encounterResult: { select: { bossId: true } },
-      mechanicEvents: {
-        where: {
-          mechanicName: { notIn: unusedMechanicNames(bossIds) },
-          NOT: { mechanicName: { contains: GENERIC_CAST_MARKER_NAME_PART } },
-        },
-        select: { mechanicName: true, displayName: true, timeMs: true },
-      },
-    },
-  });
-  const failedMechanics = topFailedMechanics(
-    ownResults.map((r) => ({ bossId: r.encounterResult.bossId, mechanicEvents: r.mechanicEvents })),
-    locale,
-  );
+  const failed = await loadTopFailedMechanics(projectId, locale, account);
 
   // One point per batch: the batch's attempts in order, then summed up — DPS
   // averaged over the attempts the player took part in.
@@ -241,7 +149,8 @@ export default async function ProjectPlayerPage(
   const chompPoints: ChompChartPoint[] = nights.map((night, i) => {
     const withAttacks = night.played.flatMap((s) => (s.chomps ? [s.chomps] : []));
     const avg = (pick: (c: { slam: number; jaws: number }) => number) =>
-      Math.round((withAttacks.reduce((sum, c) => sum + pick(c), 0) / withAttacks.length) * 100) / 100;
+      Math.round((withAttacks.reduce((sum, c) => sum + pick(c), 0) / withAttacks.length) * 100) /
+      100;
     return {
       label: points[i]!.label,
       slam: withAttacks.length > 0 ? avg((c) => c.slam) : null,
@@ -342,51 +251,13 @@ export default async function ProjectPlayerPage(
         </ChartCard>
       </div>
 
-      <h2 className="text-muted-strong mb-1 mt-8 text-xs font-medium uppercase tracking-wide">
-        {t("failedMechanics.title", { count: TOP_FAILED_MECHANICS })}
-      </h2>
-      <p className="text-muted mb-3.5 text-xs">{t("failedMechanics.hint")}</p>
-      <Table.Root variant="surface" className="border-line bg-surface border">
-        <Table.Header>
-          <Table.Row>
-            <Table.ColumnHeaderCell>#</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>{t("failedMechanics.mechanic")}</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>{t("failedMechanics.count")}</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>{t("failedMechanics.perAttempt")}</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell title={t("failedMechanics.attemptsHint")}>
-              {t("failedMechanics.attempts")}
-            </Table.ColumnHeaderCell>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {failedMechanics.map((m, i) => (
-            <Table.Row key={`${m.bossId}:${m.mechanicName}`}>
-              <Table.Cell className="text-muted">{i + 1}</Table.Cell>
-              <Table.Cell>
-                <div className="text-foreground font-semibold">{m.displayName}</div>
-                <div className="text-muted text-xs">{m.mechanicName}</div>
-              </Table.Cell>
-              <Table.Cell className="text-warning font-semibold">{m.count}</Table.Cell>
-              <Table.Cell className="text-muted-strong">
-                {(m.count / own.length).toFixed(2)}
-              </Table.Cell>
-              <Table.Cell className="text-warning font-semibold">
-                {Math.round((m.attempts / own.length) * 100)}%{" "}
-                <span className="text-muted text-sm font-medium">
-                  ({m.attempts}/{own.length})
-                </span>
-              </Table.Cell>
-            </Table.Row>
-          ))}
-          {failedMechanics.length === 0 ? (
-            <Table.Row>
-              <Table.Cell colSpan={5} className="text-muted">
-                {t("failedMechanics.empty")}
-              </Table.Cell>
-            </Table.Row>
-          ) : null}
-        </Table.Body>
-      </Table.Root>
+      <div className="mt-8">
+        <FailedMechanicsTable
+          mechanics={failed.mechanics}
+          attempts={failed.attempts}
+          scope="player"
+        />
+      </div>
     </div>
   );
 }
