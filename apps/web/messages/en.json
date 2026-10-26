@@ -549,14 +549,26 @@
       "dps": "DPS per attempt",
       "reveals": "Revealed too early per attempt",
       "shockwavesHit": "Shockwave hit rate per attempt",
-      "chomps": "Primordus Chomps per attempt"
+      "chomps": "Primordus Chomps per attempt",
+      "debilitated": "Debilitated received per attempt"
     },
-    "axisHintProject": "One point per batch (date). DPS, Revealed and Chomps are averages per attempt, the shockwave rate is the share of shockwaves that hit. Only attempts the player took part in count (Chomps: those that reached Primordus's attacks); without a shockwave played there is no rate.",
+    "axisHintProject": "One point per batch (date). DPS, Revealed, Chomps and Debilitated are averages per attempt, the shockwave rate is the share of shockwaves that hit. Only attempts the player took part in count (Chomps: those that reached Primordus's attacks); without a shockwave played there is no rate.",
     "chartsProject": {
       "dps": "Avg DPS per batch",
       "reveals": "Revealed too early per attempt (avg per batch)",
       "shockwavesHit": "Shockwave hit rate per batch",
-      "chomps": "Primordus Chomps per batch"
+      "chomps": "Primordus Chomps per batch",
+      "debilitated": "Debilitated received per attempt (avg per batch)"
+    },
+    "failedMechanics": {
+      "title": "Top {count} failed mechanics",
+      "hint": "Across all of the player's attempts in the project. Deaths, downs, conditions (void debuff, Debilitated, Infirmity), boss casts and unavoidable hits don't count.",
+      "mechanic": "Mechanic",
+      "count": "Count",
+      "perAttempt": "Avg per attempt",
+      "attempts": "Attempts affected",
+      "attemptsHint": "% of the player's attempts with at least one fail of this mechanic",
+      "empty": "No failed mechanics."
     },
     "backToRoster": "← Back to roster"
   }

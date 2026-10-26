@@ -10,7 +10,12 @@ import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import { formatNumber } from "@/lib/utils";
 import { ChompsChartCard } from "@/components/chomps-chart";
-import { PlayerDpsChart, PlayerRevealChart, PlayerShockwaveChart } from "@/components/player-charts";
+import {
+  PlayerDebilitatedChart,
+  PlayerDpsChart,
+  PlayerRevealChart,
+  PlayerShockwaveChart,
+} from "@/components/player-charts";
 
 function StatCard({
   label,
@@ -119,6 +124,7 @@ export default async function BatchPlayerPage(
     label: `#${s.n}`,
     dps: s.dps,
     revealCount: s.revealCount,
+    debilitatedCount: s.debilitatedCount,
     shockwaveRate:
       s.shockwavesPlayed ? Math.round(((s.shockwavesHit ?? 0) / s.shockwavesPlayed) * 100) : null,
     shockwavesPlayed: s.shockwavesPlayed,
@@ -180,6 +186,9 @@ export default async function BatchPlayerPage(
           <PlayerShockwaveChart points={points} />
         </ChartCard>
         <ChompsChartCard title={t("charts.chomps")} points={chompPoints} />
+        <ChartCard title={t("charts.debilitated")}>
+          <PlayerDebilitatedChart points={points} />
+        </ChartCard>
       </div>
     </div>
   );

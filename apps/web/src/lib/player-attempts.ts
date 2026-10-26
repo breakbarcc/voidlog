@@ -14,6 +14,8 @@ export interface PlayerAttemptStat {
   dps: number | null;
   /** "Revealed" events: isolated early reveals during the stealth window. */
   revealCount: number | null;
+  /** "Debilitated" (Geschwächt) stacks the player received. */
+  debilitatedCount: number | null;
   shockwavesPlayed: number | null;
   shockwavesHit: number | null;
   /**
@@ -25,7 +27,7 @@ export interface PlayerAttemptStat {
 
 /** Mechanic names the player statistics read, for narrowing the database query. */
 export const PLAYER_STAT_MECHANICS: readonly string[] = [
-  ...new Set([...shockwaveMechanicNames(), ...chompMechanicNames(), "Revealed"]),
+  ...new Set([...shockwaveMechanicNames(), ...chompMechanicNames(), "Revealed", "Debilitated"]),
 ];
 
 interface EventLike {
@@ -64,6 +66,7 @@ export function playerAttemptStats(
         ...base,
         dps: null,
         revealCount: null,
+        debilitatedCount: null,
         shockwavesPlayed: null,
         shockwavesHit: null,
         chomps: null,
@@ -84,6 +87,9 @@ export function playerAttemptStats(
       dps: player.dps,
       revealCount: events.filter(
         (e) => e.mechanicName === "Revealed" && e.playerResult?.account === account,
+      ).length,
+      debilitatedCount: events.filter(
+        (e) => e.mechanicName === "Debilitated" && e.playerResult?.account === account,
       ).length,
       shockwavesPlayed: shockwaves?.played ?? 0,
       shockwavesHit: shockwaves?.hit ?? 0,

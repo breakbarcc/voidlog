@@ -15,6 +15,7 @@ export interface PlayerChartPoint {
   label: string;
   dps: number | null;
   revealCount: number | null;
+  debilitatedCount: number | null;
   /** Hit share in percent of the shockwaves played; null when none were played. */
   shockwaveRate: number | null;
   shockwavesPlayed: number | null;
@@ -90,6 +91,30 @@ export function PlayerRevealChart({ points }: Readonly<{ points: PlayerChartPoin
           connectNulls={false}
           isAnimationActive={false}
           dot={{ r: 3, fill: "var(--color-revealCount)" }}
+        />
+      </LineChart>
+    </ChartContainer>
+  );
+}
+
+export function PlayerDebilitatedChart({ points }: Readonly<{ points: PlayerChartPoint[] }>) {
+  const t = useTranslations("playerDetail");
+  const config: ChartConfig = {
+    debilitatedCount: { label: t("charts.debilitated"), color: "var(--accent)" },
+  };
+  return (
+    <ChartContainer config={config} className={CHART_HEIGHT}>
+      <LineChart data={points} margin={MARGIN}>
+        <Axes allowDecimals />
+        <ChartTooltip content={<ChartTooltipContent />} />
+        <Line
+          dataKey="debilitatedCount"
+          type="monotone"
+          stroke="var(--color-debilitatedCount)"
+          strokeWidth={2}
+          connectNulls={false}
+          isAnimationActive={false}
+          dot={{ r: 3, fill: "var(--color-debilitatedCount)" }}
         />
       </LineChart>
     </ChartContainer>
