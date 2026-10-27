@@ -276,6 +276,25 @@
         "failed": "Gefailed"
       },
       "empty": "Noch keine Logs mit erfassten Green-Details. Neue Uploads werden automatisch erfasst, ältere Logs erscheinen hier nach dem Nachladen."
+    },
+    "summary": {
+      "title": "Übersicht aller Versuche",
+      "attempts": "Versuche",
+      "duration": "Gesamtdauer",
+      "durationHint": "Summe der Kampfdauer aller Versuche",
+      "hoursMinutes": "{hours} h {minutes} min",
+      "greens": "Greens gefailed",
+      "greensHint": "Gefailte Green-Casts von allen Green-Casts. Ein Cast gilt als gefailed, sobald ein Spieler ihn verfehlt hat.",
+      "inAttempts": "in {count} Versuchen mit Greens",
+      "chomps": "Primordus Chomps",
+      "chompsHint": "Treffer durch Lava Slam und Kiefer der Zerstörung, über alle Spieler",
+      "chompsSplit": "{slam} Slam · {jaws} Kiefer",
+      "chompAttempts": "in {chomped} von {total} Versuchen bis Primordus' Angriffen",
+      "reveals": "Reveals",
+      "revealsHint": "Zu frühe Aufdeckungen insgesamt, und wie viele Massenunsichtbarkeits-Casts mindestens eine davon hatten",
+      "revealWindows": "{revealed} von {windows} Invis-Casts mit Reveal ({percent})",
+      "kills": "Besiegte Drachen",
+      "killsHint": "Wie oft jeder Drache besiegt wurde (der Kampf ging in die nächste Phase oder der Versuch war ein Kill). Soo-Won zählt als ein Drache, besiegt nur mit dem Kill."
     }
   },
   "roster": {

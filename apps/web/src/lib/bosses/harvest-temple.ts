@@ -439,6 +439,16 @@ export const harvestTemple: BossCuration = {
   // The Greens roles (greens.roles above) plus the Venticator, who has no
   // circle of their own.
   squadRoles: ["HealKite", "Portal", "BoonDPS", "DPS", "Venticator"],
+  // The six dragons — not the Purifications or Giants. Soo-Won is one dragon
+  // across both of its phases, defeated only with the kill itself.
+  defeatableBosses: [
+    { name: "Jormag", phase: "Jormag" },
+    { name: "Primordus", phase: "Primordus" },
+    { name: "Kralkatorrik", phase: "Kralkatorrik" },
+    { name: "Mordremoth", phase: "Mordremoth" },
+    { name: "Zhaitan", phase: "Zhaitan" },
+    { name: "Soo-Won", phase: "Soo-Won 2" },
+  ],
   // Only dragon phases (incl. Soo-Won 1/2) have a boss HP worth showing. In
   // the intermissions the target is an invulnerable orb at a constant 100%
   // (Purification 1-3) or a group of adds ("Giants"), so the stored value

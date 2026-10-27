@@ -18,6 +18,7 @@ import { squadGreens } from "@/lib/green-stats";
 import { STEALTH_CAST_MECHANIC } from "@/lib/player-attempts";
 import { assignableRoles, loadBatchRoles, type BatchRoles } from "@/lib/player-roles";
 import { encounterShockwaves, squadShockwaves } from "@/lib/shockwave-stats";
+import { squadReveals } from "@/lib/stealth-stats";
 import { buildAttemptTimelineData } from "@/lib/attempt-timeline";
 import { translateMechanicName } from "@/lib/mechanic-names";
 import {
@@ -652,21 +653,9 @@ export default async function BatchDetailPage(
   let stealthWindows = 0;
   let revealedWindows = 0;
   for (const { encounter } of encounters) {
-    const events = encounter.phaseResults.flatMap((phase) => phase.mechanicEvents);
-    const casts = events
-      .filter((m) => m.mechanicName === STEALTH_CAST_MECHANIC)
-      .map((m) => m.timeMs)
-      .sort((a, b) => a - b);
-    // Reveals are only persisted inside a window, so each belongs to the
-    // latest cast before it.
-    const revealed = new Set<number>();
-    for (const m of events) {
-      if (m.category !== MechanicCategory.REVEAL) continue;
-      const cast = casts.findLast((t) => t <= m.timeMs);
-      if (cast !== undefined) revealed.add(cast);
-    }
-    stealthWindows += casts.length;
-    revealedWindows += revealed.size;
+    const reveals = squadReveals(encounter.phaseResults.flatMap((phase) => phase.mechanicEvents));
+    stealthWindows += reveals.windows;
+    revealedWindows += reveals.revealed;
   }
   // Greens card: the squad's Greens casts over all attempts — a cast is
   // failed as soon as one player failed it (lib/green-stats.ts).

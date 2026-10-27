@@ -276,6 +276,25 @@
         "failed": "Failed"
       },
       "empty": "No logs with recorded Green details yet. New uploads are recorded automatically, older logs appear here once they have been backfilled."
+    },
+    "summary": {
+      "title": "All attempts at a glance",
+      "attempts": "Attempts",
+      "duration": "Total time",
+      "durationHint": "Sum of the fight duration of every attempt",
+      "hoursMinutes": "{hours} h {minutes} min",
+      "greens": "Greens failed",
+      "greensHint": "Failed Greens casts out of all Greens casts. A cast counts as failed as soon as one player missed it.",
+      "inAttempts": "in {count} attempts with Greens",
+      "chomps": "Primordus Chomps",
+      "chompsHint": "Hits by Lava Slam and Jaws of Destruction, across all players",
+      "chompsSplit": "{slam} Slam · {jaws} Jaws",
+      "chompAttempts": "in {chomped} of {total} attempts reaching Primordus's attacks",
+      "reveals": "Reveals",
+      "revealsHint": "Early reveals in total, and how many Mass Invisibility casts had at least one",
+      "revealWindows": "{revealed} of {windows} invis casts with a reveal ({percent})",
+      "kills": "Dragons defeated",
+      "killsHint": "How often each dragon was defeated (the fight moved on to the next phase, or the attempt was a kill). Soo-Won counts as one dragon, defeated only with the kill."
     }
   },
   "roster": {

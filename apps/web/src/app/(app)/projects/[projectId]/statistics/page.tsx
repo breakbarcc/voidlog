@@ -7,12 +7,14 @@ import { FailedMechanicsCard } from "@/components/failed-mechanics-table";
 import { loadTopFailedMechanicsByRole } from "@/lib/failed-mechanics";
 import { assignableRoles, loadBossIds } from "@/lib/player-roles";
 import { loadProjectOverview } from "@/lib/project-overview";
+import { loadProjectSummary } from "@/lib/project-summary";
 import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import { formatDate } from "@/lib/utils";
 import { DpsPhaseChart } from "../dps-phase-chart";
 import { GreensByRole } from "../greens-by-role";
 import { PhaseProgressTrend } from "../phase-progress-trend";
+import { ProjectSummaryCard } from "../project-summary-card";
 import { GreenFailTrendChart, ShockwaveTrendChart } from "../trend-chart";
 
 /**
@@ -41,7 +43,10 @@ export default async function ProjectStatisticsPage(
     dpsPhaseNames,
     dpsNights,
   } = await loadProjectOverview(projectId, locale, true);
-  const failed = await loadTopFailedMechanicsByRole(projectId, locale);
+  const [failed, summary] = await Promise.all([
+    loadTopFailedMechanicsByRole(projectId, locale),
+    loadProjectSummary(projectId),
+  ]);
   const roles = assignableRoles(await loadBossIds({ projectId }));
 
   // One point per night, average kills per attempt that reached Primordus's
@@ -71,6 +76,8 @@ export default async function ProjectStatisticsPage(
       />
       <h1 className="font-heading text-foreground-strong text-2xl font-bold">{t("title")}</h1>
       <p className="text-muted mb-6 mt-1 text-sm">{t("subtitle")}</p>
+
+      {summary.attempts > 0 ? <ProjectSummaryCard summary={summary} /> : null}
 
       {progressBossId && progressPhaseNames && progressNights.length > 0 ? (
         <PhaseProgressTrend

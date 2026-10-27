@@ -102,6 +102,13 @@ export interface BossCuration {
    */
   squadRoles?: readonly string[];
   /**
+   * The bosses the encounter's fight is made of, in fight order, for the
+   * "defeated" counts (lib/project-summary.ts). `phase` is the boss's last
+   * `progressPhases` entry: it counts as defeated once a later progress
+   * phase was reached, or the attempt was a kill. Omitted = no such counts.
+   */
+  defeatableBosses?: readonly { name: string; phase: string }[];
+  /**
    * The boss's Greens mechanic, counted per cast (see lib/green-stats.ts).
    * Omitted = no Greens statistics for this boss.
    */
