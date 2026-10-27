@@ -4,6 +4,7 @@ import { chompMechanicNames, countChomps, hasChompCasts } from "./chomp-stats";
 import { greenMechanicNames, squadGreens } from "./green-stats";
 import { progressPhases } from "./main-phases";
 import { STEALTH_CAST_MECHANIC } from "./player-attempts";
+import { shockwaveConfig, shockwaveMechanicNames, squadShockwaves } from "./shockwave-stats";
 import { REVEAL_MECHANIC, squadReveals } from "./stealth-stats";
 
 /** Totals over every attempt of a project, for the statistics page's overview card. */
@@ -24,6 +25,18 @@ export interface ProjectSummary {
     attempts: number;
     /** Of those, the ones with at least one chomp. */
     attemptsChomped: number;
+  };
+  shockwaves: {
+    /** Shockwaves anybody played (was alive for). */
+    played: number;
+    /** Of those, the ones that hit at least one player. */
+    hitWaves: number;
+    /** Player hits in total (one per hit player and wave). */
+    hits: number;
+    /** Attempts with at least one shockwave played. */
+    attempts: number;
+    /** Of those, the ones with at least one hit. */
+    attemptsHit: number;
   };
   reveals: {
     reveals: number;
@@ -53,6 +66,7 @@ export async function loadProjectSummary(projectId: string): Promise<ProjectSumm
       bossId: true,
       success: true,
       durationMs: true,
+      playerResults: { select: { account: true } },
       phaseResults: {
         select: {
           name: true,
@@ -64,12 +78,17 @@ export async function loadProjectSummary(projectId: string): Promise<ProjectSumm
                 in: [
                   ...greenMechanicNames(),
                   ...chompMechanicNames(),
+                  ...shockwaveMechanicNames(),
                   STEALTH_CAST_MECHANIC,
                   REVEAL_MECHANIC,
                 ],
               },
             },
-            select: { mechanicName: true, timeMs: true },
+            select: {
+              mechanicName: true,
+              timeMs: true,
+              playerResult: { select: { account: true } },
+            },
           },
         },
       },
@@ -81,6 +100,7 @@ export async function loadProjectSummary(projectId: string): Promise<ProjectSumm
     durationMs: 0,
     greens: { failed: 0, played: 0, attempts: 0 },
     chomps: { slam: 0, jaws: 0, attempts: 0, attemptsChomped: 0 },
+    shockwaves: { played: 0, hitWaves: 0, hits: 0, attempts: 0, attemptsHit: 0 },
     reveals: { reveals: 0, windows: 0, revealed: 0 },
     kills: null,
   };
@@ -101,6 +121,25 @@ export async function loadProjectSummary(projectId: string): Promise<ProjectSumm
       summary.chomps.jaws += chomps.jaws;
       summary.chomps.attempts += 1;
       if (chomps.slam + chomps.jaws > 0) summary.chomps.attemptsChomped += 1;
+    }
+
+    // Counted per wave like the batch page's card (lib/shockwave-stats.ts).
+    const shockwaves = squadShockwaves(
+      encounter.bossId,
+      events.map((e) => ({
+        mechanicName: e.mechanicName,
+        timeMs: e.timeMs,
+        playerKey: e.playerResult?.account ?? null,
+      })),
+      encounter.playerResults.map((p) => p.account),
+    );
+    if (shockwaves.played > 0) {
+      const hitMechanic = shockwaveConfig(encounter.bossId)?.hitMechanic;
+      summary.shockwaves.played += shockwaves.played;
+      summary.shockwaves.hitWaves += shockwaves.hit;
+      summary.shockwaves.hits += events.filter((e) => e.mechanicName === hitMechanic).length;
+      summary.shockwaves.attempts += 1;
+      if (shockwaves.hit > 0) summary.shockwaves.attemptsHit += 1;
     }
 
     const reveals = squadReveals(events);

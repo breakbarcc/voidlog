@@ -38,14 +38,14 @@ export async function ProjectSummaryCard({ summary }: Readonly<{ summary: Projec
   const locale = await getLocale();
   const percent = (part: number, total: number) => formatPercent(locale, part, total);
   const totalMinutes = Math.round(summary.durationMs / 60_000);
-  const { greens, chomps, reveals } = summary;
+  const { greens, chomps, shockwaves, reveals } = summary;
 
   return (
     <Card size="3" className="border-line bg-surface mb-3.5 border">
       <div className="text-muted-strong mb-3.5 text-xs font-medium uppercase tracking-wide">
         {t("title")}
       </div>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
         <Tile label={t("attempts")}>
           <div className="font-heading text-foreground text-xl font-bold">{summary.attempts}</div>
         </Tile>
@@ -75,6 +75,18 @@ export async function ProjectSummaryCard({ summary }: Readonly<{ summary: Projec
           </div>
           <div className="text-muted text-xs">
             {t("chompAttempts", { chomped: chomps.attemptsChomped, total: chomps.attempts })}
+          </div>
+        </Tile>
+        <Tile label={t("shockwaves")} hint={t("shockwavesHint")}>
+          <div className="font-heading text-danger text-xl font-bold">
+            {shockwaves.hitWaves}{" "}
+            <span className="text-muted text-sm font-medium">
+              / {shockwaves.played} ({percent(shockwaves.hitWaves, shockwaves.played)})
+            </span>
+          </div>
+          <div className="text-muted text-xs">{t("shockwaveHits", { count: shockwaves.hits })}</div>
+          <div className="text-muted text-xs">
+            {t("shockwaveAttempts", { hit: shockwaves.attemptsHit, total: shockwaves.attempts })}
           </div>
         </Tile>
         <Tile label={t("reveals")} hint={t("revealsHint")}>
