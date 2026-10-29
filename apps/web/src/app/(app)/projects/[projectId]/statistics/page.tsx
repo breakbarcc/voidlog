@@ -9,7 +9,7 @@ import { FailedMechanicsSkeleton, OverviewSkeleton, SummarySkeleton } from "./sk
 
 /**
  * Statistics: every chart of the project in one place, in depth. The
- * history page (`../page.tsx`) keeps only the logs and one simple progress
+ * history page (`../(history)/page.tsx`) keeps only the logs and one simple progress
  * chart.
  *
  * Only the membership check and the heading are awaited here; the charts

@@ -1,21 +1,5 @@
 import { Card } from "@radix-ui/themes";
-
-function Bar({ className }: Readonly<{ className: string }>) {
-  return <div className={`bg-surface-2 animate-pulse rounded-sm ${className}`} />;
-}
-
-/** Placeholder for one chart card while its data loads: a title line and the chart's area. */
-export function ChartSkeleton({
-  height,
-  className = "",
-}: Readonly<{ height: number; className?: string }>) {
-  return (
-    <Card size="3" className={`border-line bg-surface mb-3.5 border ${className}`}>
-      <Bar className="mb-3.5 h-3 w-48" />
-      <div className="bg-surface-2 animate-pulse rounded-md" style={{ height }} />
-    </Card>
-  );
-}
+import { ChartSkeleton, SkeletonBar as Bar } from "@/components/chart-skeleton";
 
 /** The overview card's tiles (project-summary-card.tsx). */
 export function SummarySkeleton() {

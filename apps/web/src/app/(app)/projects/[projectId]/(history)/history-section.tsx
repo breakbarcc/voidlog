@@ -1,27 +1,22 @@
-import { ProjectRole } from "@voidlog/db";
 import { Table } from "@radix-ui/themes";
 import Link from "next/link";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/locale";
-import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PhaseBadge } from "@/components/phase-badge";
 import { loadProjectOverview } from "@/lib/project-overview";
-import { hasRole, requireProjectMembership } from "@/lib/projects";
-import { requireSession } from "@/lib/session";
-import { DeleteProjectButton } from "./delete-project-button";
-import { PhaseProgressTrend } from "./phase-progress-trend";
+import { PhaseProgressTrend } from "../phase-progress-trend";
 
-export default async function ProjectDetailPage(
-  props: Readonly<PageProps<"/projects/[projectId]">>,
-) {
-  const { projectId } = await props.params;
-  const session = await requireSession();
-  const membership = await requireProjectMembership(projectId, session.user.id);
-  const locale = (await getLocale()) as Locale;
+/**
+ * The log history page's data part: the progress chart and the raid-night
+ * table. Loaded on its own, so the page can show its heading at once and
+ * stream this in behind a skeleton (page.tsx).
+ */
+export async function HistorySection({
+  projectId,
+  locale,
+}: Readonly<{ projectId: string; locale: Locale }>) {
   const t = await getTranslations("project");
   const tCommon = await getTranslations("common");
-  const tSidebar = await getTranslations("sidebar");
-
   // History page: the logs and one simple progress chart. The in-depth
   // charts (damage per phase, mechanic trends) live on the statistics page.
   const { batches, progressBossId, progressPhaseNames, progressNights } = await loadProjectOverview(
@@ -31,34 +26,7 @@ export default async function ProjectDetailPage(
   );
 
   return (
-    <div className="px-10 py-8">
-      <Breadcrumbs
-        items={[{ label: tSidebar("projects"), href: "/" }, { label: membership.project.name }]}
-      />
-      <div className="mb-6 flex items-end justify-between">
-        <div>
-          <h1 className="font-heading text-foreground-strong text-2xl font-bold">
-            {membership.project.name}
-          </h1>
-          <p className="text-muted mt-1 text-sm">
-            {t("raidNightsTracked", { count: batches.length })}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          {hasRole(membership.role, ProjectRole.CONTRIBUTOR) ? (
-            <Link
-              href={`/projects/${projectId}/batches/new`}
-              className="bg-primary text-primary-foreground inline-flex h-8 items-center justify-center rounded-sm px-3.5 text-sm font-semibold"
-            >
-              {t("uploadBatch")}
-            </Link>
-          ) : null}
-          {membership.role === ProjectRole.ADMIN ? (
-            <DeleteProjectButton projectId={projectId} projectName={membership.project.name} />
-          ) : null}
-        </div>
-      </div>
-
+    <>
       {progressBossId && progressPhaseNames && progressNights.length > 0 ? (
         <PhaseProgressTrend
           bossId={progressBossId}
@@ -122,6 +90,6 @@ export default async function ProjectDetailPage(
           ) : null}
         </Table.Body>
       </Table.Root>
-    </div>
+    </>
   );
 }
