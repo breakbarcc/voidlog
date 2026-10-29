@@ -3,6 +3,7 @@
 // failed-mechanics.ts.
 
 export const TOP_FAILED_MECHANICS = 5;
+export const TOP_FAILED_MECHANICS_PER_PHASE = 3;
 
 export interface FailedMechanic {
   bossId: string;
@@ -17,4 +18,15 @@ export interface FailedMechanic {
 export interface FailedMechanicsView {
   mechanics: FailedMechanic[];
   attempts: number;
+}
+
+/** The most failed mechanics of one phase, over the attempts that reached it. */
+export interface PhaseFailedMechanic {
+  bossId: string;
+  phase: string;
+  color: string;
+  /** Attempts that reached the phase. */
+  reached: number;
+  /** Most failed first, at most TOP_FAILED_MECHANICS_PER_PHASE; empty when nobody failed anything. */
+  top: FailedMechanic[];
 }

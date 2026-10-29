@@ -609,7 +609,14 @@
     "roleFilter": "Rolle",
     "allRoles": "Alle Rollen",
     "roleHint": "Gezählt werden nur die Fails der Spieler mit der Rolle {role}, über die Versuche, in denen sie besetzt war.",
-    "emptyRole": "Keine gefailten Mechaniken für {role}."
+    "emptyRole": "Keine gefailten Mechaniken für {role}.",
+    "byPhase": {
+      "title": "Top {count} Fails pro Phase",
+      "hint": "Pro Phase die Mechaniken, die am öftesten schiefgehen, über alle Spieler. Die Balken zeigen die Fails pro Versuch, der die Phase erreicht hat. Tode, Downs, Zustände, Boss-Casts und unvermeidbare Treffer zählen nicht.",
+      "perAttempt": "{value} pro Versuch",
+      "details": "{count} Fails · in {attempts} von {reached} Versuchen",
+      "none": "Keine Fails"
+    }
   },
   "roleSelect": {
     "none": "Keine Rolle",

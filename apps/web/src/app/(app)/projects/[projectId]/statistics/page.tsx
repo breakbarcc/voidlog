@@ -4,7 +4,7 @@ import type { Locale } from "@/i18n/locale";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { ChompsChartCard } from "@/components/chomps-chart";
 import { FailedMechanicsCard } from "@/components/failed-mechanics-table";
-import { loadTopFailedMechanicsByRole } from "@/lib/failed-mechanics";
+import { loadProjectFailedMechanics } from "@/lib/failed-mechanics";
 import { assignableRoles, loadBossIds } from "@/lib/player-roles";
 import { loadProjectOverview } from "@/lib/project-overview";
 import { loadProjectSummary } from "@/lib/project-summary";
@@ -12,6 +12,7 @@ import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import { formatDate } from "@/lib/utils";
 import { DpsPhaseChart } from "../dps-phase-chart";
+import { FailedMechanicByPhase } from "../failed-mechanic-by-phase";
 import { GreensByRole } from "../greens-by-role";
 import { PhaseProgressTrend } from "../phase-progress-trend";
 import { ProjectSummaryCard } from "../project-summary-card";
@@ -34,6 +35,13 @@ export default async function ProjectStatisticsPage(
   const tChomps = await getTranslations("chomps");
   const tSidebar = await getTranslations("sidebar");
 
+  // Independent of each other, so loaded side by side.
+  const [overview, failed, summary, bossIds] = await Promise.all([
+    loadProjectOverview(projectId, locale, true),
+    loadProjectFailedMechanics(projectId, locale),
+    loadProjectSummary(projectId),
+    loadBossIds({ projectId }),
+  ]);
   const {
     allTrendPoints,
     greenCircles,
@@ -42,12 +50,8 @@ export default async function ProjectStatisticsPage(
     progressNights,
     dpsPhaseNames,
     dpsNights,
-  } = await loadProjectOverview(projectId, locale, true);
-  const [failed, summary] = await Promise.all([
-    loadTopFailedMechanicsByRole(projectId, locale),
-    loadProjectSummary(projectId),
-  ]);
-  const roles = assignableRoles(await loadBossIds({ projectId }));
+  } = overview;
+  const roles = assignableRoles(bossIds);
 
   // One point per night, average kills per attempt that reached Primordus's
   // attacks (nights without such an attempt leave a gap).
@@ -129,6 +133,8 @@ export default async function ProjectStatisticsPage(
           />
         </div>
       ) : null}
+
+      {failed.byPhase.length > 0 ? <FailedMechanicByPhase phases={failed.byPhase} /> : null}
 
       {hasContent ? null : <p className="text-muted text-sm">{t("empty")}</p>}
     </div>

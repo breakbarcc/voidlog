@@ -1,4 +1,4 @@
-import { prisma } from "@voidlog/db";
+import { Prisma, prisma } from "@voidlog/db";
 import type { Locale } from "@/i18n/locale";
 import { translateMechanicName } from "./mechanic-names";
 import {
@@ -9,11 +9,15 @@ import {
   isVisibleCastMarker,
   unusedMechanicNames,
 } from "./mechanics";
+import { isMainPhase, progressPhases } from "./main-phases";
+import { phaseColor } from "@/components/phase-badge";
 import { loadProjectRoles } from "./player-roles";
 import {
   TOP_FAILED_MECHANICS,
+  TOP_FAILED_MECHANICS_PER_PHASE,
   type FailedMechanic,
   type FailedMechanicsView,
+  type PhaseFailedMechanic,
 } from "./failed-mechanics-view";
 
 // Conditions another mechanic puts on the player (Void.D from the void
@@ -54,13 +58,14 @@ interface EncounterEvents {
 function topFailedMechanics<E extends EncounterEvents>(
   encounters: readonly E[],
   locale: Locale,
-  include: (encounter: E, account: string) => boolean = () => true,
+  include: (encounter: E, account: string, timeMs: number) => boolean = () => true,
+  limit = TOP_FAILED_MECHANICS,
 ): FailedMechanic[] {
   const byName = new Map<string, FailedMechanic>();
   for (const encounter of encounters) {
     const seen = new Set<string>();
     for (const event of encounter.mechanicEvents) {
-      if (!include(encounter, event.account)) continue;
+      if (!include(encounter, event.account, event.timeMs)) continue;
       if (!isFail(encounter.bossId, event, encounter.mechanicEvents)) continue;
       // Raw names aren't unique across bosses, so they're kept apart per boss.
       const key = `${encounter.bossId}:${event.mechanicName}`;
@@ -84,58 +89,132 @@ function topFailedMechanics<E extends EncounterEvents>(
   }
   return [...byName.values()]
     .sort((a, b) => b.count - a.count || b.attempts - a.attempts)
-    .slice(0, TOP_FAILED_MECHANICS);
+    .slice(0, limit);
+}
+
+interface PhaseSpan {
+  name: string;
+  startMs: number;
+  endMs: number;
+  reached: boolean;
+}
+
+/**
+ * The phases a per-phase view splits a boss's fight into, in fight order:
+ * the curated progress phases (dragons and intermissions), or every main
+ * phase for bosses without curation.
+ */
+function fightPhases(bossId: string, phases: readonly PhaseSpan[]): string[] {
+  const curated = progressPhases(bossId);
+  if (curated) return [...curated];
+  return [...new Set(phases.filter((p) => isMainPhase(bossId, p.name)).map((p) => p.name))];
+}
+
+/**
+ * The fight phase `timeMs` falls into — the narrowest one, as the worker
+ * does (lib persist-encounter's resolvePhaseIndex), but among the fight
+ * phases only: events are stored under breakbar sub-phases too.
+ */
+function phaseAt(phases: readonly PhaseSpan[], names: readonly string[], timeMs: number) {
+  let best: PhaseSpan | undefined;
+  for (const phase of phases) {
+    if (!names.includes(phase.name)) continue;
+    if (timeMs < phase.startMs || timeMs > phase.endMs) continue;
+    if (!best || phase.endMs - phase.startMs < best.endMs - best.startMs) best = phase;
+  }
+  return best?.name;
+}
+
+/** The most failed mechanics per fight phase, counted over the attempts that reached it. */
+function topFailedMechanicByPhase(
+  encounters: readonly (EncounterEvents & { phases: PhaseSpan[] })[],
+  locale: Locale,
+): PhaseFailedMechanic[] {
+  const result: PhaseFailedMechanic[] = [];
+  for (const bossId of new Set(encounters.map((e) => e.bossId))) {
+    const ofBoss = encounters.filter((e) => e.bossId === bossId);
+    const names = fightPhases(bossId, ofBoss.flatMap((e) => e.phases));
+    names.forEach((phase, index) => {
+      const reached = ofBoss.filter((e) => e.phases.some((p) => p.name === phase && p.reached));
+      if (reached.length === 0) return;
+      const top = topFailedMechanics(
+        reached,
+        locale,
+        (e, _account, timeMs) => phaseAt(e.phases, names, timeMs) === phase,
+        TOP_FAILED_MECHANICS_PER_PHASE,
+      );
+      result.push({
+        bossId,
+        phase,
+        color: phaseColor(bossId, index, phase),
+        reached: reached.length,
+        top,
+      });
+    });
+  }
+  return result;
+}
+
+interface EventRow {
+  encounterResultId: string;
+  mechanicName: string;
+  displayName: string;
+  timeMs: number;
+  account: string;
 }
 
 async function loadEncounterEvents(projectId: string, account?: string) {
-  const where = {
-    logFile: { batch: { projectId } },
-    ...(account ? { playerResults: { some: { account } } } : {}),
-  };
-  const bosses = await prisma.encounterResult.findMany({
-    where,
-    select: { bossId: true },
-    distinct: ["bossId"],
-  });
   const encounters = await prisma.encounterResult.findMany({
-    where,
+    where: {
+      logFile: { batch: { projectId } },
+      ...(account ? { playerResults: { some: { account } } } : {}),
+    },
     select: {
+      id: true,
       bossId: true,
       logFile: { select: { batchId: true } },
       playerResults: { select: { account: true } },
-      phaseResults: {
-        select: {
-          // Player events only, minus what no view reads (noise such as
-          // "Orb Push" and the bulk-captured casts are most rows).
-          mechanicEvents: {
-            where: {
-              playerResult: account ? { is: { account } } : { isNot: null },
-              mechanicName: { notIn: unusedMechanicNames(bosses.map((b) => b.bossId)) },
-              NOT: { mechanicName: { contains: GENERIC_CAST_MARKER_NAME_PART } },
-            },
-            select: {
-              mechanicName: true,
-              displayName: true,
-              timeMs: true,
-              playerResult: { select: { account: true } },
-            },
-          },
-        },
-      },
+      phaseResults: { select: { name: true, startMs: true, endMs: true, reached: true } },
     },
   });
+
+  // The events are tens of thousands of rows: as raw SQL in one flat query,
+  // since Prisma's nested select (one huge IN list per relation level, then
+  // stitching the result together) took about five times as long.
+  // Player events only, minus what no view reads (noise such as "Orb Push"
+  // and the bulk-captured casts are most rows).
+  const unused = unusedMechanicNames([...new Set(encounters.map((e) => e.bossId))]);
+  const rows = await prisma.$queryRaw<EventRow[]>`
+    SELECT ph."encounterResultId", m."mechanicName", m."displayName", m."timeMs", pr.account
+    FROM mechanic_events m
+    JOIN player_results pr ON pr.id = m."playerResultId"
+    JOIN phase_results ph ON ph.id = m."phaseResultId"
+    JOIN encounter_results er ON er.id = ph."encounterResultId"
+    JOIN log_files lf ON lf.id = er."logFileId"
+    JOIN upload_batches b ON b.id = lf."batchId"
+    WHERE b."projectId" = ${projectId}
+      AND m."mechanicName" <> ALL(${unused}::text[])
+      AND m."mechanicName" NOT LIKE ${`%${GENERIC_CAST_MARKER_NAME_PART}%`}
+      ${account ? Prisma.sql`AND pr.account = ${account}` : Prisma.empty}`;
+
+  const eventsByEncounter = new Map<string, EventRow[]>();
+  for (const row of rows) {
+    const events = eventsByEncounter.get(row.encounterResultId) ?? [];
+    events.push(row);
+    eventsByEncounter.set(row.encounterResultId, events);
+  }
+
   return encounters.map((e) => ({
     bossId: e.bossId,
     batchId: e.logFile.batchId,
     accounts: e.playerResults.map((p) => p.account),
-    mechanicEvents: e.phaseResults.flatMap((p) =>
-      p.mechanicEvents.map((m) => ({
-        mechanicName: m.mechanicName,
-        displayName: m.displayName,
-        timeMs: m.timeMs,
-        account: m.playerResult?.account ?? "",
-      })),
-    ),
+    phases: e.phaseResults,
+    mechanicEvents: (eventsByEncounter.get(e.id) ?? []).map((m) => ({
+      mechanicName: m.mechanicName,
+      displayName: m.displayName,
+      timeMs: m.timeMs,
+      account: m.account,
+    })),
   }));
 }
 
@@ -154,15 +233,20 @@ export async function loadTopFailedMechanics(
 }
 
 /**
- * The squad's top fails, overall (`all`) and per assigned role
+ * The squad's top fails, overall (`all`), per fight phase (`byPhase`, only
+ * the few most failed mechanics) and per assigned role
  * (lib/player-roles.ts — a batch override wins over the project's role). A
  * role's view counts only the fails of the players holding it in each
  * attempt, over the attempts in which somebody held it.
  */
-export async function loadTopFailedMechanicsByRole(
+export async function loadProjectFailedMechanics(
   projectId: string,
   locale: Locale,
-): Promise<{ all: FailedMechanicsView; byRole: Record<string, FailedMechanicsView> }> {
+): Promise<{
+  all: FailedMechanicsView;
+  byRole: Record<string, FailedMechanicsView>;
+  byPhase: PhaseFailedMechanic[];
+}> {
   const [encounters, projectRoles, batchRoles] = await Promise.all([
     loadEncounterEvents(projectId),
     loadProjectRoles(projectId),
@@ -192,5 +276,6 @@ export async function loadTopFailedMechanicsByRole(
   return {
     all: { mechanics: topFailedMechanics(encounters, locale), attempts: encounters.length },
     byRole,
+    byPhase: topFailedMechanicByPhase(encounters, locale),
   };
 }

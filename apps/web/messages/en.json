@@ -609,7 +609,14 @@
     "roleFilter": "Role",
     "allRoles": "All roles",
     "roleHint": "Only the fails of the players holding {role} count, over the attempts in which it was held.",
-    "emptyRole": "No failed mechanics for {role}."
+    "emptyRole": "No failed mechanics for {role}.",
+    "byPhase": {
+      "title": "Top {count} fails per phase",
+      "hint": "Per phase, the mechanics that go wrong most often, across all players. The bars show fails per attempt that reached the phase. Deaths, downs, conditions, boss casts and unavoidable hits don't count.",
+      "perAttempt": "{value} per attempt",
+      "details": "{count} fails · in {attempts} of {reached} attempts",
+      "none": "No fails"
+    }
   },
   "roleSelect": {
     "none": "No role",
