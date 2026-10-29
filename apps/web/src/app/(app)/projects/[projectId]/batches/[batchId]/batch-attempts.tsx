@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircledIcon, ChevronRightIcon, Cross2Icon } from "@radix-ui/react-icons";
-import { Card, HoverCard, Select, Tabs, Table } from "@radix-ui/themes";
+import { Card, Select, Tabs, Table } from "@radix-ui/themes";
 import Link from "next/link";
 import { useMemo, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
@@ -9,27 +9,15 @@ import {
   AttackGlyph,
   attackType,
   failMechanicIcon,
-  HIGH_FREQUENCY_ATTACK_TYPES,
-  tooltipMechanicIcon,
   type AttackType,
 } from "@/components/mechanic-icons";
-import {
-  MARKER_CLUSTER_GAP_MS,
-  MARKER_PRIORITY,
-  markerRank,
-  DEAD_MECHANIC_NAME,
-  clusterMarkers,
-  groupClustersByTime,
-  groupFailMechanics,
-  MechanicHoverCard,
-  MultiMechanicHoverCard,
-} from "@/components/mechanic-hover-card";
+import { groupFailMechanics, MechanicHoverCard } from "@/components/mechanic-hover-card";
 import { AttemptTimeline } from "@/components/attempt-timeline";
 import { PhaseBadge, phaseColor, readableHeadingColor } from "@/components/phase-badge";
 import { RoleSelect } from "@/components/role-select";
 import { SortableColumnHeader } from "@/components/sortable-column-header";
 import type { Locale } from "@/i18n/locale";
-import { DOWNED_MECHANIC_NAME, isVisibleCastMarker } from "@/lib/mechanics";
+import { isVisibleCastMarker } from "@/lib/mechanics";
 import { formatDateTime, formatPercent } from "@/lib/utils";
 import {
   PhaseProgressChart,
