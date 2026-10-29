@@ -585,7 +585,8 @@
       "reveals": "Zu früh aufgedeckt pro Versuch",
       "shockwavesHit": "Schockwellen-Trefferquote pro Versuch",
       "chomps": "Primordus Chomps pro Versuch",
-      "debilitated": "Geschwächt erhalten pro Versuch"
+      "debilitated": "Geschwächt erhalten pro Versuch",
+      "greensMissed": "Greens verpasst"
     },
     "axisHintProject": "Ein Punkt pro Batch (Datum). DPS, Revealed, Chomps und Geschwächt sind Durchschnitte pro Versuch, die Schockwellen-Quote ist der Anteil getroffener Schockwellen. Es zählen nur Versuche, an denen der Spieler teilgenommen hat (Chomps: die bis zu Primordus' Angriffen kamen); ohne gespielte Schockwelle gibt es keine Quote.",
     "chartsProject": {
@@ -593,7 +594,8 @@
       "reveals": "Zu früh aufgedeckt pro Versuch (Ø je Batch)",
       "shockwavesHit": "Schockwellen-Trefferquote pro Batch",
       "chomps": "Primordus Chomps pro Batch",
-      "debilitated": "Geschwächt erhalten pro Versuch (Ø je Batch)"
+      "debilitated": "Geschwächt erhalten pro Versuch (Ø je Batch)",
+      "greensMissed": "Verpasste Greens pro Batch"
     },
     "backToRoster": "← Zurück zum Roster"
   },

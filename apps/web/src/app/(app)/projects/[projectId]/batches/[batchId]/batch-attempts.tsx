@@ -1222,7 +1222,7 @@ export function BatchAttempts({
             ))}
             {roster.length === 0 ? (
               <Table.Row>
-                <Table.Cell colSpan={11} className="text-muted">
+                <Table.Cell colSpan={12} className="text-muted">
                   {t("roster.empty")}
                 </Table.Cell>
               </Table.Row>

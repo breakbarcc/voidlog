@@ -20,6 +20,14 @@ export interface PlayerChartPoint {
   shockwaveRate: number | null;
   shockwavesPlayed: number | null;
   shockwavesHit: number | null;
+  /**
+   * Share in percent of the player's Greens they weren't in their circle
+   * (lib/green-player-stats.ts); null when their role had none. Only on the
+   * project page.
+   */
+  greensRate?: number | null;
+  greensExpected?: number | null;
+  greensMissed?: number | null;
 }
 
 const CHART_HEIGHT = "aspect-auto h-[180px] w-full";
@@ -150,6 +158,41 @@ export function PlayerShockwaveChart({ points }: Readonly<{ points: PlayerChartP
           connectNulls={false}
           isAnimationActive={false}
           dot={{ r: 3, fill: "var(--color-shockwaveRate)" }}
+        />
+      </LineChart>
+    </ChartContainer>
+  );
+}
+
+export function PlayerGreensChart({ points }: Readonly<{ points: PlayerChartPoint[] }>) {
+  const t = useTranslations("playerDetail");
+  const config: ChartConfig = {
+    greensRate: { label: t("charts.greensMissed"), color: "var(--danger)" },
+  };
+  return (
+    <ChartContainer config={config} className={CHART_HEIGHT}>
+      <LineChart data={points} margin={MARGIN}>
+        <Axes formatTick={(v) => `${v}%`} />
+        <ChartTooltip
+          content={
+            <ChartTooltipContent
+              formatter={(value, _name, item) => {
+                const p = item?.payload as PlayerChartPoint | undefined;
+                return p?.greensExpected == null
+                  ? `${String(value)}%`
+                  : `${String(value)}% (${p.greensMissed}/${p.greensExpected})`;
+              }}
+            />
+          }
+        />
+        <Line
+          dataKey="greensRate"
+          type="monotone"
+          stroke="var(--color-greensRate)"
+          strokeWidth={2}
+          connectNulls={false}
+          isAnimationActive={false}
+          dot={{ r: 3, fill: "var(--color-greensRate)" }}
         />
       </LineChart>
     </ChartContainer>

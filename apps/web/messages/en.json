@@ -585,7 +585,8 @@
       "reveals": "Revealed too early per attempt",
       "shockwavesHit": "Shockwave hit rate per attempt",
       "chomps": "Primordus Chomps per attempt",
-      "debilitated": "Debilitated received per attempt"
+      "debilitated": "Debilitated received per attempt",
+      "greensMissed": "Greens missed"
     },
     "axisHintProject": "One point per batch (date). DPS, Revealed, Chomps and Debilitated are averages per attempt, the shockwave rate is the share of shockwaves that hit. Only attempts the player took part in count (Chomps: those that reached Primordus's attacks); without a shockwave played there is no rate.",
     "chartsProject": {
@@ -593,7 +594,8 @@
       "reveals": "Revealed too early per attempt (avg per batch)",
       "shockwavesHit": "Shockwave hit rate per batch",
       "chomps": "Primordus Chomps per batch",
-      "debilitated": "Debilitated received per attempt (avg per batch)"
+      "debilitated": "Debilitated received per attempt (avg per batch)",
+      "greensMissed": "Greens missed per batch"
     },
     "backToRoster": "← Back to roster"
   },

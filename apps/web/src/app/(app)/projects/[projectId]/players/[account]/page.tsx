@@ -10,6 +10,7 @@ import { FailedMechanicsCard } from "@/components/failed-mechanics-table";
 import {
   PlayerDebilitatedChart,
   PlayerDpsChart,
+  PlayerGreensChart,
   PlayerRevealChart,
   PlayerShockwaveChart,
   type PlayerChartPoint,
@@ -20,6 +21,14 @@ import {
   playerAttemptStats,
 } from "@/lib/player-attempts";
 import { loadTopFailedMechanics } from "@/lib/failed-mechanics";
+import {
+  addPlayerGreens,
+  EMPTY_PLAYER_GREENS,
+  GREEN_LIFECYCLE_MECHANICS,
+  greenWaveMechanicNames,
+  playerGreens,
+} from "@/lib/green-player-stats";
+import { loadBatchRoleOverrides, loadProjectRoles } from "@/lib/player-roles";
 import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import { formatDate, formatNumber } from "@/lib/utils";
@@ -68,9 +77,10 @@ export default async function ProjectPlayerPage(
   const tCommon = await getTranslations("common");
   const tSidebar = await getTranslations("sidebar");
 
-  // Only the events the three charts read: the player's own plus the boss's
-  // casts (no player), which the shockwave count needs.
-  const encounters = await prisma.encounterResult.findMany({
+  // Only the events the charts read: the player's own plus the boss's casts
+  // (no player), which the shockwave count needs, and the Greens waves with
+  // who stood in which circle.
+  const encountersQuery = prisma.encounterResult.findMany({
     where: { logFile: { batch: { projectId } } },
     select: {
       bossId: true,
@@ -83,7 +93,13 @@ export default async function ProjectPlayerPage(
         select: {
           mechanicEvents: {
             where: {
-              mechanicName: { in: [...PLAYER_STAT_MECHANICS] },
+              mechanicName: {
+                in: [
+                  ...PLAYER_STAT_MECHANICS,
+                  ...greenWaveMechanicNames(),
+                  ...GREEN_LIFECYCLE_MECHANICS,
+                ],
+              },
               OR: [
                 { playerResult: { is: null } },
                 { playerResult: { is: { account } } },
@@ -93,6 +109,7 @@ export default async function ProjectPlayerPage(
             select: {
               mechanicName: true,
               timeMs: true,
+              context: true,
               playerResult: { select: { account: true } },
             },
           },
@@ -100,6 +117,11 @@ export default async function ProjectPlayerPage(
       },
     },
   });
+  const [encounters, projectRoles, roleOverrides] = await Promise.all([
+    encountersQuery,
+    loadProjectRoles(projectId),
+    loadBatchRoleOverrides(projectId),
+  ]);
   const own = encounters.flatMap((e) => e.playerResults.filter((p) => p.account === account));
   if (own.length === 0) notFound();
 
@@ -119,11 +141,34 @@ export default async function ProjectPlayerPage(
         (a[0]!.recordedAt ?? a[0]!.createdAt).getTime() -
         (b[0]!.recordedAt ?? b[0]!.createdAt).getTime(),
     )
-    .map((group) => ({
-      date: group[0]!.recordedAt ?? group[0]!.createdAt,
-      batchId: group[0]!.logFile.batchId,
-      played: playerAttemptStats(account, group).filter((s) => s.dps !== null),
-    }));
+    .map((group) => {
+      const batchId = group[0]!.logFile.batchId;
+      // The role the player held in this batch (lib/player-roles.ts).
+      const greensRole =
+        roleOverrides.get(`${batchId}|${account}`) ?? projectRoles.get(account) ?? null;
+      const greens = { ...EMPTY_PLAYER_GREENS };
+      for (const encounter of group) {
+        const player = encounter.playerResults.find((p) => p.account === account);
+        if (!player) continue;
+        const events = encounter.phaseResults.flatMap((phase) => phase.mechanicEvents);
+        addPlayerGreens(
+          greens,
+          playerGreens(
+            encounter.bossId,
+            events.filter((e) => e.playerResult === null),
+            events.filter((e) => e.playerResult?.account === account),
+            player.characterName,
+            greensRole,
+          ),
+        );
+      }
+      return {
+        date: group[0]!.recordedAt ?? group[0]!.createdAt,
+        batchId,
+        played: playerAttemptStats(account, group).filter((s) => s.dps !== null),
+        greens,
+      };
+    });
 
   const points: PlayerChartPoint[] = nights.map((night) => {
     const sum = (pick: (s: (typeof night.played)[number]) => number | null) =>
@@ -142,6 +187,12 @@ export default async function ProjectPlayerPage(
           : null,
       shockwavesPlayed: took > 0 ? sum((s) => s.shockwavesPlayed) : null,
       shockwavesHit: took > 0 ? sum((s) => s.shockwavesHit) : null,
+      greensRate:
+        night.greens.expected > 0
+          ? Math.round((night.greens.missed / night.greens.expected) * 100)
+          : null,
+      greensExpected: night.greens.expected > 0 ? night.greens.expected : null,
+      greensMissed: night.greens.expected > 0 ? night.greens.missed : null,
     };
   });
 
@@ -249,6 +300,11 @@ export default async function ProjectPlayerPage(
         <ChartCard title={t("chartsProject.debilitated")}>
           <PlayerDebilitatedChart points={points} />
         </ChartCard>
+        {points.some((p) => p.greensRate != null) ? (
+          <ChartCard title={t("chartsProject.greensMissed")}>
+            <PlayerGreensChart points={points} />
+          </ChartCard>
+        ) : null}
       </div>
 
       <div className="mt-4">
