@@ -385,6 +385,8 @@ export const harvestTemple: BossCuration = {
       "Soo-Won 1": { S: "DPS", SE: "BoonDPS", NE: "Portal" },
       "Soo-Won 2": { S: "BoonDPS", SE: "Portal", NE: "HealKite" },
     },
+    // The Venticator stacks with the DPS.
+    sharedCircles: { Venticator: "DPS" },
   },
   isTransitionPhase: (phaseName) => phaseName.startsWith("Purification") || phaseName === "Giants",
   phaseColor: (_order, phaseName) => {
@@ -437,7 +439,7 @@ export const harvestTemple: BossCuration = {
     jawsCast: "Jaws.Cast",
   },
   // The Greens roles (greens.roles above) plus the Venticator, who has no
-  // circle of their own.
+  // circle of their own and stacks with the DPS (greens.sharedCircles).
   squadRoles: ["HealKite", "Portal", "BoonDPS", "DPS", "Venticator"],
   // The six dragons — not the Purifications or Giants. Soo-Won is one dragon
   // across both of its phases, defeated only with the kill itself.

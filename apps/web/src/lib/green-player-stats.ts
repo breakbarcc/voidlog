@@ -11,8 +11,8 @@ import { greensConfig } from "./green-stats";
  * their circle missed it.
  *
  * Not counted:
- * - waves whose phase has no circle for the player's role (the Venticator,
- *   or DPS outside Soo-Won 1), and players without a role;
+ * - waves whose phase has no circle for the player's role (DPS and the
+ *   Venticator, who shares theirs, outside Soo-Won 1), and players without a role;
  * - circles without a known position (`insideKnown`) — nothing to tell;
  * - players downed or dead when the circle resolved: they couldn't stand in
  *   it, so they're counted apart (`unavailable`) instead of as a miss.
@@ -73,6 +73,8 @@ export function playerGreens(
   const count = { ...EMPTY_PLAYER_GREENS };
   if (!config || role === null) return count;
 
+  // A role without circles of its own stands in the one it shares.
+  const circleRole = config.sharedCircles?.[role] ?? role;
   const lifecycle = playerEvents
     .filter((e) => UNAVAILABLE.has(e.mechanicName) || AVAILABLE_AGAIN.has(e.mechanicName))
     .toSorted((a, b) => a.timeMs - b.timeMs);
@@ -80,7 +82,7 @@ export function playerGreens(
   for (const event of bossEvents) {
     if (event.mechanicName !== config.castMechanic) continue;
     const wave = readGreenWave(event.context);
-    const circle = wave?.circles.find((c) => greenRole(bossId, wave.phase, c.label) === role);
+    const circle = wave?.circles.find((c) => greenRole(bossId, wave.phase, c.label) === circleRole);
     if (!circle?.insideKnown) continue;
     if (circle.inside.includes(characterName)) {
       count.expected += 1;

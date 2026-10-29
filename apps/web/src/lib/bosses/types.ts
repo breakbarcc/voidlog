@@ -41,6 +41,12 @@ export interface GreensConfig {
    * phase, independent of the wave number.
    */
   roles?: Record<string, Record<string, string>>;
+  /**
+   * Roles without a circle of their own that stand in another role's circle:
+   * role → the role whose circles it shares (per-player Greens,
+   * lib/green-player-stats.ts).
+   */
+  sharedCircles?: Record<string, string>;
 }
 
 /**
