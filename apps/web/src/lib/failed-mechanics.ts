@@ -11,7 +11,7 @@ import {
 } from "./mechanics";
 import { isMainPhase, progressPhases } from "./main-phases";
 import { phaseColor } from "@/components/phase-badge";
-import { loadProjectRoles } from "./player-roles";
+import { loadBatchRoleOverrides, loadProjectRoles } from "./player-roles";
 import {
   TOP_FAILED_MECHANICS,
   TOP_FAILED_MECHANICS_PER_PHASE,
@@ -133,7 +133,10 @@ function topFailedMechanicByPhase(
   const result: PhaseFailedMechanic[] = [];
   for (const bossId of new Set(encounters.map((e) => e.bossId))) {
     const ofBoss = encounters.filter((e) => e.bossId === bossId);
-    const names = fightPhases(bossId, ofBoss.flatMap((e) => e.phases));
+    const names = fightPhases(
+      bossId,
+      ofBoss.flatMap((e) => e.phases),
+    );
     names.forEach((phase, index) => {
       const reached = ofBoss.filter((e) => e.phases.some((p) => p.name === phase && p.reached));
       if (reached.length === 0) return;
@@ -247,15 +250,11 @@ export async function loadProjectFailedMechanics(
   byRole: Record<string, FailedMechanicsView>;
   byPhase: PhaseFailedMechanic[];
 }> {
-  const [encounters, projectRoles, batchRoles] = await Promise.all([
+  const [encounters, projectRoles, overrides] = await Promise.all([
     loadEncounterEvents(projectId),
     loadProjectRoles(projectId),
-    prisma.batchPlayerRole.findMany({
-      where: { batch: { projectId } },
-      select: { batchId: true, account: true, role: true },
-    }),
+    loadBatchRoleOverrides(projectId),
   ]);
-  const overrides = new Map(batchRoles.map((r) => [`${r.batchId}|${r.account}`, r.role]));
   const roleOf = (batchId: string, account: string) =>
     overrides.get(`${batchId}|${account}`) ?? projectRoles.get(account) ?? null;
 

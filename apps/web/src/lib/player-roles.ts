@@ -55,6 +55,18 @@ export async function loadBatchRoles(projectId: string, batchId: string): Promis
   return { project, overrides: new Map(overrides.map((r) => [r.account, r.role])) };
 }
 
+/**
+ * Every batch override of a project, keyed `${batchId}|${account}` — for
+ * views over the whole project, where each attempt's batch decides.
+ */
+export async function loadBatchRoleOverrides(projectId: string): Promise<Map<string, string>> {
+  const rows = await prisma.batchPlayerRole.findMany({
+    where: { batch: { projectId } },
+    select: { batchId: true, account: true, role: true },
+  });
+  return new Map(rows.map((r) => [`${r.batchId}|${r.account}`, r.role]));
+}
+
 /** The role that counts for `account` in a batch: its override, else the project's. */
 export function effectiveRole(roles: BatchRoles, account: string): string | null {
   return roles.overrides.get(account) ?? roles.project.get(account) ?? null;

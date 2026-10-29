@@ -1,6 +1,19 @@
 import { prisma } from "@voidlog/db";
 import { chompMechanicNames, countChomps, hasChompCasts } from "@/lib/chomp-stats";
-import { assignableRoles, loadBossIds, loadProjectRoles } from "@/lib/player-roles";
+import {
+  addPlayerGreens,
+  EMPTY_PLAYER_GREENS,
+  GREEN_LIFECYCLE_MECHANICS,
+  greenWaveMechanicNames,
+  playerGreens,
+  type PlayerGreenCount,
+} from "@/lib/green-player-stats";
+import {
+  assignableRoles,
+  loadBatchRoleOverrides,
+  loadBossIds,
+  loadProjectRoles,
+} from "@/lib/player-roles";
 import {
   countShockwaves,
   shockwaveCastMechanicNames,
@@ -10,7 +23,7 @@ import {
 import { RosterTable } from "./roster-table";
 
 /** The roster table's column count, for its skeleton (roster-table.tsx). */
-export const ROSTER_COLUMNS = 11;
+export const ROSTER_COLUMNS = 12;
 
 interface RosterEntry {
   account: string;
@@ -29,6 +42,8 @@ interface RosterEntry {
   // chomped (Slam or Jaws) at least once (lib/chomp-stats.ts).
   chompAttempts: number;
   chompedAttempts: number;
+  // Greens of the player's role they weren't in (lib/green-player-stats.ts).
+  greens: PlayerGreenCount;
 }
 
 /**
@@ -40,7 +55,7 @@ export async function RosterSection({
   canEdit,
 }: Readonly<{ projectId: string; canEdit: boolean }>) {
   // Roles are assigned per project in this table (lib/player-roles.ts).
-  const [playerResults, projectRoles, bossIds] = await Promise.all([
+  const [playerResults, projectRoles, roleOverrides, bossIds] = await Promise.all([
     prisma.playerResult.findMany({
       where: { encounterResult: { logFile: { batch: { projectId } } } },
       select: {
@@ -50,32 +65,43 @@ export async function RosterSection({
         downs: true,
         encounterResult: {
           select: {
+            logFile: { select: { batchId: true } },
             success: true,
             createdAt: true,
             bossId: true,
             // Boss-side events only (no player) — carries the shockwave and
-            // chomp casts.
+            // chomp casts and the Greens waves (with who stood in which circle).
             phaseResults: {
               select: {
                 mechanicEvents: {
                   where: {
                     playerResultId: null,
                     mechanicName: {
-                      in: [...shockwaveCastMechanicNames(), ...chompMechanicNames()],
+                      in: [
+                        ...shockwaveCastMechanicNames(),
+                        ...chompMechanicNames(),
+                        ...greenWaveMechanicNames(),
+                      ],
                     },
                   },
-                  select: { mechanicName: true, timeMs: true },
+                  select: { mechanicName: true, timeMs: true, context: true },
                 },
               },
             },
           },
         },
         // Only the events the roster counts: Geschwächt, Revealed and what the
-        // shockwave and chomp statistics read. The rest is most of the table.
+        // shockwave, chomp and Greens statistics read. The rest is most of the table.
         mechanicEvents: {
           where: {
             mechanicName: {
-              in: ["Debilitated", "Revealed", ...shockwaveMechanicNames(), ...chompMechanicNames()],
+              in: [
+                "Debilitated",
+                "Revealed",
+                ...shockwaveMechanicNames(),
+                ...chompMechanicNames(),
+                ...GREEN_LIFECYCLE_MECHANICS,
+              ],
             },
           },
           select: { mechanicName: true, timeMs: true },
@@ -83,6 +109,7 @@ export async function RosterSection({
       },
     }),
     loadProjectRoles(projectId),
+    loadBatchRoleOverrides(projectId),
     loadBossIds({ projectId }),
   ]);
 
@@ -104,6 +131,7 @@ export async function RosterSection({
       revealCount: 0,
       chompAttempts: 0,
       chompedAttempts: 0,
+      greens: { ...EMPTY_PLAYER_GREENS },
     };
     entry.characterNames.add(p.characterName);
     entry.encounters += 1;
@@ -137,6 +165,15 @@ export async function RosterSection({
       entry.chompAttempts += 1;
       if (chomps.slam + chomps.jaws > 0) entry.chompedAttempts += 1;
     }
+    // Each attempt counts with the role the player held in its batch.
+    const role =
+      roleOverrides.get(`${p.encounterResult.logFile.batchId}|${p.account}`) ??
+      projectRoles.get(p.account) ??
+      null;
+    addPlayerGreens(
+      entry.greens,
+      playerGreens(p.encounterResult.bossId, bossEvents, p.mechanicEvents, p.characterName, role),
+    );
     byAccount.set(p.account, entry);
   }
 
@@ -159,6 +196,9 @@ export async function RosterSection({
       revealCountPerEncounter: (entry.revealCount / entry.encounters).toFixed(2),
       chompAttempts: entry.chompAttempts,
       chompedAttempts: entry.chompedAttempts,
+      greensExpected: entry.greens.expected,
+      greensMissed: entry.greens.missed,
+      greensUnavailable: entry.greens.unavailable,
     };
   });
 

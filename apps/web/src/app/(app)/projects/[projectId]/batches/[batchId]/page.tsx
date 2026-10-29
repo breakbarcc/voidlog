@@ -16,7 +16,18 @@ import {
 import { countChomps, hasChompCasts, squadChomps } from "@/lib/chomp-stats";
 import { squadGreens } from "@/lib/green-stats";
 import { STEALTH_CAST_MECHANIC } from "@/lib/player-attempts";
-import { assignableRoles, loadBatchRoles, type BatchRoles } from "@/lib/player-roles";
+import {
+  addPlayerGreens,
+  EMPTY_PLAYER_GREENS,
+  playerGreens,
+  type PlayerGreenCount,
+} from "@/lib/green-player-stats";
+import {
+  assignableRoles,
+  effectiveRole,
+  loadBatchRoles,
+  type BatchRoles,
+} from "@/lib/player-roles";
 import { encounterShockwaves, squadShockwaves } from "@/lib/shockwave-stats";
 import { squadReveals } from "@/lib/stealth-stats";
 import { buildAttemptTimelineData } from "@/lib/attempt-timeline";
@@ -372,6 +383,8 @@ interface RosterAccumulator {
   // chomped (Slam or Jaws) at least once (lib/chomp-stats.ts).
   chompAttempts: number;
   chompedAttempts: number;
+  /** Greens of the player's role they weren't in (lib/green-player-stats.ts). */
+  greens: PlayerGreenCount;
 }
 
 // Same fail definition as the phase-aggregation stats above: everything
@@ -431,6 +444,7 @@ function computeBatchRoster(encounters: Encounters, roles: BatchRoles): BatchRos
     // One stealth window per Mass Invisibility cast, whoever cast it — a
     // player can be revealed at most once per window.
     const stealthWindows = events.filter((e) => e.mechanicName === STEALTH_CAST_MECHANIC).length;
+    const bossEvents = events.filter((e) => e.playerResult === null);
     for (const p of encounter.playerResults) {
       const entry = rosterByAccount.get(p.account) ?? {
         characterNames: new Set<string>(),
@@ -446,6 +460,7 @@ function computeBatchRoster(encounters: Encounters, roles: BatchRoles): BatchRos
         stealthWindows: 0,
         chompAttempts: 0,
         chompedAttempts: 0,
+        greens: { ...EMPTY_PLAYER_GREENS },
       };
       entry.characterNames.add(p.characterName);
       entry.encounters += 1;
@@ -466,6 +481,16 @@ function computeBatchRoster(encounters: Encounters, roles: BatchRoles): BatchRos
         entry.chompAttempts += 1;
         if (chomps.slam + chomps.jaws > 0) entry.chompedAttempts += 1;
       }
+      addPlayerGreens(
+        entry.greens,
+        playerGreens(
+          encounter.bossId,
+          bossEvents,
+          events.filter((e) => e.playerResult?.account === p.account),
+          p.characterName,
+          effectiveRole(roles, p.account),
+        ),
+      );
       rosterByAccount.set(p.account, entry);
     }
     accumulateRosterFails(rosterByAccount, encounter);
@@ -490,6 +515,9 @@ function computeBatchRoster(encounters: Encounters, roles: BatchRoles): BatchRos
       stealthWindows: entry.stealthWindows,
       chompAttempts: entry.chompAttempts,
       chompedAttempts: entry.chompedAttempts,
+      greensExpected: entry.greens.expected,
+      greensMissed: entry.greens.missed,
+      greensUnavailable: entry.greens.unavailable,
     }))
     .sort((a, b) => b.failedMechanics - a.failedMechanics);
 }

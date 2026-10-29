@@ -107,6 +107,12 @@ export interface BatchRosterRow {
   chompAttempts: number;
   /** Of those, the ones in which the player got chomped (Slam or Jaws). */
   chompedAttempts: number;
+  /** Greens waves the player's role had a circle in (while they were up). */
+  greensExpected: number;
+  /** Of those, the ones they weren't in their circle. */
+  greensMissed: number;
+  /** Waves their circle resolved while they were downed or dead (not counted). */
+  greensUnavailable: number;
 }
 
 type RosterSortKey =
@@ -117,6 +123,7 @@ type RosterSortKey =
   | "avgDps"
   | "avgDowns"
   | "failedMechanics"
+  | "greens"
   | "shockwaves"
   | "debilitatedHits"
   | "revealCount"
@@ -134,11 +141,18 @@ const ROSTER_DEFAULT_DIRECTION: Record<RosterSortKey, "asc" | "desc"> = {
   avgDps: "desc",
   avgDowns: "desc",
   failedMechanics: "desc",
+  greens: "desc",
   shockwaves: "desc",
   debilitatedHits: "desc",
   revealCount: "desc",
   chomps: "desc",
 };
+
+// Share of the player's Greens they missed; null when their role had none
+// (sorts below 0%).
+function greensShare(row: BatchRosterRow): number | null {
+  return row.greensExpected > 0 ? row.greensMissed / row.greensExpected : null;
+}
 
 // Share of the shockwaves the player played that hit them; null when they
 // played none (sorts below 0%).
@@ -187,6 +201,8 @@ function compareRosterRows(a: BatchRosterRow, b: BatchRosterRow, key: RosterSort
       return (revealShare(a) ?? -1) - (revealShare(b) ?? -1);
     case "chomps":
       return (chompShare(a) ?? -1) - (chompShare(b) ?? -1);
+    case "greens":
+      return (greensShare(a) ?? -1) - (greensShare(b) ?? -1);
   }
 }
 
@@ -1131,6 +1147,7 @@ export function BatchAttempts({
               {rosterHeader("avgDps", t("roster.avgDps"))}
               {rosterHeader("avgDowns", t("roster.avgDowns"))}
               {rosterHeader("failedMechanics", t("roster.failedMechanics"))}
+              {rosterHeader("greens", t("roster.greensMissed"), t("roster.greensMissedHint"))}
               {rosterHeader("shockwaves", t("roster.shockwaves"), t("roster.shockwavesHint"))}
               {rosterHeader("debilitatedHits", t("roster.debilitated"))}
               {rosterHeader("revealCount", t("roster.revealed"), t("roster.revealedHint"))}
@@ -1170,6 +1187,21 @@ export function BatchAttempts({
                 <Table.Cell className="text-muted-strong">{entry.avgDowns}</Table.Cell>
                 <Table.Cell className="text-danger font-semibold">
                   {entry.failedMechanics}
+                </Table.Cell>
+                <Table.Cell
+                  className="text-danger font-semibold"
+                  title={
+                    entry.greensUnavailable > 0
+                      ? t("roster.greensUnavailable", { count: entry.greensUnavailable })
+                      : undefined
+                  }
+                >
+                  {entry.greensExpected > 0
+                    ? `${Math.round((entry.greensMissed / entry.greensExpected) * 100)}%`
+                    : tCommon("dash")}{" "}
+                  <span className="text-muted text-sm font-medium">
+                    ({entry.greensMissed}/{entry.greensExpected})
+                  </span>
                 </Table.Cell>
                 <Table.Cell className="text-warning font-semibold">
                   {entry.shockwavesPlayed > 0

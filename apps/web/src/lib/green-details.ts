@@ -69,7 +69,14 @@ export interface GreenWaveDetail {
   phase: string;
   wave: number;
   failed: boolean;
-  circles: { label: string | null; result: GreenResult }[];
+  circles: {
+    label: string | null;
+    result: GreenResult;
+    /** Character names standing in the circle just before it resolved. */
+    inside: string[];
+    /** False when no position was available, so `inside` says nothing. */
+    insideKnown: boolean;
+  }[];
 }
 
 export function readGreenWave(context: unknown): GreenWaveDetail | null {
@@ -82,13 +89,20 @@ export function readGreenWave(context: unknown): GreenWaveDetail | null {
     phase: w.phase,
     wave: w.wave,
     failed: w.failed === true,
-    circles: w.greens
-      .filter(isRecord)
-      .flatMap((g) =>
-        isResult(g.result)
-          ? [{ label: typeof g.label === "string" ? g.label : null, result: g.result }]
-          : [],
-      ),
+    circles: w.greens.filter(isRecord).flatMap((g) =>
+      isResult(g.result)
+        ? [
+            {
+              label: typeof g.label === "string" ? g.label : null,
+              result: g.result,
+              inside: Array.isArray(g.inside)
+                ? g.inside.filter((n): n is string => typeof n === "string")
+                : [],
+              insideKnown: g.insideKnown === true,
+            },
+          ]
+        : [],
+    ),
   };
 }
 

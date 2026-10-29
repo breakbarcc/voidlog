@@ -1,5 +1,6 @@
 import { getBossCuration } from "./bosses/registry";
 import type { BossCuration } from "./bosses/types";
+import { GREEN_LIFECYCLE_MECHANICS } from "./green-player-stats";
 import { PLAYER_LIFECYCLE_MECHANICS } from "./shockwave-stats";
 
 // Matches the generic bulk-captured cast markers from cast-markers.ts on
@@ -47,7 +48,7 @@ export function isContextualNoiseMechanic(
 export function unusedMechanicNames(bossIds: readonly string[]): string[] {
   const curations = bossIds.map((id) => getBossCuration(id));
   if (curations.length === 0 || curations.some((c) => c === undefined)) return [];
-  const keep = new Set<string>(PLAYER_LIFECYCLE_MECHANICS);
+  const keep = new Set<string>([...PLAYER_LIFECYCLE_MECHANICS, ...GREEN_LIFECYCLE_MECHANICS]);
   const sets = curations.map((c) => c!);
   for (const c of sets) for (const name of c.noiseNamesStillRead ?? []) keep.add(name);
   const [first, ...rest] = sets;

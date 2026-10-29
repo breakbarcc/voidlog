@@ -26,6 +26,12 @@ export interface RosterRow {
   revealCountPerEncounter: string;
   chompAttempts: number;
   chompedAttempts: number;
+  /** Greens waves the player's role had a circle in (while they were up). */
+  greensExpected: number;
+  /** Of those, the ones they weren't in their circle. */
+  greensMissed: number;
+  /** Waves their circle resolved while they were downed or dead (not counted). */
+  greensUnavailable: number;
   lastActive: Date;
 }
 
@@ -36,6 +42,7 @@ type SortKey =
   | "kills"
   | "avgDps"
   | "avgDowns"
+  | "greens"
   | "shockwaves"
   | "debilitatedHits"
   | "revealCount"
@@ -53,6 +60,7 @@ const DEFAULT_DIRECTION: Record<SortKey, "asc" | "desc"> = {
   kills: "desc",
   avgDps: "desc",
   avgDowns: "desc",
+  greens: "desc",
   shockwaves: "desc",
   debilitatedHits: "desc",
   revealCount: "desc",
@@ -64,6 +72,12 @@ const DEFAULT_DIRECTION: Record<SortKey, "asc" | "desc"> = {
 // none (sorts below 0%).
 function shockwaveShare(row: RosterRow): number | null {
   return row.shockwavesPlayed > 0 ? row.shockwavesHit / row.shockwavesPlayed : null;
+}
+
+// Share of the player's Greens they missed; null when their role had none
+// (sorts below 0%).
+function greensShare(row: RosterRow): number | null {
+  return row.greensExpected > 0 ? row.greensMissed / row.greensExpected : null;
 }
 
 // Share of the attempts reaching Primordus's attacks in which the player got
@@ -86,6 +100,8 @@ function compareRows(a: RosterRow, b: RosterRow, key: SortKey): number {
       return a.avgDps - b.avgDps;
     case "avgDowns":
       return Number.parseFloat(a.avgDowns) - Number.parseFloat(b.avgDowns);
+    case "greens":
+      return (greensShare(a) ?? -1) - (greensShare(b) ?? -1);
     case "shockwaves":
       return (shockwaveShare(a) ?? -1) - (shockwaveShare(b) ?? -1);
     case "debilitatedHits":
@@ -165,6 +181,7 @@ export function RosterTable({
           {header("kills", t("columns.kills"))}
           {header("avgDps", t("columns.avgDps"))}
           {header("avgDowns", t("columns.avgDowns"))}
+          {header("greens", t("columns.greensMissed"), t("columns.greensMissedHint"))}
           {header("shockwaves", t("columns.shockwaves"), t("columns.shockwavesHint"))}
           {header("debilitatedHits", t("columns.debilitated"), t("columns.perFightHint"))}
           {header("revealCount", t("columns.revealed"), t("columns.perFightHint"))}
@@ -202,6 +219,21 @@ export function RosterTable({
             <Table.Cell className="text-muted-strong">{entry.kills}</Table.Cell>
             <Table.Cell className="text-muted-strong">{entry.avgDps}</Table.Cell>
             <Table.Cell className="text-muted-strong">{entry.avgDowns}</Table.Cell>
+            <Table.Cell
+              className="text-danger font-semibold"
+              title={
+                entry.greensUnavailable > 0
+                  ? t("columns.greensUnavailable", { count: entry.greensUnavailable })
+                  : undefined
+              }
+            >
+              {entry.greensExpected > 0
+                ? `${Math.round((entry.greensMissed / entry.greensExpected) * 100)}%`
+                : "—"}{" "}
+              <span className="text-muted text-sm font-medium">
+                ({entry.greensMissed}/{entry.greensExpected})
+              </span>
+            </Table.Cell>
             <Table.Cell className="text-warning font-semibold">
               {entry.shockwavesPlayed > 0
                 ? `${Math.round((entry.shockwavesHit / entry.shockwavesPlayed) * 100)}%`
