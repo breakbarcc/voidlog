@@ -1,27 +1,20 @@
-import { Card } from "@radix-ui/themes";
+import { Suspense } from "react";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/locale";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { ChompsChartCard } from "@/components/chomps-chart";
-import { FailedMechanicsCard } from "@/components/failed-mechanics-table";
-import { loadProjectFailedMechanics } from "@/lib/failed-mechanics";
-import { assignableRoles, loadBossIds } from "@/lib/player-roles";
-import { loadProjectOverview } from "@/lib/project-overview";
-import { loadProjectSummary } from "@/lib/project-summary";
 import { requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
-import { formatDate } from "@/lib/utils";
-import { DpsPhaseChart } from "../dps-phase-chart";
-import { FailedMechanicByPhase } from "../failed-mechanic-by-phase";
-import { GreensByRole } from "../greens-by-role";
-import { PhaseProgressTrend } from "../phase-progress-trend";
-import { ProjectSummaryCard } from "../project-summary-card";
-import { GreenFailTrendChart, ShockwaveTrendChart } from "../trend-chart";
+import { FailedMechanicsSection, OverviewSection, SummarySection } from "./sections";
+import { FailedMechanicsSkeleton, OverviewSkeleton, SummarySkeleton } from "./skeletons";
 
 /**
  * Statistics: every chart of the project in one place, in depth. The
  * history page (`../page.tsx`) keeps only the logs and one simple progress
  * chart.
+ *
+ * Only the membership check and the heading are awaited here; the charts
+ * load their data in their own sections (sections.tsx), all at once, and
+ * stream in behind skeletons as each one is ready.
  */
 export default async function ProjectStatisticsPage(
   props: Readonly<PageProps<"/projects/[projectId]/statistics">>,
@@ -31,43 +24,7 @@ export default async function ProjectStatisticsPage(
   const membership = await requireProjectMembership(projectId, session.user.id);
   const locale = (await getLocale()) as Locale;
   const t = await getTranslations("statistics");
-  const tProject = await getTranslations("project");
-  const tChomps = await getTranslations("chomps");
   const tSidebar = await getTranslations("sidebar");
-
-  // Independent of each other, so loaded side by side.
-  const [overview, failed, summary, bossIds] = await Promise.all([
-    loadProjectOverview(projectId, locale, true),
-    loadProjectFailedMechanics(projectId, locale),
-    loadProjectSummary(projectId),
-    loadBossIds({ projectId }),
-  ]);
-  const {
-    allTrendPoints,
-    greenCircles,
-    progressBossId,
-    progressPhaseNames,
-    progressNights,
-    dpsPhaseNames,
-    dpsNights,
-  } = overview;
-  const roles = assignableRoles(bossIds);
-
-  // One point per night, average kills per attempt that reached Primordus's
-  // attacks (nights without such an attempt leave a gap).
-  const chompPoints = allTrendPoints.map((b) => ({
-    label: formatDate(b.occurredAt, locale, { day: "2-digit", month: "2-digit" }),
-    slam: b.chompAttempts > 0 ? Math.round((b.chompSlam / b.chompAttempts) * 100) / 100 : null,
-    jaws: b.chompAttempts > 0 ? Math.round((b.chompJaws / b.chompAttempts) * 100) / 100 : null,
-    reached: b.chompAttempts,
-    attemptsSlam: b.chompAttemptsSlam,
-    attemptsAny: b.chompAttemptsAny,
-  }));
-
-  const hasContent =
-    allTrendPoints.length >= 2 ||
-    (progressBossId && dpsPhaseNames && dpsNights.length > 0) ||
-    (progressBossId && progressPhaseNames && progressNights.length > 0);
 
   return (
     <div className="px-10 py-8">
@@ -81,62 +38,15 @@ export default async function ProjectStatisticsPage(
       <h1 className="font-heading text-foreground-strong text-2xl font-bold">{t("title")}</h1>
       <p className="text-muted mb-6 mt-1 text-sm">{t("subtitle")}</p>
 
-      {summary.attempts > 0 ? <ProjectSummaryCard summary={summary} /> : null}
-
-      {progressBossId && progressPhaseNames && progressNights.length > 0 ? (
-        <PhaseProgressTrend
-          bossId={progressBossId}
-          phases={progressPhaseNames.map((name, order) => ({ name, order }))}
-          nights={progressNights}
-        />
-      ) : null}
-
-      {allTrendPoints.length >= 2 ? (
-        <>
-          <div className="mb-3.5 grid grid-cols-1 gap-3.5 lg:grid-cols-2">
-            <Card size="3" className="border-line bg-surface border">
-              <div className="text-muted-strong mb-3.5 text-xs font-medium uppercase tracking-wide">
-                {tProject("shockwaveRateAll", { count: allTrendPoints.length })}
-              </div>
-              <ShockwaveTrendChart points={allTrendPoints} />
-            </Card>
-            {chompPoints.some((p) => p.slam !== null) ? (
-              <ChompsChartCard title={tChomps("squadTitle")} points={chompPoints} unit="average" />
-            ) : null}
-          </div>
-          <Card size="3" className="border-line bg-surface mb-3.5 border">
-            <div className="text-muted-strong mb-3.5 text-xs font-medium uppercase tracking-wide">
-              {tProject("greenFailRateAll", { count: allTrendPoints.length })}
-            </div>
-            <GreenFailTrendChart points={allTrendPoints} />
-          </Card>
-        </>
-      ) : null}
-
-      {progressBossId ? <GreensByRole bossId={progressBossId} circles={greenCircles} /> : null}
-
-      {progressBossId && dpsPhaseNames && dpsNights.length > 0 ? (
-        <DpsPhaseChart
-          bossId={progressBossId}
-          phases={dpsPhaseNames.map((name, order) => ({ name, order }))}
-          nights={dpsNights}
-        />
-      ) : null}
-
-      {failed.all.attempts > 0 ? (
-        <div className="mt-3.5">
-          <FailedMechanicsCard
-            scope="project"
-            all={failed.all}
-            byRole={failed.byRole}
-            roles={roles}
-          />
-        </div>
-      ) : null}
-
-      {failed.byPhase.length > 0 ? <FailedMechanicByPhase phases={failed.byPhase} /> : null}
-
-      {hasContent ? null : <p className="text-muted text-sm">{t("empty")}</p>}
+      <Suspense fallback={<SummarySkeleton />}>
+        <SummarySection projectId={projectId} />
+      </Suspense>
+      <Suspense fallback={<OverviewSkeleton />}>
+        <OverviewSection projectId={projectId} locale={locale} />
+      </Suspense>
+      <Suspense fallback={<FailedMechanicsSkeleton />}>
+        <FailedMechanicsSection projectId={projectId} locale={locale} />
+      </Suspense>
     </div>
   );
 }
