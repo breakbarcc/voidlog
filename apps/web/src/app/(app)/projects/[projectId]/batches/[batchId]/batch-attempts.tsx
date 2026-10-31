@@ -3,6 +3,7 @@
 import { CheckCircledIcon, ChevronRightIcon, Cross2Icon } from "@radix-ui/react-icons";
 import { Card, Select, Tabs, Table } from "@radix-ui/themes";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useMemo, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -624,6 +625,11 @@ function MechanicFilterAccordion({
   );
 }
 
+// The open tab lives in the URL (`?tab=roster`), so a tab can be linked to and
+// survives a reload; the default tab keeps the URL clean.
+const DEFAULT_TAB = "table";
+const TABS = new Set([DEFAULT_TAB, "timeline", "roster"]);
+
 export function BatchAttempts({
   projectId,
   batchId,
@@ -656,6 +662,20 @@ export function BatchAttempts({
   const tGlobalMechanics = useTranslations("globalMechanicLabels");
   const tCommon = useTranslations("common");
   const locale = useLocale() as Locale;
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const activeTab = tabParam !== null && TABS.has(tabParam) ? tabParam : DEFAULT_TAB;
+
+  function handleTabChange(tab: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (tab === DEFAULT_TAB) params.delete("tab");
+    else params.set("tab", tab);
+    const query = params.toString();
+    // The native history API updates useSearchParams without a server
+    // round trip, so switching tabs doesn't reload the batch's data.
+    window.history.pushState(null, "", query ? `?${query}` : window.location.pathname);
+  }
+
   const [expanded, setExpanded] = useState<number | null>(null);
   const [hiddenMechanics, setHiddenMechanics] = useState<Set<string>>(new Set());
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
@@ -784,7 +804,7 @@ export function BatchAttempts({
   );
 
   return (
-    <Tabs.Root defaultValue="table">
+    <Tabs.Root value={activeTab} onValueChange={handleTabChange}>
       <Tabs.List>
         <Tabs.Trigger value="table">{t("tabs.table")}</Tabs.Trigger>
         <Tabs.Trigger value="timeline">{t("tabs.timeline")}</Tabs.Trigger>
