@@ -441,6 +441,10 @@ export const harvestTemple: BossCuration = {
   // The Greens roles (greens.roles above) plus the Venticator, who has no
   // circle of their own and stacks with the DPS (greens.sharedCircles).
   squadRoles: ["HealKite", "Portal", "BoonDPS", "DPS", "Venticator"],
+  squadComposition: {
+    counts: { HealKite: 2, BoonDPS: 2, Portal: 2, Venticator: 1 },
+    fill: "DPS",
+  },
   // The six dragons — not the Purifications or Giants. Soo-Won is one dragon
   // across both of its phases, defeated only with the kill itself.
   defeatableBosses: [

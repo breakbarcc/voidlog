@@ -130,7 +130,14 @@
       "furthestPhase": "Weiteste Phase"
     },
     "empty": "Noch keine Batches.",
-    "delete": "Projekt löschen"
+    "delete": "Projekt löschen",
+    "roleIssues": {
+      "title": "Rollenverteilung passt in {mismatched} von {attempts} Versuchen nicht (erwartet: {expected})",
+      "deviation": "{role} {actual}× statt {expected}×",
+      "unassigned": "{count} ohne Rolle",
+      "more": "… und {count} weitere Varianten",
+      "fill": "Rest {role}"
+    }
   },
   "members": {
     "breadcrumb": "Mitglieder",

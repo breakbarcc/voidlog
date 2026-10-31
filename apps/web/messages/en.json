@@ -130,7 +130,14 @@
       "furthestPhase": "Furthest phase"
     },
     "empty": "No batches yet.",
-    "delete": "Delete project"
+    "delete": "Delete project",
+    "roleIssues": {
+      "title": "Roles don't add up in {mismatched} of {attempts} attempts (expected: {expected})",
+      "deviation": "{role} {actual}× instead of {expected}×",
+      "unassigned": "{count} without a role",
+      "more": "… and {count} more variants",
+      "fill": "rest {role}"
+    }
   },
   "members": {
     "breadcrumb": "Members",

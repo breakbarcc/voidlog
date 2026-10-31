@@ -108,6 +108,12 @@ export interface BossCuration {
    */
   squadRoles?: readonly string[];
   /**
+   * How many players each `squadRoles` role has in a squad; `fill` is the
+   * role everybody else plays. Attempts whose assigned roles don't add up to
+   * it get flagged (lib/role-composition.ts). Omitted = no such check.
+   */
+  squadComposition?: { counts: Readonly<Record<string, number>>; fill: string };
+  /**
    * The bosses the encounter's fight is made of, in fight order, for the
    * "defeated" counts (lib/project-summary.ts). `phase` is the boss's last
    * `progressPhases` entry: it counts as defeated once a later progress
