@@ -97,9 +97,14 @@ export async function HistorySection({
                       {batch.label}
                     </Link>
                     {issues ? (
-                      <span title={roleIssueText(issues)} className="text-warning inline-flex">
-                        <ExclamationTriangleIcon aria-label={roleIssueText(issues)} />
-                      </span>
+                      <Link
+                        href={`/projects/${projectId}/batches/${batch.id}?tab=roster`}
+                        title={roleIssueText(issues)}
+                        aria-label={roleIssueText(issues)}
+                        className="text-warning inline-flex hover:opacity-70"
+                      >
+                        <ExclamationTriangleIcon />
+                      </Link>
                     ) : null}
                   </span>
                 </Table.Cell>
