@@ -236,7 +236,11 @@
   "batchesNew": {
     "breadcrumb": "Upload logs",
     "title": "Upload logs",
-    "description": ".evtc/.zevtc files only. Each file goes straight to storage (ADR-003), then processing starts automatically and progress shows live below."
+    "description": ".evtc/.zevtc files only. Each file goes straight to storage (ADR-003), then processing starts automatically and progress shows live below.",
+    "dpsReportDown": {
+      "title": "dps.report is currently unreachable.",
+      "text": "Uploaded logs can't be parsed until it is back and will fail. Better upload them later – or retry failed logs on the batch page once dps.report is up again."
+    }
   },
   "batchUploadForm": {
     "labelPlaceholder": "Label (empty = date of the logs)",

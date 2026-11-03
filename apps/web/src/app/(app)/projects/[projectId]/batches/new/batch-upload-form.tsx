@@ -187,7 +187,10 @@ export function BatchUploadForm({ projectId }: Readonly<{ projectId: string }>) 
           {snapshot ? (
             <>
               <p className="text-muted mt-1 text-sm">
-                {t("progressStatus", { done: snapshot.done + snapshot.failed, total: snapshot.total })}
+                {t("progressStatus", {
+                  done: snapshot.done + snapshot.failed,
+                  total: snapshot.total,
+                })}
                 {snapshot.failed > 0 ? t("progressFailed", { count: snapshot.failed }) : ""}
               </p>
               <Table.Root variant="surface" className="border-line bg-surface mt-2 border">

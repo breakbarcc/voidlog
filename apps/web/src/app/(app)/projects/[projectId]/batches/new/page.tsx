@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import { ProjectRole } from "@voidlog/db";
 import { getTranslations } from "next-intl/server";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { requireProjectRole } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import { BatchUploadForm } from "./batch-upload-form";
+import { DpsReportNotice } from "./dps-report-notice";
 
 export default async function NewBatchPage(
   props: Readonly<PageProps<"/projects/[projectId]/batches/new">>,
@@ -25,6 +27,10 @@ export default async function NewBatchPage(
       />
       <h1 className="font-heading text-foreground-strong text-2xl font-bold">{t("title")}</h1>
       <p className="text-muted mt-1 text-sm">{t("description")}</p>
+
+      <Suspense fallback={null}>
+        <DpsReportNotice />
+      </Suspense>
 
       <BatchUploadForm projectId={projectId} />
     </div>
