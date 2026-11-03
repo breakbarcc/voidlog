@@ -63,6 +63,11 @@ export function BatchUploadForm({ projectId }: Readonly<{ projectId: string }>) 
     setError(null);
     setPhase("uploading");
 
+    function fail(message: string) {
+      setError(message);
+      setPhase("error");
+    }
+
     try {
       const createResponse = await fetch(`/api/projects/${projectId}/batches`, {
         method: "POST",
@@ -73,7 +78,8 @@ export function BatchUploadForm({ projectId }: Readonly<{ projectId: string }>) 
         }),
       });
       if (!createResponse.ok) {
-        throw new Error(t("errorCreateBatch", { status: createResponse.status }));
+        fail(t("errorCreateBatch", { status: createResponse.status }));
+        return;
       }
       const created = (await createResponse.json()) as CreateBatchResponse;
       setBatchId(created.batchId);
@@ -100,7 +106,8 @@ export function BatchUploadForm({ projectId }: Readonly<{ projectId: string }>) 
         method: "POST",
       });
       if (!enqueueResponse.ok) {
-        throw new Error(t("errorEnqueue", { status: enqueueResponse.status }));
+        fail(t("errorEnqueue", { status: enqueueResponse.status }));
+        return;
       }
 
       const source = new EventSource(`/api/batches/${created.batchId}/events`);
@@ -118,8 +125,8 @@ export function BatchUploadForm({ projectId }: Readonly<{ projectId: string }>) 
         source.close();
       };
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-      setPhase("error");
+      // Network errors, and a file upload rejected by the storage (thrown above).
+      fail(err instanceof Error ? err.message : String(err));
     }
   }
 
