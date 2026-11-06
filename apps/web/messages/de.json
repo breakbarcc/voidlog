@@ -644,5 +644,9 @@
     "overridden": "(Batch)",
     "overriddenHint": "Für diesen Batch abweichend vom Projekt gesetzt",
     "error": "Rolle konnte nicht gespeichert werden ({status})"
+  },
+  "legalFooter": {
+    "partOf": "voidlog ist ein Tool von <site>breakbar.cc</site>.",
+    "imprint": "Impressum"
   }
 }

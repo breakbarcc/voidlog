@@ -7,10 +7,7 @@ import { signOut } from "next-auth/react";
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/language-switcher";
-
-// The breakbar.cc main site voidlog belongs to (it shares the language cookie,
-// see language-switcher.tsx).
-const MAIN_SITE_URL = "https://breakbar.cc";
+import { MAIN_SITE_URL } from "@/lib/breakbar";
 
 interface SidebarProps {
   userName: string;

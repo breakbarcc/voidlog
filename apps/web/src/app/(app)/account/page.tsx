@@ -1,6 +1,7 @@
 import { ProjectRole, prisma } from "@voidlog/db";
 import { Avatar } from "@radix-ui/themes";
 import { getLocale, getTranslations } from "next-intl/server";
+import { LegalFooter } from "@/components/legal-footer";
 import { Sidebar } from "@/components/sidebar";
 import type { Locale } from "@/i18n/locale";
 import { planAccountDeletion } from "@/lib/account";
@@ -97,6 +98,8 @@ export default async function AccountPage() {
             }))}
             transferredProjects={plan.transferred.map((p) => p.name)}
           />
+
+          <LegalFooter />
         </div>
       </div>
     </div>

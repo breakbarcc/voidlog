@@ -644,5 +644,9 @@
     "overridden": "(batch)",
     "overriddenHint": "Set for this batch, differs from the project",
     "error": "Role could not be saved ({status})"
+  },
+  "legalFooter": {
+    "partOf": "voidlog is a tool by <site>breakbar.cc</site>.",
+    "imprint": "Legal notice"
   }
 }
