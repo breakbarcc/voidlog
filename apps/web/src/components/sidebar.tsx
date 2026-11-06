@@ -8,6 +8,10 @@ import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/language-switcher";
 
+// The breakbar.cc main site voidlog belongs to (it shares the language cookie,
+// see language-switcher.tsx).
+const MAIN_SITE_URL = "https://breakbar.cc";
+
 interface SidebarProps {
   userName: string;
   userImage?: string | null;
@@ -144,6 +148,9 @@ export function Sidebar({ userName, userImage, currentProject }: Readonly<Sideba
             <Link href="/account">{t("account")}</Link>
           </DropdownMenu.Item>
           <DropdownMenu.Separator />
+          <DropdownMenu.Item asChild>
+            <a href={MAIN_SITE_URL}>{t("backToMainSite")}</a>
+          </DropdownMenu.Item>
           <DropdownMenu.Item onSelect={() => signOut({ redirectTo: "/login" })}>
             {t("logout")}
           </DropdownMenu.Item>

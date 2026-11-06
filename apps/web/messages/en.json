@@ -44,6 +44,7 @@
     "members": "Members",
     "uploadLogs": "+ Upload logs",
     "account": "Account",
+    "backToMainSite": "Back to breakbar.cc",
     "logout": "Log out"
   },
   "account": {
