@@ -280,6 +280,9 @@ model MechanicEvent {
 
   @@index([phaseResultId])
   @@index([playerResultId])
+  /// Project-wide views filter events by name across thousands of phases or
+  /// players; without this the planner falls back to a full table scan.
+  @@index([mechanicName])
   @@map("mechanic_events")
 }
 
