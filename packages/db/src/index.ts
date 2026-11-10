@@ -14,4 +14,9 @@ if (process.env.NODE_ENV !== "production") {
   globalThis.__voidlogPrisma = prisma;
 }
 
-export * from "@prisma/client";
+// Runtime values are listed explicitly: @prisma/client is CommonJS, so a
+// blanket `export *` can't be resolved at build time (Turbopack warns and
+// adds runtime glue). Add new enums here when code needs them as values.
+// Types (models, enum types, payloads) all pass through `export type *`.
+export { LogFileStatus, MechanicCategory, Prisma, PrismaClient, ProjectRole } from "@prisma/client";
+export type * from "@prisma/client";
