@@ -38,7 +38,8 @@ export async function PATCH(
 async function removeQueuedJobs(logFileIds: ReadonlySet<string>): Promise<void> {
   if (logFileIds.size === 0) return;
   const queue = createLogParsingQueue();
-  const jobs = await queue.getJobs(["waiting", "prioritized", "delayed", "paused"]);
+  // BullMQ 6 reports jobs of a paused queue as "waiting" (no separate "paused" state).
+  const jobs = await queue.getJobs(["waiting", "prioritized", "delayed"]);
   await Promise.all(
     jobs
       .filter((job) => logFileIds.has(job.data.logFileId))
