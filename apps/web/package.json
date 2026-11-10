@@ -6,7 +6,8 @@
     "dev": "dotenv -e ../../.env -- next dev -p 4000",
     "build": "next build",
     "start": "dotenv -e ../../.env -- next start -p 4000",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.3",

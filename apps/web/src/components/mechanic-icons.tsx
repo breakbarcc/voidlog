@@ -222,8 +222,8 @@ export function failMechanicIcon(mechanicName: string, options?: { size?: "sm" |
   // component's tiny label sizes read as blurry rather than just small.
   const size = options?.size ?? "sm";
   if (mechanicName === "Downed") {
-    // eslint-disable-next-line @next/next/no-img-element -- fixed-size static icon, next/image is unnecessary overhead here
     return (
+      // eslint-disable-next-line @next/next/no-img-element -- fixed-size static icon, next/image is unnecessary overhead here
       <img src="/icons/downed.png" alt="" className={size === "md" ? "h-5 w-3" : "h-4 w-2.5"} />
     );
   }

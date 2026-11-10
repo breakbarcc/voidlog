@@ -128,11 +128,6 @@ export function LogTimeline({ data }: Readonly<{ data: LogTimelineData }>) {
   });
 
   const allEvents = useMemo(() => data.phases.flatMap((p) => p.events), [data.phases]);
-  const totals = useMemo(() => {
-    const count = (c: EventCategory) => allEvents.filter((e) => e.category === c).length;
-    return { fail: count("fail"), down: count("down"), death: count("death") };
-  }, [allEvents]);
-
   const perPlayer = useMemo(() => {
     const map = new Map<string, number>();
     for (const e of allEvents) {

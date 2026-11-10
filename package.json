@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "pnpm --parallel --filter=./apps/* run dev",
     "build": "pnpm --recursive --filter=./apps/* run build",
-    "lint": "pnpm --recursive run lint",
+    "lint": "eslint scripts && pnpm --recursive run lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc -p tsconfig.json --noEmit && pnpm --recursive run typecheck",
@@ -25,11 +25,14 @@
     "@voidlog/shared": "workspace:*"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "@types/node": "^22.20.5",
     "dotenv-cli": "^11.1.0",
+    "eslint": "^9.39.5",
     "prettier": "^3.9.10",
     "prettier-plugin-tailwindcss": "^0.6.14",
     "tsx": "^4.23.15",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.72.1"
   }
 }
