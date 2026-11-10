@@ -1,5 +1,6 @@
 "use client";
 
+import { CheckIcon } from "@radix-ui/react-icons";
 import { Table } from "@radix-ui/themes";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -32,6 +33,8 @@ export interface RosterRow {
   greensMissed: number;
   /** Waves their circle resolved while they were downed or dead (not counted). */
   greensUnavailable: number;
+  /** First kill in this project that earned the Voidwalker title; null if none did (lib/achievements.ts). */
+  titleUnlockedAt: Date | null;
   lastActive: Date;
 }
 
@@ -40,6 +43,7 @@ type SortKey =
   | "role"
   | "encounters"
   | "kills"
+  | "title"
   | "avgDps"
   | "avgDowns"
   | "greens"
@@ -58,6 +62,7 @@ const DEFAULT_DIRECTION: Record<SortKey, "asc" | "desc"> = {
   role: "asc",
   encounters: "desc",
   kills: "desc",
+  title: "desc",
   avgDps: "desc",
   avgDowns: "desc",
   greens: "desc",
@@ -96,6 +101,11 @@ function compareRows(a: RosterRow, b: RosterRow, key: SortKey): number {
       return a.encounters - b.encounters;
     case "kills":
       return a.kills - b.kills;
+    case "title":
+      // Unlocked first, the earliest unlock first among them.
+      return (
+        (b.titleUnlockedAt?.getTime() ?? Infinity) - (a.titleUnlockedAt?.getTime() ?? Infinity)
+      );
     case "avgDps":
       return a.avgDps - b.avgDps;
     case "avgDowns":
@@ -179,6 +189,7 @@ export function RosterTable({
           {header("role", t("columns.role"))}
           {header("encounters", t("columns.participations"))}
           {header("kills", t("columns.kills"))}
+          {header("title", t("columns.title"), t("columns.titleHint"))}
           {header("avgDps", t("columns.avgDps"))}
           {header("avgDowns", t("columns.avgDowns"))}
           {header("greens", t("columns.greensMissed"), t("columns.greensMissedHint"))}
@@ -217,6 +228,21 @@ export function RosterTable({
             </Table.Cell>
             <Table.Cell className="text-muted-strong">{entry.encounters}</Table.Cell>
             <Table.Cell className="text-muted-strong">{entry.kills}</Table.Cell>
+            <Table.Cell>
+              {entry.titleUnlockedAt ? (
+                <span
+                  className="text-success inline-flex items-center gap-1 text-sm font-semibold"
+                  title={t("columns.titleUnlocked", {
+                    date: formatDate(entry.titleUnlockedAt, locale),
+                  })}
+                >
+                  <CheckIcon className="h-4 w-4" />
+                  {formatDate(entry.titleUnlockedAt, locale)}
+                </span>
+              ) : (
+                <span className="text-muted">—</span>
+              )}
+            </Table.Cell>
             <Table.Cell className="text-muted-strong">{entry.avgDps}</Table.Cell>
             <Table.Cell className="text-muted-strong">{entry.avgDowns}</Table.Cell>
             <Table.Cell
@@ -265,7 +291,7 @@ export function RosterTable({
         ))}
         {sorted.length === 0 ? (
           <Table.Row>
-            <Table.Cell colSpan={12} className="text-muted">
+            <Table.Cell colSpan={13} className="text-muted">
               {t("empty")}
             </Table.Cell>
           </Table.Row>

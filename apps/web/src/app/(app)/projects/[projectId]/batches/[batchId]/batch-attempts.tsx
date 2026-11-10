@@ -25,6 +25,8 @@ import {
   type PhaseProgressStat,
   type PreviousPhaseProgress,
 } from "./phase-progress-chart";
+import type { AchievementOutcome } from "@/lib/achievements";
+import { AchievementMarks } from "./achievement-mark";
 import { RemoveLogButton } from "./remove-log-button";
 
 export interface AttemptRow {
@@ -34,6 +36,8 @@ export interface AttemptRow {
   isCM: boolean;
   n: number;
   success: boolean;
+  /** Stack achievements of the boss (e.g. Voidwalker), as far as the log captured them. */
+  achievements: AchievementOutcome[];
   /** Health the last enemy had left on a wipe, 0-100; null for kills and logs without it. */
   bossHealthPercent: number | null;
   furthestPhase: { name: string; order: number } | null;
@@ -848,7 +852,10 @@ export function BatchAttempts({
                 <Table.Cell
                   className={a.success ? "text-success font-semibold" : "text-danger font-semibold"}
                 >
-                  {a.success ? tCommon("kill") : tCommon("wipe")}
+                  <span className="inline-flex flex-wrap items-center gap-2">
+                    {a.success ? tCommon("kill") : tCommon("wipe")}
+                    <AchievementMarks success={a.success} achievements={a.achievements} />
+                  </span>
                 </Table.Cell>
                 <Table.Cell>
                   <ModeBadge isCM={a.isCM} />

@@ -4,6 +4,7 @@ import type { Readable } from "node:stream";
 // must be a default import, not `import { parser } from "stream-json"`.
 import createTokenParser from "stream-json";
 import { GREENS_BY_BOSS } from "../boss-configs/greens";
+import { TARGET_BUFF_STACKS_BY_BOSS, buffStackTargetIds } from "../boss-configs/target-buff-stacks";
 import type { EiPlayer, EiRoot, EiTarget } from "./ei-json-shape";
 import { type JsonToken, type JsonValue, SkipTracker, ValueBuilder } from "./value-builder";
 
@@ -139,6 +140,29 @@ export function extractEncounterFromStream(jsonStream: Readable): Promise<Extrac
     function isGreenTarget(target: Record<string, JsonValue> | undefined): boolean {
       const config = greensConfig();
       return config !== undefined && typeof target?.id === "number" && target.id in config.targets;
+    }
+
+    // `targets[].buffs` (every buff's timeline on that target) is only read
+    // for the targets of target-buff-stacks.ts — a handful of small Heart
+    // objects, unlike the bosses' own buff lists. Like REPLAY_KEY, "buffs"
+    // comes after "id" in EI's output.
+    const BUFFS_KEY = "buffs";
+    function isBuffStackTarget(target: Record<string, JsonValue> | undefined): boolean {
+      if (typeof root.triggerID !== "number" || typeof target?.id !== "number") return false;
+      return buffStackTargetIds(String(root.triggerID)).has(target.id);
+    }
+
+    /** Drops every buff of a kept `buffs` list that no config reads. */
+    function trimTargetBuffs(target: Record<string, JsonValue>): void {
+      const buffs = target[BUFFS_KEY];
+      if (!Array.isArray(buffs)) return;
+      const wanted = new Set(
+        (TARGET_BUFF_STACKS_BY_BOSS[String(root.triggerID)] ?? []).map((c) => c.buffId),
+      );
+      target[BUFFS_KEY] = buffs.filter(
+        (b) =>
+          typeof b === "object" && b !== null && !Array.isArray(b) && wanted.has(b.id as number),
+      );
     }
 
     function handleToken(token: JsonToken): void {
@@ -300,6 +324,7 @@ export function extractEncounterFromStream(jsonStream: Readable): Promise<Extrac
 
         case "target-key":
           if (token.name === "endObject") {
+            trimTargetBuffs(currentTarget!);
             targets.push(currentTarget as unknown as EiTarget);
             currentTarget = undefined;
             state = "in-targets-array";
@@ -314,7 +339,11 @@ export function extractEncounterFromStream(jsonStream: Readable): Promise<Extrac
 
         case "target-value-dispatch": {
           const key = currentTargetKey as string;
-          if (TARGET_KEEP_WHOLE.has(key) || (key === REPLAY_KEY && isGreenTarget(currentTarget))) {
+          if (
+            TARGET_KEEP_WHOLE.has(key) ||
+            (key === REPLAY_KEY && isGreenTarget(currentTarget)) ||
+            (key === BUFFS_KEY && isBuffStackTarget(currentTarget))
+          ) {
             targetBuilder = new ValueBuilder();
             targetBuilder.push(token);
             if (targetBuilder.done) {

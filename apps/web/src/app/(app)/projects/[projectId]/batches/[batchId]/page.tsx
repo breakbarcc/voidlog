@@ -39,6 +39,7 @@ import {
   isVisibleCastMarker,
   unusedMechanicNames,
 } from "@/lib/mechanics";
+import { achievementOutcomes } from "@/lib/achievements";
 import { hasRole, requireProjectMembership } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
 import {
@@ -543,6 +544,11 @@ function buildAttemptRow(
     isCM: encounter.isCM,
     n: index + 1,
     success: encounter.success,
+    achievements: achievementOutcomes(
+      encounter.bossId,
+      encounter.success,
+      encounter.phaseResults.flatMap((p) => p.mechanicEvents),
+    ),
     // Only meaningful for a wipe (a kill always ends with the boss at 0%) that
     // ended in a phase whose enemy actually has a health bar worth reporting.
     bossHealthPercent:

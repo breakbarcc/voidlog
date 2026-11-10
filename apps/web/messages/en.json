@@ -350,7 +350,10 @@
       "lastActive": "Last active",
       "perFightHint": "avg per fight (total)",
       "shockwavesHint": "% of played shockwaves that hit",
-      "chompsHint": "% of attempts reaching Primordus's attacks with a chomp"
+      "chompsHint": "% of attempts reaching Primordus's attacks with a chomp",
+      "title": "Voidwalker",
+      "titleHint": "Title unlocked",
+      "titleUnlocked": "Voidwalker title unlocked by a kill on {date}"
     },
     "empty": "No evaluated logs yet."
   },
@@ -456,6 +459,10 @@
       "tooltipPrevious": "Previous batch ({label}): {pct}%",
       "tooltipWipes": "{count, plural, one {# wipe} other {# wipes}} in this phase",
       "biggestDrop": "Biggest drop: <name>{phase}</name> with {wipes} wipes ({pct}% of attempts)"
+    },
+    "achievements": {
+      "earned": "This kill counts for {name}: no Heart reached the critical number of Void Empowerment stacks.",
+      "failed": "Doesn't count for {name}: Heart {target} reached {stacks} stacks of Void Empowerment at {time}."
     }
   },
   "logDetail": {

@@ -49,6 +49,16 @@ export interface GreensConfig {
   sharedCircles?: Record<string, string>;
 }
 
+/** See `BossCuration.stackAchievements`. */
+export interface StackAchievement {
+  /** The achievement's in-game name (also its title), e.g. "Voidwalker". */
+  name: string;
+  /** Raw name of the worker's per-target summary events. */
+  mechanicName: string;
+  /** The stack count at which it is lost — reaching it already fails. */
+  failsAtStacks: number;
+}
+
 /**
  * Everything hand-curated about a single boss encounter, in one place.
  * One file per boss (see harvest-temple.ts) instead of one file per
@@ -175,6 +185,14 @@ export interface BossCuration {
      */
     overriddenBy?: ReadonlySet<string>;
   };
+  /**
+   * Achievements lost once a boss-side target reaches `failsAtStacks` stacks
+   * of a buff — read from the summary events `mechanicName` (worker
+   * target-buff-stacks.ts). A kill without such a target earns it. Shown on
+   * the kills and as unlocks in the project roster (lib/achievements.ts).
+   * Omitted = none.
+   */
+  stackAchievements?: readonly StackAchievement[];
   /** Synthetic "*.Cast" markers (see worker cast-markers.ts) individually curated with their own timeline icon in the UI. */
   visibleCastMarkers: Set<string>;
   /**

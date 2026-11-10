@@ -1,4 +1,5 @@
 import { prisma } from "@voidlog/db";
+import { loadAchievementUnlocks } from "@/lib/achievements";
 import { chompMechanicNames, countChomps, hasChompCasts } from "@/lib/chomp-stats";
 import {
   addPlayerGreens,
@@ -23,7 +24,10 @@ import {
 import { RosterTable } from "./roster-table";
 
 /** The roster table's column count, for its skeleton (roster-table.tsx). */
-export const ROSTER_COLUMNS = 12;
+export const ROSTER_COLUMNS = 13;
+
+/** The title the roster has a column for (lib/achievements.ts). */
+const TITLE_ACHIEVEMENT = "Voidwalker";
 
 interface RosterEntry {
   account: string;
@@ -55,7 +59,7 @@ export async function RosterSection({
   canEdit,
 }: Readonly<{ projectId: string; canEdit: boolean }>) {
   // Roles are assigned per project in this table (lib/player-roles.ts).
-  const [playerResults, projectRoles, roleOverrides, bossIds] = await Promise.all([
+  const [playerResults, projectRoles, roleOverrides, bossIds, unlocks] = await Promise.all([
     prisma.playerResult.findMany({
       where: { encounterResult: { logFile: { batch: { projectId } } } },
       select: {
@@ -111,6 +115,7 @@ export async function RosterSection({
     loadProjectRoles(projectId),
     loadBatchRoleOverrides(projectId),
     loadBossIds({ projectId }),
+    loadAchievementUnlocks(projectId),
   ]);
 
   // Grouped by account, not character name — character names change,
@@ -199,6 +204,7 @@ export async function RosterSection({
       greensExpected: entry.greens.expected,
       greensMissed: entry.greens.missed,
       greensUnavailable: entry.greens.unavailable,
+      titleUnlockedAt: unlocks.get(entry.account)?.get(TITLE_ACHIEVEMENT) ?? null,
     };
   });
 

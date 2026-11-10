@@ -135,6 +135,11 @@ export interface EiTarget {
   lastAware?: number;
   /** Only kept for the Green circle actors (boss-configs/greens.ts). */
   combatReplayData?: EiCombatReplay;
+  /**
+   * Buffs on the target as `[timeMs, stacks]` timelines. Only kept for the
+   * targets of boss-configs/target-buff-stacks.ts, and only their buffs.
+   */
+  buffs?: { id: number; states: [number, number][] }[];
 }
 
 export interface EiSkillMapEntry {

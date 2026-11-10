@@ -317,6 +317,9 @@ const MECHANIC_NAMES: Record<Locale, Record<string, string>> = {
 // markers are surfaced. "Dead" is handled separately since death events
 // feed a dedicated death-marker UI instead of being discarded outright.
 const NOISE_MECHANIC_NAMES = new Set([
+  // Per-Heart stack summary for the Voidwalker check (stackAchievements),
+  // not a mechanic anybody failed.
+  "Heart.Empowerment",
   "Orb Push",
   "Res",
   "Resp",
@@ -467,7 +470,12 @@ export const harvestTemple: BossCuration = {
   mechanicNames: MECHANIC_NAMES,
   noiseMechanicNames: NOISE_MECHANIC_NAMES,
   // Scream.H is the context isContextualNoise (below) looks at.
-  noiseNamesStillRead: new Set(["Scream.H", "MagHail.H"]),
+  noiseNamesStillRead: new Set(["Scream.H", "MagHail.H", "Heart.Empowerment"]),
+  // "Voidwalker": no Void Heart may reach 3 stacks of Void Empowerment. The
+  // in-game text says "more than 3", but on a real kill the eligibility buff
+  // dropped the very millisecond Heart 2 got its 3rd stack, while Hearts at
+  // 2 cost nothing (worker target-buff-stacks.ts; 3 kills checked).
+  stackAchievements: [{ name: "Voidwalker", mechanicName: "Heart.Empowerment", failsAtStacks: 3 }],
   // Hail ticks are dense; on real logs 116 of 118 downstates that follow one
   // come within 1 s of it.
   // A failed Green downs the whole squad at once, hail or not.

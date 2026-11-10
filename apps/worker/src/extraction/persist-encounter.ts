@@ -9,6 +9,7 @@ import {
 import { withDerivedPhases } from "../boss-configs/derived-phases";
 import { GREENS_BY_BOSS } from "../boss-configs/greens";
 import { STEALTH_PHASES_BY_BOSS } from "../boss-configs/stealth-phases";
+import { targetBuffStackEvents } from "../boss-configs/target-buff-stacks";
 import { computeFinalBossHealthPercent } from "./boss-health";
 import { computePhaseDamage } from "./phase-damage";
 import { DEATH_MECHANIC_NAME, parseEiTimestamp } from "./ei-json-shape";
@@ -421,6 +422,23 @@ export async function persistExtractedEncounter(
             },
           });
         }
+      }
+
+      // Buff stacks on boss-side targets (see target-buff-stacks.ts): one
+      // summary event per target, also when it never got the buff — its
+      // presence is what tells "0 stacks" from "not captured" (older logs).
+      for (const event of targetBuffStackEvents(bossId, targets)) {
+        await tx.mechanicEvent.create({
+          data: {
+            phaseResultId: phaseIdsInOrder[resolvePhaseIndex(event.timeMs)]!,
+            playerResultId: null,
+            mechanicName: event.mechanicName,
+            category: MechanicCategory.BOSS_SPECIFIC,
+            displayName: event.displayName,
+            timeMs: event.timeMs,
+            context: { ...event.context },
+          },
+        });
       }
 
       // "Invisible phase" mechanic (see stealth-phases.ts): one STEALTH
