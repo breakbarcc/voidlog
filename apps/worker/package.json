@@ -13,14 +13,14 @@
   "dependencies": {
     "@voidlog/db": "workspace:*",
     "@voidlog/shared": "workspace:*",
-    "bullmq": "^5.28.2",
+    "bullmq": "^5.81.5",
     "stream-json": "^1.9.1"
   },
   "devDependencies": {
     "@types/node": "^20.19.43",
     "@types/stream-json": "^1.7.8",
     "dotenv-cli": "^7.4.4",
-    "tsx": "^4.19.2",
-    "typescript": "^5.6.3"
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
   }
 }
