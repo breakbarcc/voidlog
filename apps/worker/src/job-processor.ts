@@ -4,7 +4,19 @@ import { getBossConfig } from "./boss-configs/registry";
 import { extractEncounterFromStream } from "./extraction/extract-encounter";
 import { persistExtractedEncounter } from "./extraction/persist-encounter";
 
-export async function processLogFileJob(data: LogParsingJobData, parser: LogParser): Promise<void> {
+/**
+ * Called after every status change has been written. The upload page only
+ * re-reads statuses when the queue reports progress, so the event must come
+ * after the write — sent before it, the page reads the old status and a
+ * step looks skipped.
+ */
+export type StatusListener = (status: LogFileStatus) => Promise<void>;
+
+export async function processLogFileJob(
+  data: LogParsingJobData,
+  parser: LogParser,
+  onStatus: StatusListener = async () => {},
+): Promise<void> {
   const logFile = await prisma.logFile.findUnique({ where: { id: data.logFileId } });
   if (!logFile) {
     // The batch was deleted (e.g. its upload cancelled) after this job got queued.
@@ -12,13 +24,21 @@ export async function processLogFileJob(data: LogParsingJobData, parser: LogPars
     return;
   }
 
-  await prisma.logFile.update({
-    where: { id: logFile.id },
-    data: { status: LogFileStatus.PARSING, errorMessage: null },
-  });
-
   try {
+    // Upload to dps.report and wait until its Elite Insights JSON is ready.
+    await setStatus(logFile.id, {
+      status: LogFileStatus.UPLOADING,
+      errorMessage: null,
+      externalReportUrl: null,
+    });
+    await onStatus(LogFileStatus.UPLOADING);
     const { reportUrl, jsonStream } = await parser.parse(logFile.storageKeyRaw);
+
+    // voidlog's own part: stream the JSON, extract and persist it. The report
+    // link is stored right away, so a failure from here on reads as a
+    // processing failure rather than an upload one.
+    await setStatus(logFile.id, { status: LogFileStatus.PARSING, externalReportUrl: reportUrl });
+    await onStatus(LogFileStatus.PARSING);
     const extracted = await extractEncounterFromStream(jsonStream);
 
     const bossId =
@@ -27,23 +47,25 @@ export async function processLogFileJob(data: LogParsingJobData, parser: LogPars
 
     await persistExtractedEncounter(logFile.id, extracted, bossConfig);
 
-    await prisma.logFile.updateMany({
-      where: { id: logFile.id },
-      data: { status: LogFileStatus.DONE, externalReportUrl: reportUrl },
-    });
+    await setStatus(logFile.id, { status: LogFileStatus.DONE });
   } catch (error) {
-    // updateMany: the row may be gone if the batch was deleted mid-parse.
-    const { count } = await prisma.logFile.updateMany({
-      where: { id: logFile.id },
-      data: {
-        status: LogFileStatus.FAILED,
-        errorMessage: error instanceof Error ? error.message : String(error),
-      },
+    const stillExists = await setStatus(logFile.id, {
+      status: LogFileStatus.FAILED,
+      errorMessage: error instanceof Error ? error.message : String(error),
     });
-    if (count === 0) {
+    if (!stillExists) {
       console.warn(`[worker] log file ${logFile.id} was deleted while parsing, dropping result`);
       return;
     }
     throw error;
   }
+}
+
+/** updateMany: the row may be gone if the batch was deleted mid-job. Returns whether it still exists. */
+async function setStatus(
+  logFileId: string,
+  data: { status: LogFileStatus; errorMessage?: string | null; externalReportUrl?: string | null },
+): Promise<boolean> {
+  const { count } = await prisma.logFile.updateMany({ where: { id: logFileId }, data });
+  return count > 0;
 }

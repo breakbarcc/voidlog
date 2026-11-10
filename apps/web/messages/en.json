@@ -266,10 +266,12 @@
     "errorCancel": "Could not delete the batch ({status})",
     "steps": {
       "pending": "Queued",
-      "parsing": "Processing",
+      "uploading": "Upload to dps.report",
+      "parsing": "Processing in voidlog",
       "done": "Done",
       "PENDING": "Queued",
-      "PARSING": "Processing",
+      "UPLOADING": "Upload to dps.report",
+      "PARSING": "Processing in voidlog",
       "DONE": "Done",
       "FAILED": "Failed"
     }

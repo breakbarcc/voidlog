@@ -15,6 +15,8 @@ interface LogFileSnapshot {
   id: string;
   status: LogFileStatus;
   errorMessage: string | null;
+  /** Set once dps.report accepted the upload — tells a failed upload from a failed processing. */
+  externalReportUrl: string | null;
 }
 
 interface BatchSnapshot {
@@ -265,7 +267,11 @@ export function BatchUploadForm({ projectId }: Readonly<{ projectId: string }>) 
                         {f.id}
                       </Table.Cell>
                       <Table.Cell className="align-middle">
-                        <UploadStatusStepper status={f.status} errorMessage={f.errorMessage} />
+                        <UploadStatusStepper
+                          status={f.status}
+                          uploaded={f.externalReportUrl !== null}
+                          errorMessage={f.errorMessage}
+                        />
                       </Table.Cell>
                     </Table.Row>
                   ))}

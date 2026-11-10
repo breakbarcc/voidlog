@@ -19,9 +19,8 @@ function main(): void {
   const worker = new Worker<LogParsingJobData>(
     LOG_PARSING_QUEUE_NAME,
     async (job) => {
-      await job.updateProgress({ status: "parsing" });
-      await processLogFileJob(job.data, parser);
-      await job.updateProgress({ status: "done" });
+      // Each status change is reported only once it is in the database (see StatusListener).
+      await processLogFileJob(job.data, parser, (status) => job.updateProgress({ status }));
     },
     {
       connection,

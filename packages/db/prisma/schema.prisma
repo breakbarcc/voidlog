@@ -181,6 +181,9 @@ model BatchPlayerRole {
 
 enum LogFileStatus {
   PENDING
+  /// Uploaded to dps.report, waiting for its Elite Insights JSON.
+  UPLOADING
+  /// voidlog extracting and persisting the JSON.
   PARSING
   DONE
   FAILED

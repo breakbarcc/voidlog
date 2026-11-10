@@ -266,10 +266,12 @@
     "errorCancel": "Batch konnte nicht gelöscht werden ({status})",
     "steps": {
       "pending": "Wartet",
-      "parsing": "Wird verarbeitet",
+      "uploading": "Upload zu dps.report",
+      "parsing": "Verarbeitung in voidlog",
       "done": "Fertig",
       "PENDING": "Wartet",
-      "PARSING": "Wird verarbeitet",
+      "UPLOADING": "Upload zu dps.report",
+      "PARSING": "Verarbeitung in voidlog",
       "DONE": "Fertig",
       "FAILED": "Fehlgeschlagen"
     }

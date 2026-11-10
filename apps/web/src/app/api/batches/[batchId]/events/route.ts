@@ -54,7 +54,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ batc
       async function pushSnapshot(): Promise<void> {
         const logFiles = await prisma.logFile.findMany({
           where: { batchId },
-          select: { id: true, status: true, errorMessage: true },
+          select: { id: true, status: true, errorMessage: true, externalReportUrl: true },
           // Without an explicit order, Postgres doesn't guarantee row order
           // is stable across repeated queries — the progress table would
           // reshuffle on every SSE push. createdAt alone can tie (the
