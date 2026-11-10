@@ -1,5 +1,6 @@
 import { Cross2Icon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { phaseColor } from "@/components/phase-badge";
+import { HARVEST_TEMPLE_BOSS_ID } from "@/lib/bosses/harvest-temple";
 
 // Mechanic and attack glyphs shared by every view that draws mechanics (batch
 // timeline, single-log timeline) so one mechanic always looks the same.
@@ -20,8 +21,7 @@ export type AttackType =
 // to Harvest Temple CM's curated cast markers (see cast-markers.ts on the
 // worker) — pending a boss-pluggable icon system, this component only
 // draws them for that one boss, so the color lookup is hardcoded to it
-// rather than threaded through as a prop.
-export const HARVEST_TEMPLE_BOSS_ID = "43488";
+// (HARVEST_TEMPLE_BOSS_ID from its curation) rather than threaded through as a prop.
 
 // The Greens hazard spawns across three different dragons (Jormag/Primordus/
 // Zhaitan), so it can't reuse one dragon's phase color the way the other

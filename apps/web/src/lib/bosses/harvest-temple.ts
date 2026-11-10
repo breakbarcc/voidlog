@@ -7,6 +7,9 @@ import type { BossCuration } from "./types";
  * hand-curated code rather than an editable DB table.
  */
 
+/** EI's encounter id for Harvest Temple CM (bossId on EncounterResult). */
+export const HARVEST_TEMPLE_BOSS_ID = "43488";
+
 // Soo-Won is the only dragon whose fight is itself split by an
 // intermission: EI persists "Soo-Won" as an outer wrapper phase (order ~20)
 // spanning the whole final segment, plus two sub-phases "Soo-Won 1"
@@ -372,7 +375,7 @@ const VISIBLE_CAST_MARKERS = new Set([
 const ZHAITAN_SCREAM_INFIRMITY_WINDOW_MS = 3000;
 
 export const harvestTemple: BossCuration = {
-  bossId: "43488",
+  bossId: HARVEST_TEMPLE_BOSS_ID,
   isMainPhase: (phaseName) =>
     MAIN_PHASE_NAMES.includes(phaseName) || phaseName.startsWith("Purification"),
   // "Green.Spawn" is clustered from S.Green/F.Green within 3 s (worker
