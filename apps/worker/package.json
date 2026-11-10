@@ -15,11 +15,10 @@
     "@voidlog/shared": "workspace:*",
     "bullmq": "^6.7.2",
     "ioredis": "^5.11.1",
-    "stream-json": "^1.9.1"
+    "stream-json": "^3.8.0"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
-    "@types/stream-json": "^1.7.8",
     "dotenv-cli": "^11.1.0",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3"

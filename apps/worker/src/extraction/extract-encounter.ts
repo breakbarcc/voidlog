@@ -1,8 +1,7 @@
 import type { Readable } from "node:stream";
-// stream-json is a CommonJS package (`export =`); Node's ESM interop does
-// not reliably expose its `.parser` property as a named export, so this
-// must be a default import, not `import { parser } from "stream-json"`.
-import createTokenParser from "stream-json";
+// stream-json 3 is ESM with bundled types; `parserStream(options)` is its
+// alias for `parser.asStream(options)` — a Duplex emitting `{name, value}` tokens.
+import { parserStream } from "stream-json";
 import { GREENS_BY_BOSS } from "../boss-configs/greens";
 import { TARGET_BUFF_STACKS_BY_BOSS, buffStackTargetIds } from "../boss-configs/target-buff-stacks";
 import type { EiPlayer, EiRoot, EiTarget } from "./ei-json-shape";
@@ -103,7 +102,7 @@ export function extractEncounterFromStream(jsonStream: Readable): Promise<Extrac
     // end* streaming events unless streaming is explicitly turned off.
     // The state machine below only understands the packed events.
     const tokenStream = jsonStream.pipe(
-      createTokenParser({
+      parserStream({
         packKeys: true,
         packStrings: true,
         packNumbers: true,
