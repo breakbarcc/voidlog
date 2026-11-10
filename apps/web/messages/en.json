@@ -258,7 +258,21 @@
     "viewBatch": "View batch",
     "errorCreateBatch": "Could not create batch ({status})",
     "errorUploadFile": "Upload failed for {fileName} ({status})",
-    "errorEnqueue": "Could not start processing ({status})"
+    "errorEnqueue": "Could not start processing ({status})",
+    "cancelButton": "Cancel",
+    "cancelling": "Cancelling…",
+    "cancelConfirm": "Cancel the upload? The batch and every log processed so far will be deleted.",
+    "cancelled": "Upload cancelled – the batch was deleted.",
+    "errorCancel": "Could not delete the batch ({status})",
+    "steps": {
+      "pending": "Queued",
+      "parsing": "Processing",
+      "done": "Done",
+      "PENDING": "Queued",
+      "PARSING": "Processing",
+      "DONE": "Done",
+      "FAILED": "Failed"
+    }
   },
   "statistics": {
     "breadcrumb": "Statistics",

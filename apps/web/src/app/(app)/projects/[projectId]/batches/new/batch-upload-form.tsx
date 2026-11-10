@@ -4,6 +4,7 @@ import { Button, Table, TextField } from "@radix-ui/themes";
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
+import { UploadStatusStepper, type LogFileStatus } from "./upload-status-stepper";
 
 interface CreateBatchResponse {
   batchId: string;
@@ -12,7 +13,7 @@ interface CreateBatchResponse {
 
 interface LogFileSnapshot {
   id: string;
-  status: "PENDING" | "PARSING" | "DONE" | "FAILED";
+  status: LogFileStatus;
   errorMessage: string | null;
 }
 
@@ -23,14 +24,13 @@ interface BatchSnapshot {
   files: LogFileSnapshot[];
 }
 
-type Phase = "idle" | "uploading" | "processing" | "complete" | "error";
+type Phase = "idle" | "uploading" | "processing" | "cancelling" | "complete" | "error";
 
-const STATUS_COLOR: Record<LogFileSnapshot["status"], string> = {
-  PENDING: "var(--muted)",
-  PARSING: "var(--primary)",
-  DONE: "var(--warning)",
-  FAILED: "var(--danger)",
-};
+/** One upload attempt: aborts its in-flight requests and remembers its batch once created. */
+interface UploadRun {
+  controller: AbortController;
+  batchId: string | null;
+}
 
 function isLogFile(file: File): boolean {
   return /\.(evtc|zevtc)$/i.test(file.name);
@@ -45,7 +45,9 @@ export function BatchUploadForm({ projectId }: Readonly<{ projectId: string }>) 
   const [error, setError] = useState<string | null>(null);
   const [batchId, setBatchId] = useState<string | null>(null);
   const [snapshot, setSnapshot] = useState<BatchSnapshot | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
+  const runRef = useRef<UploadRun | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -57,11 +59,46 @@ export function BatchUploadForm({ projectId }: Readonly<{ projectId: string }>) 
     setFiles(Array.from(list).filter(isLogFile));
   }
 
+  async function deleteBatch(id: string) {
+    const response = await fetch(`/api/batches/${id}`, { method: "DELETE" });
+    if (!response.ok && response.status !== 404) {
+      throw new Error(t("errorCancel", { status: response.status }));
+    }
+  }
+
+  async function handleCancel() {
+    const run = runRef.current;
+    if (!run || !window.confirm(t("cancelConfirm"))) return;
+    run.controller.abort();
+    eventSourceRef.current?.close();
+    setPhase("cancelling");
+    try {
+      // Without a batch id the create request is still in flight —
+      // handleSubmit deletes the batch itself once it arrives.
+      if (run.batchId) await deleteBatch(run.batchId);
+      runRef.current = null;
+      setFiles([]);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setBatchId(null);
+      setSnapshot(null);
+      setError(null);
+      setNotice(t("cancelled"));
+      setPhase("idle");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+      setPhase("error");
+    }
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (files.length === 0) return;
     setError(null);
+    setNotice(null);
     setPhase("uploading");
+    const run: UploadRun = { controller: new AbortController(), batchId: null };
+    runRef.current = run;
+    const { signal } = run.controller;
 
     function fail(message: string) {
       setError(message);
@@ -82,6 +119,12 @@ export function BatchUploadForm({ projectId }: Readonly<{ projectId: string }>) 
         return;
       }
       const created = (await createResponse.json()) as CreateBatchResponse;
+      if (signal.aborted) {
+        // Cancelled while the batch was being created.
+        await deleteBatch(created.batchId).catch(() => undefined);
+        return;
+      }
+      run.batchId = created.batchId;
       setBatchId(created.batchId);
 
       // Direct-to-storage upload (ADR-003) — files never pass through our server.
@@ -91,6 +134,7 @@ export function BatchUploadForm({ projectId }: Readonly<{ projectId: string }>) 
             method: "PUT",
             body: files[i],
             headers: { "Content-Type": "application/octet-stream" },
+            signal,
           }).then((res) => {
             if (!res.ok)
               throw new Error(
@@ -104,6 +148,7 @@ export function BatchUploadForm({ projectId }: Readonly<{ projectId: string }>) 
 
       const enqueueResponse = await fetch(`/api/batches/${created.batchId}/enqueue`, {
         method: "POST",
+        signal,
       });
       if (!enqueueResponse.ok) {
         fail(t("errorEnqueue", { status: enqueueResponse.status }));
@@ -125,6 +170,8 @@ export function BatchUploadForm({ projectId }: Readonly<{ projectId: string }>) 
         source.close();
       };
     } catch (err) {
+      // A cancel aborts the requests on purpose — handleCancel takes over.
+      if (signal.aborted) return;
       // Network errors, and a file upload rejected by the storage (thrown above).
       fail(err instanceof Error ? err.message : String(err));
     }
@@ -174,21 +221,31 @@ export function BatchUploadForm({ projectId }: Readonly<{ projectId: string }>) 
           className="hidden"
         />
 
-        <Button
-          type="submit"
-          size="3"
-          disabled={files.length === 0 || phase !== "idle"}
-          className="self-start"
-        >
-          {phase === "idle" ? t("uploadButton", { count: files.length || 0 }) : t("processing")}
-        </Button>
+        <div className="flex flex-wrap gap-3">
+          <Button type="submit" size="3" disabled={files.length === 0 || phase !== "idle"}>
+            {phase === "idle" ? t("uploadButton", { count: files.length || 0 }) : t("processing")}
+          </Button>
+          {phase === "uploading" || phase === "processing" || phase === "cancelling" ? (
+            <Button
+              type="button"
+              size="3"
+              color="red"
+              variant="soft"
+              onClick={handleCancel}
+              disabled={phase === "cancelling"}
+            >
+              {phase === "cancelling" ? t("cancelling") : t("cancelButton")}
+            </Button>
+          ) : null}
+        </div>
       </form>
 
       {error ? <p className="text-danger mt-4">{error}</p> : null}
+      {notice ? <p className="text-muted mt-4">{notice}</p> : null}
 
       {phase === "uploading" ? <p className="text-muted mt-4">{t("uploading")}</p> : null}
 
-      {phase === "processing" || phase === "complete" ? (
+      {phase === "processing" || phase === "cancelling" || phase === "complete" ? (
         <div className="mt-6">
           <h2 className="text-muted-strong text-sm font-semibold">{t("progressTitle")}</h2>
           {snapshot ? (
@@ -204,12 +261,11 @@ export function BatchUploadForm({ projectId }: Readonly<{ projectId: string }>) 
                 <Table.Body>
                   {snapshot.files.map((f) => (
                     <Table.Row key={f.id}>
-                      <Table.Cell className="text-foreground font-mono text-xs">{f.id}</Table.Cell>
-                      <Table.Cell
-                        className="text-right font-semibold"
-                        style={{ color: STATUS_COLOR[f.status] }}
-                      >
-                        {f.status}
+                      <Table.Cell className="text-foreground align-middle font-mono text-xs">
+                        {f.id}
+                      </Table.Cell>
+                      <Table.Cell className="align-middle">
+                        <UploadStatusStepper status={f.status} errorMessage={f.errorMessage} />
                       </Table.Cell>
                     </Table.Row>
                   ))}

@@ -258,7 +258,21 @@
     "viewBatch": "Batch ansehen",
     "errorCreateBatch": "Batch konnte nicht erstellt werden ({status})",
     "errorUploadFile": "Upload für {fileName} fehlgeschlagen ({status})",
-    "errorEnqueue": "Verarbeitung konnte nicht gestartet werden ({status})"
+    "errorEnqueue": "Verarbeitung konnte nicht gestartet werden ({status})",
+    "cancelButton": "Abbrechen",
+    "cancelling": "Wird abgebrochen…",
+    "cancelConfirm": "Upload abbrechen? Der Batch und alle bereits verarbeiteten Logs werden gelöscht.",
+    "cancelled": "Upload abgebrochen – der Batch wurde gelöscht.",
+    "errorCancel": "Batch konnte nicht gelöscht werden ({status})",
+    "steps": {
+      "pending": "Wartet",
+      "parsing": "Wird verarbeitet",
+      "done": "Fertig",
+      "PENDING": "Wartet",
+      "PARSING": "Wird verarbeitet",
+      "DONE": "Fertig",
+      "FAILED": "Fehlgeschlagen"
+    }
   },
   "statistics": {
     "breadcrumb": "Statistiken",

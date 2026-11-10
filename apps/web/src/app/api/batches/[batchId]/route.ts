@@ -1,5 +1,5 @@
 import { ProjectRole, prisma } from "@voidlog/db";
-import { createStorageClient, deleteObjects } from "@voidlog/shared";
+import { createLogParsingQueue, createStorageClient, deleteObjects } from "@voidlog/shared";
 import { NextResponse } from "next/server";
 import { checkProjectRole } from "@/lib/projects";
 import { requireSession } from "@/lib/session";
@@ -31,6 +31,23 @@ export async function PATCH(
 }
 
 /**
+ * Drops the batch's parse jobs that the worker hasn't picked up yet, so a
+ * deleted (or cancelled) batch doesn't keep eating dps.report's rate limit.
+ * A job already running finds its log file gone and skips it (worker).
+ */
+async function removeQueuedJobs(logFileIds: ReadonlySet<string>): Promise<void> {
+  if (logFileIds.size === 0) return;
+  const queue = createLogParsingQueue();
+  const jobs = await queue.getJobs(["waiting", "prioritized", "delayed", "paused"]);
+  await Promise.all(
+    jobs
+      .filter((job) => logFileIds.has(job.data.logFileId))
+      // A job may turn active between listing and removing — the worker copes.
+      .map((job) => job.remove().catch(() => undefined)),
+  );
+}
+
+/**
  * Deletes an UploadBatch and everything under it. DB rows (LogFile,
  * EncounterResult, PhaseResult, PlayerResult, MechanicEvent) cascade away
  * via FK ON DELETE CASCADE, but the raw .evtc files in object storage
@@ -54,8 +71,10 @@ export async function DELETE(
 
   const logFiles = await prisma.logFile.findMany({
     where: { batchId },
-    select: { storageKeyRaw: true, storageKeyJson: true },
+    select: { id: true, storageKeyRaw: true, storageKeyJson: true },
   });
+  await removeQueuedJobs(new Set(logFiles.map((f) => f.id)));
+
   const storageKeys = logFiles.flatMap((f) =>
     [f.storageKeyRaw, f.storageKeyJson].filter((key): key is string => Boolean(key)),
   );
