@@ -645,25 +645,55 @@ export default async function BatchDetailPage(
   });
   const unusedNames = unusedMechanicNames(batchBosses.map((b) => b.bossId));
 
+  // Only the columns this page reads (see the *Like shapes above) — whole rows
+  // would repeat each event's full player row across thousands of events.
   const batch = await prisma.uploadBatch.findUnique({
     where: { id: batchId },
-    include: {
+    select: {
+      projectId: true,
+      label: true,
       logFiles: {
         orderBy: { createdAt: "asc" },
-        include: {
+        select: {
+          id: true,
+          storageKeyRaw: true,
+          status: true,
+          errorMessage: true,
           encounterResult: {
-            include: {
-              playerResults: true,
+            select: {
+              bossId: true,
+              success: true,
+              isCM: true,
+              durationMs: true,
+              recordedAt: true,
+              createdAt: true,
+              finalBossHealthPercent: true,
+              playerResults: {
+                select: { account: true, characterName: true, dps: true, downs: true, role: true },
+              },
               phaseResults: {
                 orderBy: { order: "asc" },
-                include: {
+                select: {
+                  name: true,
+                  order: true,
+                  reached: true,
+                  success: true,
+                  startMs: true,
+                  endMs: true,
                   mechanicEvents: {
                     where: {
                       mechanicName: { notIn: unusedNames },
                       NOT: { mechanicName: { contains: GENERIC_CAST_MARKER_NAME_PART } },
                     },
-                    include: { playerResult: true },
                     orderBy: { timeMs: "asc" },
+                    select: {
+                      mechanicName: true,
+                      displayName: true,
+                      category: true,
+                      timeMs: true,
+                      context: true,
+                      playerResult: { select: { characterName: true, account: true } },
+                    },
                   },
                 },
               },
