@@ -1,4 +1,4 @@
-import { prisma } from "@voidlog/db";
+import { type Prisma, prisma } from "@voidlog/db";
 import { loadAchievementUnlocks } from "@/lib/achievements";
 import { chompMechanicNames, countChomps, hasChompCasts } from "@/lib/chomp-stats";
 import {
@@ -22,6 +22,13 @@ import {
   shockwaveMechanicNames,
 } from "@/lib/shockwave-stats";
 import { RosterTable } from "./roster-table";
+
+/** A boss-side event (no player) as the shockwave, chomp and Greens stats read it. */
+interface BossEvent {
+  mechanicName: string;
+  timeMs: number;
+  context: Prisma.JsonValue;
+}
 
 /** The roster table's column count, for its skeleton (roster-table.tsx). */
 export const ROSTER_COLUMNS = 13;
@@ -59,7 +66,7 @@ export async function RosterSection({
   canEdit,
 }: Readonly<{ projectId: string; canEdit: boolean }>) {
   // Roles are assigned per project in this table (lib/player-roles.ts).
-  const [playerResults, projectRoles, roleOverrides, bossIds, unlocks] = await Promise.all([
+  const [playerResults, phases, projectRoles, roleOverrides, bossIds, unlocks] = await Promise.all([
     prisma.playerResult.findMany({
       where: { encounterResult: { logFile: { batch: { projectId } } } },
       select: {
@@ -67,31 +74,13 @@ export async function RosterSection({
         characterName: true,
         dps: true,
         downs: true,
+        encounterResultId: true,
         encounterResult: {
           select: {
             logFile: { select: { batchId: true } },
             success: true,
             createdAt: true,
             bossId: true,
-            // Boss-side events only (no player) — carries the shockwave and
-            // chomp casts and the Greens waves (with who stood in which circle).
-            phaseResults: {
-              select: {
-                mechanicEvents: {
-                  where: {
-                    playerResultId: null,
-                    mechanicName: {
-                      in: [
-                        ...shockwaveCastMechanicNames(),
-                        ...chompMechanicNames(),
-                        ...greenWaveMechanicNames(),
-                      ],
-                    },
-                  },
-                  select: { mechanicName: true, timeMs: true, context: true },
-                },
-              },
-            },
           },
         },
         // Only the events the roster counts: Geschwächt, Revealed and what the
@@ -112,11 +101,61 @@ export async function RosterSection({
         },
       },
     }),
+    // Boss-side events only (no player) — carries the shockwave and chomp
+    // casts and the Greens waves (with who stood in which circle). Loaded once
+    // per project here instead of nested under every player result, which
+    // repeated each encounter's events once per squad member. Reached via the
+    // project's phases so the events are looked up by phaseResultId (indexed)
+    // rather than by filtering the whole event table.
+    prisma.phaseResult.findMany({
+      where: { encounterResult: { logFile: { batch: { projectId } } } },
+      select: {
+        encounterResultId: true,
+        mechanicEvents: {
+          where: {
+            playerResultId: null,
+            mechanicName: {
+              in: [
+                ...shockwaveCastMechanicNames(),
+                ...chompMechanicNames(),
+                ...greenWaveMechanicNames(),
+              ],
+            },
+          },
+          select: { mechanicName: true, timeMs: true, context: true },
+        },
+      },
+    }),
     loadProjectRoles(projectId),
     loadBatchRoleOverrides(projectId),
     loadBossIds({ projectId }),
     loadAchievementUnlocks(projectId),
   ]);
+
+  const bossEventsByEncounter = new Map<string, BossEvent[]>();
+  for (const phase of phases) {
+    const events = bossEventsByEncounter.get(phase.encounterResultId);
+    if (events) events.push(...phase.mechanicEvents);
+    else bossEventsByEncounter.set(phase.encounterResultId, [...phase.mechanicEvents]);
+  }
+  // What only depends on the encounter is worked out once, not per player.
+  const encounterStats = new Map<
+    string,
+    { bossEvents: BossEvent[]; castTimes: number[]; hasChomps: boolean }
+  >();
+  function statsOf(encounterResultId: string, bossId: string) {
+    let stats = encounterStats.get(encounterResultId);
+    if (!stats) {
+      const bossEvents = bossEventsByEncounter.get(encounterResultId) ?? [];
+      stats = {
+        bossEvents,
+        castTimes: shockwaveCastTimes(bossId, bossEvents),
+        hasChomps: hasChompCasts(bossId, bossEvents),
+      };
+      encounterStats.set(encounterResultId, stats);
+    }
+    return stats;
+  }
 
   // Grouped by account, not character name — character names change,
   // the account handle doesn't (ADR-009).
@@ -147,8 +186,10 @@ export async function RosterSection({
       entry.lastActive = p.encounterResult.createdAt;
     // Counted per shockwave (not per attempt), so a short attempt only weighs
     // in with the shockwaves it actually contained — see lib/shockwave-stats.ts.
-    const bossEvents = p.encounterResult.phaseResults.flatMap((phase) => phase.mechanicEvents);
-    const castTimes = shockwaveCastTimes(p.encounterResult.bossId, bossEvents);
+    const { bossEvents, castTimes, hasChomps } = statsOf(
+      p.encounterResultId,
+      p.encounterResult.bossId,
+    );
     const shockwaves = countShockwaves(p.encounterResult.bossId, castTimes, p.mechanicEvents);
     entry.shockwavesPlayed += shockwaves.played;
     entry.shockwavesHit += shockwaves.hit;
@@ -165,7 +206,7 @@ export async function RosterSection({
     // Only attempts that reached Primordus's attacks count, so early wipes
     // don't dilute the share (same rule as the chomp charts). Slam and Jaws
     // together, matching the player page's Chomps total.
-    if (hasChompCasts(p.encounterResult.bossId, bossEvents)) {
+    if (hasChomps) {
       const chomps = countChomps(p.encounterResult.bossId, p.mechanicEvents);
       entry.chompAttempts += 1;
       if (chomps.slam + chomps.jaws > 0) entry.chompedAttempts += 1;
