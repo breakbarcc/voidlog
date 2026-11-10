@@ -17,9 +17,9 @@
     "stream-json": "^1.9.1"
   },
   "devDependencies": {
-    "@types/node": "^20.19.43",
+    "@types/node": "^22.20.5",
     "@types/stream-json": "^1.7.8",
-    "dotenv-cli": "^7.4.4",
+    "dotenv-cli": "^11.1.0",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3"
   }
