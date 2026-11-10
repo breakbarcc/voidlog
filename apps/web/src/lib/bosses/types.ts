@@ -112,7 +112,15 @@ export interface BossCuration {
    * role everybody else plays. Attempts whose assigned roles don't add up to
    * it get flagged (lib/role-composition.ts). Omitted = no such check.
    */
-  squadComposition?: { counts: Readonly<Record<string, number>>; fill: string };
+  squadComposition?: {
+    counts: Readonly<Record<string, number>>;
+    fill: string;
+    /**
+     * Players in a full squad. An attempt with fewer isn't checked: a role
+     * missing there is a player who wasn't in the log, not a wrong assignment.
+     */
+    size: number;
+  };
   /**
    * The bosses the encounter's fight is made of, in fight order, for the
    * "defeated" counts (lib/project-summary.ts). `phase` is the boss's last

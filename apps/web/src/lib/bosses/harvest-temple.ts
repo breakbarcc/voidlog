@@ -444,6 +444,7 @@ export const harvestTemple: BossCuration = {
   squadComposition: {
     counts: { HealKite: 2, BoonDPS: 2, Portal: 2, Venticator: 1 },
     fill: "DPS",
+    size: 10,
   },
   // The six dragons — not the Purifications or Giants. Soo-Won is one dragon
   // across both of its phases, defeated only with the kill itself.

@@ -8,7 +8,9 @@ import { loadBatchRoleOverrides, loadProjectRoles } from "./player-roles";
  * the boss's squad (`BossCuration.squadComposition`, e.g. Harvest Temple's
  * 2 HealKite, 2 BoonDPS, 2 Portal, 1 Venticator, DPS for the rest), checked
  * per attempt with the players who took part in it — a batch can have
- * substitutes, so its roster as a whole may hold more of a role.
+ * substitutes, so its roster as a whole may hold more of a role. Attempts
+ * with an incomplete squad (fewer players than `size`) are left out: a role
+ * missing there is someone who wasn't in the log, nothing the roster can fix.
  */
 
 export type SquadComposition = NonNullable<BossCuration["squadComposition"]>;
@@ -34,13 +36,14 @@ export interface BatchRoleIssues {
 
 /**
  * How the roles of one attempt's players miss `bossId`'s squad; empty when
- * they add up, or the boss has no composition curated. The fill role (DPS)
+ * they add up, the squad was incomplete, or the boss has no composition
+ * curated. The fill role (DPS)
  * is whatever is left, so only the counted roles and missing roles are
  * checked — a count off there shows up as the fill role's anyway.
  */
 export function roleDeviations(bossId: string, roles: readonly (string | null)[]): RoleDeviation[] {
   const composition = getBossCuration(bossId)?.squadComposition;
-  if (!composition) return [];
+  if (!composition || roles.length < composition.size) return [];
   const deviations: RoleDeviation[] = [];
   for (const [role, expected] of Object.entries(composition.counts)) {
     const actual = roles.filter((r) => r === role).length;
