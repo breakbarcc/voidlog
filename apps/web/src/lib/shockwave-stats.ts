@@ -189,11 +189,6 @@ export function squadShockwaves(
   return { played: played.size, hit: hit.size };
 }
 
-/** Sum of counts, e.g. over the players of an encounter or the attempts of a night. */
-export function addShockwaveCounts(a: ShockwaveCount, b: ShockwaveCount): ShockwaveCount {
-  return { played: a.played + b.played, hit: a.hit + b.hit };
-}
-
 /** Hit share in percent (rounded), null when no shockwave was played. */
 export function shockwavePercent(count: ShockwaveCount): number | null {
   return count.played > 0 ? Math.round((count.hit / count.played) * 100) : null;

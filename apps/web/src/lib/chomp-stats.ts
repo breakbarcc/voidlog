@@ -96,8 +96,3 @@ export function countChomps(bossId: string, events: readonly ChompEvent[]): Chom
     jaws: events.filter((e) => e.mechanicName === config.jawsHit).length,
   };
 }
-
-/** Slam kills, plus the Jaws ones when `withJaws`. */
-export function chompTotal(count: ChompCount, withJaws: boolean): number {
-  return count.slam + (withJaws ? count.jaws : 0);
-}
