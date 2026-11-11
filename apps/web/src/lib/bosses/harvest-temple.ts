@@ -341,6 +341,10 @@ const NOISE_MECHANIC_NAMES = new Set([
   "MagHail.H", // Magic Hail — unavoidable, only named on a downstate (downCauses below)
   "Lckt", // Targeted (presumed) — just a targeting marker, not a fail
   "Firebomb.H", // Firebomb — hit, treated as unavoidable
+  // Missing Quickness/Alacrity, added by newer Elite Insights (dps.report).
+  // Not evaluated by voidlog yet, so kept out of the detail views.
+  "Miss.Qck",
+  "Miss.Alac",
 ]);
 
 // The handful of boss-cast markers (see cast-markers.ts on the worker)
