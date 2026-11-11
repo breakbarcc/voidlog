@@ -19,23 +19,27 @@ pnpm dev                     # runs apps/web (:4000) + apps/worker in parallel
 
 ```bash
 pnpm build                   # builds apps/web and apps/worker
-pnpm lint                    # eslint across all packages (pnpm --recursive run lint)
-pnpm format                  # prettier --write .
-pnpm typecheck                # root tsc --noEmit, then tsc --noEmit in every package
+pnpm lint                    # eslint on scripts/, then in every package (pnpm --recursive run lint)
+pnpm format                  # prettier --write . (rewrites line endings repo-wide — prefer formatting single files)
+pnpm typecheck                # root tsc --noEmit (scripts/), then the typecheck script of every package incl. apps/web
 ```
 
-Per-package typecheck (apps/web has no root-level `typecheck` script of its own — use tsc directly):
+Per-package typecheck:
 
 ```bash
-pnpm --filter @voidlog/web exec tsc -p tsconfig.json --noEmit
-pnpm --filter @voidlog/worker exec tsc --noEmit
+pnpm --filter @voidlog/web run typecheck
+pnpm --filter @voidlog/worker run typecheck
 ```
+
+The shared `eslint.config.mjs` at the root (used by apps/worker, packages/db, packages/shared and scripts/) needs the root devDependencies `eslint`, `@eslint/js` and `typescript-eslint`; apps/web has its own config on top of `eslint-config-next`.
 
 No unit test framework is set up. The only test is an end-to-end data/job-flow proof script:
 
 ```bash
 pnpm test:e2e                # storage upload -> queue -> worker -> Postgres, against MockParser by default
 ```
+
+It needs apps/web and apps/worker running. The enqueue route requires a logged-in project member, so the script creates a short-lived DB session for its own E2E user, sends it as the `authjs.session-token` cookie and deletes it afterwards. The worker must run with `LOG_PARSER=mock` (dotenv-cli doesn't override variables already set, so e.g. `$env:LOG_PARSER='mock'; pnpm dev` and the same for `pnpm test:e2e`) — with `LOG_PARSER=dps-report` and no `TEST_EVTC_PATH` the script refuses to run, so it never uploads its dummy file to dps.report.
 
 For a real dps.report run instead of the mock: set `LOG_PARSER=dps-report` and `TEST_EVTC_PATH=/path/to/file.evtc` in `.env`, restart the worker, then rerun.
 

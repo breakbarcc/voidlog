@@ -110,8 +110,12 @@ pnpm test:e2e
 
 Proves the complete data/job flow (storage upload → queue → worker →
 Postgres) without a UI, against `MockParser` by default (no external
-dependency). For a real dps.report test run: set `LOG_PARSER=dps-report`
-and `TEST_EVTC_PATH=/path/to/file.evtc`, restart the worker, then rerun.
+dependency). Web and worker must be running, the worker with
+`LOG_PARSER=mock`; the script logs in with a short-lived session of its
+own test user. For a real dps.report test run: set `LOG_PARSER=dps-report`
+and `TEST_EVTC_PATH=/path/to/file.evtc`, restart the worker, then rerun —
+without `TEST_EVTC_PATH` the script refuses to send its dummy file to
+dps.report.
 
 There is no unit test suite yet — `test-e2e.ts` is the only automated
 check.
