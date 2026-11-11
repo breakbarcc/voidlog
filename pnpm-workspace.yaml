@@ -10,6 +10,11 @@ allowBuilds:
   msgpackr-extract: true
   prisma: true
   unrs-resolver: true
+overrides:
+  # @prisma/config@6.19.3 (Prisma CLI only, never loaded at app runtime) pins
+  # deepmerge-ts 7.1.5, affected by GHSA stack exhaustion fixed in 8.0.0.
+  # Remove once Prisma itself ships deepmerge-ts >=8 (e.g. on the Prisma 7 upgrade).
+  deepmerge-ts: ^8.0.2
 minimumReleaseAgeExclude:
   - icu-minify@4.14.1
   - next-intl-swc-plugin-extractor@4.14.1
