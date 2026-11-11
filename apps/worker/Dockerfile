@@ -4,7 +4,7 @@
 # version kept in sync with the root package.json's packageManager — see that
 # Dockerfile's base-image comment).
 
-FROM node:22-bookworm-slim AS base
+FROM node:25-bookworm-slim AS base
 # See apps/web/Dockerfile's identical line — Prisma needs openssl present to
 # pick the correct query-engine binary variant, otherwise every DB call
 # fails at runtime with a missing .so.node error.
