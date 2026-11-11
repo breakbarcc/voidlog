@@ -104,7 +104,7 @@ export function DangerZone({
 
   return (
     <section className="border-danger/40 bg-surface rounded-md border">
-      <h2 className="border-danger/40 text-danger border-b px-5 py-3 text-xs font-semibold uppercase tracking-widest">
+      <h2 className="border-danger/40 text-danger border-b px-5 py-3 text-xs font-semibold tracking-widest uppercase">
         {t("title")}
       </h2>
       <div className="divide-line divide-y px-5">

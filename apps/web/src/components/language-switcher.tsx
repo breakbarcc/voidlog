@@ -32,7 +32,7 @@ export function LanguageSwitcher() {
   }
 
   return (
-    <fieldset className="flex items-center gap-1 border-0 p-0 m-0">
+    <fieldset className="m-0 flex items-center gap-1 border-0 p-0">
       <legend className="sr-only">{t("label")}</legend>
       {locales.map((option) => (
         <button

@@ -70,14 +70,14 @@ export default async function AccountPage() {
           <section aria-labelledby="stats-title" className="flex flex-col gap-3">
             <h2
               id="stats-title"
-              className="text-muted text-xs font-medium uppercase tracking-widest"
+              className="text-muted text-xs font-medium tracking-widest uppercase"
             >
               {t("stats.title")}
             </h2>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               {stats.map((s) => (
                 <div key={s.label} className="border-line bg-surface rounded-md border p-4">
-                  <div className="text-muted mb-1 text-[11px] font-medium uppercase tracking-wide">
+                  <div className="text-muted mb-1 text-[11px] font-medium tracking-wide uppercase">
                     {s.label}
                   </div>
                   <div className="font-heading text-foreground-strong text-2xl font-bold">

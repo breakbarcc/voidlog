@@ -94,7 +94,7 @@ export function InvitesSection({
 
   return (
     <section aria-labelledby="invites-title" className="flex flex-col gap-3">
-      <h2 id="invites-title" className="text-muted text-xs font-medium uppercase tracking-widest">
+      <h2 id="invites-title" className="text-muted text-xs font-medium tracking-widest uppercase">
         {t("title")}
       </h2>
       <p className="text-muted text-sm">{t("description")}</p>

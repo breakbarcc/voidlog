@@ -819,14 +819,14 @@ export default async function BatchDetailPage(
 
       <div className="mb-6 grid grid-cols-2 gap-3.5 lg:grid-cols-6">
         <Card size="2" className="border-line bg-surface border">
-          <div className="text-muted mb-1.5 text-[11px] font-medium uppercase tracking-wide">
+          <div className="text-muted mb-1.5 text-[11px] font-medium tracking-wide uppercase">
             {t("totalAttempts")}
           </div>
           <div className="font-heading text-foreground text-xl font-bold">{attempts}</div>
         </Card>
         <Card size="2" className="border-line bg-surface border">
           <div
-            className="text-muted mb-1.5 text-[11px] font-medium uppercase tracking-wide"
+            className="text-muted mb-1.5 text-[11px] font-medium tracking-wide uppercase"
             title={t("revealsHint")}
           >
             {t("reveals")}
@@ -842,7 +842,7 @@ export default async function BatchDetailPage(
         </Card>
         <Card size="2" className="border-line bg-surface border">
           <div
-            className="text-muted mb-1.5 text-[11px] font-medium uppercase tracking-wide"
+            className="text-muted mb-1.5 text-[11px] font-medium tracking-wide uppercase"
             title={t("greenMissedHint")}
           >
             {t("greenMissed")}
@@ -856,7 +856,7 @@ export default async function BatchDetailPage(
         </Card>
         <Card size="2" className="border-line bg-surface border">
           <div
-            className="text-muted mb-1.5 text-[11px] font-medium uppercase tracking-wide"
+            className="text-muted mb-1.5 text-[11px] font-medium tracking-wide uppercase"
             title={t("shockwavesHitHint")}
           >
             {t("shockwavesHit")}
@@ -872,7 +872,7 @@ export default async function BatchDetailPage(
         </Card>
         <Card size="2" className="border-line bg-surface border">
           <div
-            className="text-muted mb-1.5 text-[11px] font-medium uppercase tracking-wide"
+            className="text-muted mb-1.5 text-[11px] font-medium tracking-wide uppercase"
             title={t("chompsHitHint")}
           >
             {t("chompsHit")}
@@ -887,7 +887,7 @@ export default async function BatchDetailPage(
           </div>
         </Card>
         <Card size="2" className="border-line bg-surface border">
-          <div className="text-muted mb-1.5 text-[11px] font-medium uppercase tracking-wide">
+          <div className="text-muted mb-1.5 text-[11px] font-medium tracking-wide uppercase">
             {t("furthestPhase")}
           </div>
           {furthestPhase ? (

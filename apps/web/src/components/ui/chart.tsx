@@ -63,7 +63,7 @@ function ChartContainer({
         data-slot="chart"
         data-chart={chartId}
         className={cn(
-          "[&_.recharts-cartesian-axis-tick_text]:fill-muted-strong [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-line-soft [&_.recharts-curve.recharts-tooltip-cursor]:stroke-line [&_.recharts-layer]:outline-hidden [&_.recharts-sector]:outline-hidden [&_.recharts-surface]:outline-hidden flex aspect-video justify-center text-xs [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-sector[stroke='#fff']]:stroke-transparent",
+          "[&_.recharts-cartesian-axis-tick_text]:fill-muted-strong [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-line-soft [&_.recharts-curve.recharts-tooltip-cursor]:stroke-line flex aspect-video justify-center text-xs [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden",
           className,
         )}
         {...props}
@@ -199,7 +199,7 @@ function ChartTooltipContent({
                       !hideIndicator && (
                         <div
                           className={cn(
-                            "border-(--color-border) bg-(--color-bg) shrink-0 rounded-[2px]",
+                            "shrink-0 rounded-[2px] border-(--color-border) bg-(--color-bg)",
                             {
                               "h-2.5 w-2.5": indicator === "dot",
                               "w-1": indicator === "line",

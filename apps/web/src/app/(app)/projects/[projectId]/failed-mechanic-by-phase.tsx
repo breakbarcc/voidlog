@@ -27,7 +27,7 @@ export async function FailedMechanicByPhase({
 
   return (
     <Card size="3" className="border-line bg-surface mt-3.5 border">
-      <div className="text-muted-strong mb-1 text-xs font-medium uppercase tracking-wide">
+      <div className="text-muted-strong mb-1 text-xs font-medium tracking-wide uppercase">
         {t("title", { count: TOP_FAILED_MECHANICS_PER_PHASE })}
       </div>
       <p className="text-muted mb-2 text-xs">{t("hint")}</p>

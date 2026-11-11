@@ -68,7 +68,7 @@ export function ChompsChartCard({
   return (
     <Card size="3" className="border-line bg-surface border">
       <div className="mb-3.5 space-y-2">
-        <div className="text-muted-strong text-xs font-medium uppercase tracking-wide">{title}</div>
+        <div className="text-muted-strong text-xs font-medium tracking-wide uppercase">{title}</div>
         {hasAttempts ? (
           <SegmentedControl.Root
             size="1"
@@ -108,7 +108,11 @@ export function ChompsChartCard({
                 formatter={(value, _name, item) => {
                   const row = item?.payload as { attempts: number; reached?: number } | undefined;
                   return showAttempts && row?.reached !== undefined
-                    ? t("ofAttempts", { percent: Number(value), value: row.attempts, total: row.reached })
+                    ? t("ofAttempts", {
+                        percent: Number(value),
+                        value: row.attempts,
+                        total: row.reached,
+                      })
                     : String(value);
                 }}
               />

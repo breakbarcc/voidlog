@@ -180,7 +180,7 @@ export function PhaseProgressChart({
       <div className="border-line-soft bg-surface-2 mt-4 rounded-sm border">
         <div className="flex items-center gap-2 px-3 pt-2.5 text-[11px]">
           <span className="bg-danger h-2.5 w-2.5 rounded-[2px]" />
-          <span className="text-muted-strong font-bold uppercase tracking-wide">
+          <span className="text-muted-strong font-bold tracking-wide uppercase">
             {t("wipesTitle")}
           </span>
           <span className="text-muted">{t("wipesHint")}</span>

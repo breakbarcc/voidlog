@@ -325,7 +325,7 @@ export default async function LogAnalysisPage(
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {stats.map((s) => (
           <div key={s.label} className="border-line bg-surface rounded-sm border px-4 py-3">
-            <div className="text-muted text-[11px] font-medium uppercase tracking-wide">
+            <div className="text-muted text-[11px] font-medium tracking-wide uppercase">
               {s.label}
             </div>
             <div className={`font-heading mt-1 text-2xl font-bold ${s.className}`}>{s.value}</div>

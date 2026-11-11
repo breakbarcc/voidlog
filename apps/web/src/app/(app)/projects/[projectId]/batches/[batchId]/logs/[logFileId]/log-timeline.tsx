@@ -177,7 +177,7 @@ export function LogTimeline({ data }: Readonly<{ data: LogTimelineData }>) {
   return (
     <div>
       {/* Overview: the same timeline as on the batch page */}
-      <div className="border-line bg-surface mb-6 rounded-sm border px-5 pb-3 pt-4">
+      <div className="border-line bg-surface mb-6 rounded-sm border px-5 pt-4 pb-3">
         <div className="font-heading text-foreground mb-3 text-sm font-semibold">
           {t("overview.title")}
         </div>
@@ -285,7 +285,7 @@ export function LogTimeline({ data }: Readonly<{ data: LogTimelineData }>) {
               className="grid grid-cols-[56px_22px_1fr]"
               style={{ opacity: notReached ? 0.5 : 1 }}
             >
-              <div className="pr-2 pt-3.5 text-right">
+              <div className="pt-3.5 pr-2 text-right">
                 {notReached ? null : (
                   <>
                     <div className="text-foreground text-xs font-semibold tabular-nums">
@@ -299,7 +299,7 @@ export function LogTimeline({ data }: Readonly<{ data: LogTimelineData }>) {
               </div>
               <div className="relative">
                 <div
-                  className="absolute bottom-0 left-1/2 top-0 -translate-x-1/2"
+                  className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2"
                   style={{
                     width: transition ? 2 : 3,
                     background: phase.color,

@@ -62,7 +62,7 @@ export function Sidebar({ userName, userImage, currentProject }: Readonly<Sideba
         <span className="font-heading text-base font-bold tracking-wide">VOIDLOG</span>
       </Link>
 
-      <div className="text-muted mb-2 px-2 text-[11px] font-medium uppercase tracking-wide">
+      <div className="text-muted mb-2 px-2 text-[11px] font-medium tracking-wide uppercase">
         {t("overview")}
       </div>
       <NavLink href="/" active={pathname === "/"}>
@@ -72,7 +72,7 @@ export function Sidebar({ userName, userImage, currentProject }: Readonly<Sideba
 
       {currentProject ? (
         <>
-          <div className="text-muted mb-2 mt-5 px-2 text-[11px] font-medium uppercase tracking-wide">
+          <div className="text-muted mt-5 mb-2 px-2 text-[11px] font-medium tracking-wide uppercase">
             {t("currentProject")}
           </div>
           <div className="border-line bg-surface mb-3.5 rounded-sm border px-3 py-2.5">

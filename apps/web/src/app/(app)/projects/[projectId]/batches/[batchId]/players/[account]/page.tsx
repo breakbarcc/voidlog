@@ -29,7 +29,7 @@ function StatCard({
   return (
     <Card size="2" className="border-line bg-surface border">
       <div
-        className="text-muted mb-1.5 text-[11px] font-medium uppercase tracking-wide"
+        className="text-muted mb-1.5 text-[11px] font-medium tracking-wide uppercase"
         title={hint}
       >
         {label}
@@ -42,7 +42,7 @@ function StatCard({
 function ChartCard({ title, children }: Readonly<{ title: string; children: React.ReactNode }>) {
   return (
     <Card size="3" className="border-line bg-surface border">
-      <div className="text-muted-strong mb-3.5 text-xs font-medium uppercase tracking-wide">
+      <div className="text-muted-strong mb-3.5 text-xs font-medium tracking-wide uppercase">
         {title}
       </div>
       {children}
@@ -134,8 +134,9 @@ export default async function BatchPlayerPage(
     dps: s.dps,
     revealCount: s.revealCount,
     debilitatedCount: s.debilitatedCount,
-    shockwaveRate:
-      s.shockwavesPlayed ? Math.round(((s.shockwavesHit ?? 0) / s.shockwavesPlayed) * 100) : null,
+    shockwaveRate: s.shockwavesPlayed
+      ? Math.round(((s.shockwavesHit ?? 0) / s.shockwavesPlayed) * 100)
+      : null,
     shockwavesPlayed: s.shockwavesPlayed,
     shockwavesHit: s.shockwavesHit,
   }));
@@ -160,8 +161,7 @@ export default async function BatchPlayerPage(
 
       <div className="mb-6 grid grid-cols-2 gap-3.5 lg:grid-cols-5">
         <StatCard label={t("stats.attempts")}>
-          {played.length}{" "}
-          <span className="text-muted text-sm font-medium">/ {stats.length}</span>
+          {played.length} <span className="text-muted text-sm font-medium">/ {stats.length}</span>
         </StatCard>
         <StatCard label={t("stats.avgDps")}>{formatNumber(avgDps, locale)}</StatCard>
         <StatCard label={t("stats.reveals")} hint={t("stats.revealsHint")}>

@@ -41,7 +41,7 @@ function StatCard({
   return (
     <Card size="2" className="border-line bg-surface border">
       <div
-        className="text-muted mb-1.5 text-[11px] font-medium uppercase tracking-wide"
+        className="text-muted mb-1.5 text-[11px] font-medium tracking-wide uppercase"
         title={hint}
       >
         {label}
@@ -54,7 +54,7 @@ function StatCard({
 function ChartCard({ title, children }: Readonly<{ title: string; children: React.ReactNode }>) {
   return (
     <Card size="3" className="border-line bg-surface border">
-      <div className="text-muted-strong mb-3.5 text-xs font-medium uppercase tracking-wide">
+      <div className="text-muted-strong mb-3.5 text-xs font-medium tracking-wide uppercase">
         {title}
       </div>
       {children}

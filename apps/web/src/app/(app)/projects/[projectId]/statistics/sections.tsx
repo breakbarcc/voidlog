@@ -71,7 +71,7 @@ export async function OverviewSection({
         <>
           <div className="mb-3.5 grid grid-cols-1 gap-3.5 lg:grid-cols-2">
             <Card size="3" className="border-line bg-surface border">
-              <div className="text-muted-strong mb-3.5 text-xs font-medium uppercase tracking-wide">
+              <div className="text-muted-strong mb-3.5 text-xs font-medium tracking-wide uppercase">
                 {tProject("shockwaveRateAll", { count: allTrendPoints.length })}
               </div>
               <ShockwaveTrendChart points={allTrendPoints} />
@@ -81,7 +81,7 @@ export async function OverviewSection({
             ) : null}
           </div>
           <Card size="3" className="border-line bg-surface mb-3.5 border">
-            <div className="text-muted-strong mb-3.5 text-xs font-medium uppercase tracking-wide">
+            <div className="text-muted-strong mb-3.5 text-xs font-medium tracking-wide uppercase">
               {tProject("greenFailRateAll", { count: allTrendPoints.length })}
             </div>
             <GreenFailTrendChart points={allTrendPoints} />

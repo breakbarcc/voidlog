@@ -22,7 +22,7 @@ function Tile({
   return (
     <div className="border-line rounded-md border px-4 py-3">
       <div
-        className="text-muted mb-1.5 text-[11px] font-medium uppercase tracking-wide"
+        className="text-muted mb-1.5 text-[11px] font-medium tracking-wide uppercase"
         title={hint}
       >
         {label}
@@ -42,7 +42,7 @@ export async function ProjectSummaryCard({ summary }: Readonly<{ summary: Projec
 
   return (
     <Card size="3" className="border-line bg-surface mb-3.5 border">
-      <div className="text-muted-strong mb-3.5 text-xs font-medium uppercase tracking-wide">
+      <div className="text-muted-strong mb-3.5 text-xs font-medium tracking-wide uppercase">
         {t("title")}
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
@@ -104,7 +104,7 @@ export async function ProjectSummaryCard({ summary }: Readonly<{ summary: Projec
       {summary.kills ? (
         <>
           <div
-            className="text-muted mb-2 mt-4 text-[11px] font-medium uppercase tracking-wide"
+            className="text-muted mt-4 mb-2 text-[11px] font-medium tracking-wide uppercase"
             title={t("killsHint")}
           >
             {t("kills")}

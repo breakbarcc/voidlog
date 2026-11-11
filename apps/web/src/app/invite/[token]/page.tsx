@@ -39,7 +39,7 @@ export default async function InvitePage(props: Readonly<PageProps<"/invite/[tok
 
   return (
     <div className="void-gradient-bg relative flex min-h-screen flex-col overflow-hidden">
-      <div className="void-orb bg-primary/25 -top-30 -left-25 absolute h-[480px] w-[480px]" />
+      <div className="void-orb bg-primary/25 absolute -top-30 -left-25 h-[480px] w-[480px]" />
       <header className="relative z-10 flex items-center justify-between px-6 py-6 sm:px-12">
         <Link href="/" className="flex items-center gap-3">
           <span className="bg-primary h-[22px] w-[22px] [clip-path:polygon(50%_0%,100%_25%,100%_75%,50%_100%,0%_75%,0%_25%)]" />

@@ -34,7 +34,7 @@ export function FailedMechanicsCard({
   return (
     <Card size="3" className="border-line bg-surface border">
       <div className="mb-1 flex items-center justify-between gap-3">
-        <div className="text-muted-strong text-xs font-medium uppercase tracking-wide">
+        <div className="text-muted-strong text-xs font-medium tracking-wide uppercase">
           {t("title", { count: TOP_FAILED_MECHANICS })}
         </div>
         {roles.length > 0 ? (

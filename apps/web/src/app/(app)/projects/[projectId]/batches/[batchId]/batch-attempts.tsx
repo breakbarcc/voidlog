@@ -219,7 +219,7 @@ function StatItem({
 }: Readonly<{ label: string; value: ReactNode; valueClassName?: string }>) {
   return (
     <div>
-      <div className="text-muted text-[10px] uppercase tracking-wide">{label}</div>
+      <div className="text-muted text-[10px] tracking-wide uppercase">{label}</div>
       <div className={`text-xs font-semibold ${valueClassName ?? "text-foreground"}`}>{value}</div>
     </div>
   );
@@ -458,7 +458,7 @@ function MechanicFilterAccordion({
   const tAttack = useTranslations("attackLabels");
   return (
     <details className="border-line-soft group mb-3.5 border-b pb-3.5">
-      <summary className="text-muted-strong flex cursor-pointer select-none list-none items-center gap-1.5 text-xs font-semibold">
+      <summary className="text-muted-strong flex cursor-pointer list-none items-center gap-1.5 text-xs font-semibold select-none">
         <ChevronRightIcon className="h-3.5 w-3.5 transition-transform group-open:rotate-90" />
         {t("mechanicFilter")}
       </summary>
@@ -566,7 +566,7 @@ function MechanicFilterAccordion({
             {multiPhaseAttacks.length > 0 || multiPhaseFails.length > 0 ? (
               <Table.Row>
                 <Table.Cell>
-                  <span className="text-muted-strong text-xs font-semibold uppercase tracking-wide">
+                  <span className="text-muted-strong text-xs font-semibold tracking-wide uppercase">
                     {t("multiplePhases")}
                   </span>
                 </Table.Cell>
@@ -598,7 +598,7 @@ function MechanicFilterAccordion({
             ) : null}
             <Table.Row>
               <Table.Cell>
-                <span className="text-muted-strong text-xs font-semibold uppercase tracking-wide">
+                <span className="text-muted-strong text-xs font-semibold tracking-wide uppercase">
                   {t("other")}
                 </span>
               </Table.Cell>
@@ -1094,7 +1094,7 @@ export function BatchAttempts({
                         return (
                           <div
                             key={phase.order}
-                            className="bg-surface-2 border-line border-l-3 rounded-sm border-y border-r px-2.5 py-2"
+                            className="bg-surface-2 border-line rounded-sm border-y border-r border-l-3 px-2.5 py-2"
                             style={{
                               borderLeftColor: phaseColor(a.bossId, phase.order, phase.name),
                             }}

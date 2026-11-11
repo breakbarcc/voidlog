@@ -53,8 +53,8 @@ export default async function LoginPage(props: Readonly<PageProps<"/login">>) {
 
   return (
     <div className="void-gradient-bg relative flex min-h-screen flex-col overflow-hidden">
-      <div className="void-orb bg-primary/25 -top-30 -left-25 absolute h-[480px] w-[480px]" />
-      <div className="void-orb bg-success/15 -bottom-35 absolute -right-20 h-[420px] w-[420px] [animation-duration:8s]" />
+      <div className="void-orb bg-primary/25 absolute -top-30 -left-25 h-[480px] w-[480px]" />
+      <div className="void-orb bg-success/15 absolute -right-20 -bottom-35 h-[420px] w-[420px] [animation-duration:8s]" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -76,7 +76,7 @@ export default async function LoginPage(props: Readonly<PageProps<"/login">>) {
       <main className="relative z-10 mx-auto grid w-full max-w-6xl flex-1 items-center gap-12 px-6 py-12 lg:grid-cols-[1fr_420px] lg:gap-20">
         <div className="order-2 flex flex-col gap-8 lg:order-1">
           <div className="flex flex-col gap-5">
-            <h1 className="font-heading text-foreground-strong text-3xl font-bold leading-tight sm:text-4xl">
+            <h1 className="font-heading text-foreground-strong text-3xl leading-tight font-bold sm:text-4xl">
               {t("headline")}
             </h1>
             <p className="text-muted-strong max-w-xl text-base leading-relaxed">{t("tagline")}</p>
@@ -85,7 +85,7 @@ export default async function LoginPage(props: Readonly<PageProps<"/login">>) {
           <section aria-labelledby="features-title" className="flex flex-col gap-4">
             <h2
               id="features-title"
-              className="text-muted text-xs font-medium uppercase tracking-widest"
+              className="text-muted text-xs font-medium tracking-widest uppercase"
             >
               {t("featuresTitle")}
             </h2>

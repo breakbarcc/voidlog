@@ -368,7 +368,7 @@ export function DpsPhaseChart({
                 setSelection(c.key);
                 setNightIndex(null);
               }}
-              className="flex min-w-0 flex-col items-center gap-1 rounded-[3px] border px-1.5 pb-[7px] pt-2 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex min-w-0 flex-col items-center gap-1 rounded-[3px] border px-1.5 pt-2 pb-[7px] disabled:cursor-not-allowed disabled:opacity-40"
               style={{
                 background: active ? "rgba(139,47,209,0.18)" : "#0f0d18",
                 borderColor: active ? "#8b2fd1" : "#251f35",
@@ -385,7 +385,7 @@ export function DpsPhaseChart({
                 {j === 0 ? (
                   <span
                     title={t("totalInfo")}
-                    className="box-border flex size-[11px] shrink-0 cursor-help items-center justify-center rounded-full border border-[#8a8299] text-[8px] font-bold leading-none text-[#8a8299]"
+                    className="box-border flex size-[11px] shrink-0 cursor-help items-center justify-center rounded-full border border-[#8a8299] text-[8px] leading-none font-bold text-[#8a8299]"
                   >
                     i
                   </span>
@@ -495,7 +495,7 @@ export function DpsPhaseChart({
             );
           })}
           <div
-            className="pointer-events-none absolute whitespace-nowrap text-[11.5px] font-bold text-[#ede9f5]"
+            className="pointer-events-none absolute text-[11.5px] font-bold whitespace-nowrap text-[#ede9f5]"
             style={{
               left: `${xFrac(lastIndex) * 100}%`,
               top: `${yFrac(points[lastIndex]?.v ?? 0) * 100}%`,
@@ -513,7 +513,7 @@ export function DpsPhaseChart({
                 {p.v === null ? (
                   <span
                     title={`${date(i)} · ${hasData[i] ? t("gapFew") : t("gapNone")}`}
-                    className="pointer-events-auto box-border flex size-3.5 cursor-help items-center justify-center rounded-full border-[1.5px] border-[#6b6478] bg-[#15121f] text-[9px] font-bold leading-none text-[#8a8299]"
+                    className="pointer-events-auto box-border flex size-3.5 cursor-help items-center justify-center rounded-full border-[1.5px] border-[#6b6478] bg-[#15121f] text-[9px] leading-none font-bold text-[#8a8299]"
                   >
                     ?
                   </span>
@@ -580,7 +580,7 @@ function Card({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="border-line bg-surface mb-[18px] rounded-sm border px-[22px] pb-4 pt-5">
+    <div className="border-line bg-surface mb-[18px] rounded-sm border px-[22px] pt-5 pb-4">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-5">
         <div>
           <div className="text-foreground-strong text-sm font-semibold">{title}</div>
@@ -605,7 +605,7 @@ function EmptyState({ title, text }: Readonly<{ title: string; text: string }>) 
         style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }}
       />
       <div className="mb-1.5 text-[13.5px] font-semibold text-[#c9c3d6]">{title}</div>
-      <div className="mx-auto max-w-[440px] text-pretty text-xs leading-relaxed text-[#6b6478]">
+      <div className="mx-auto max-w-[440px] text-xs leading-relaxed text-pretty text-[#6b6478]">
         {text}
       </div>
     </div>

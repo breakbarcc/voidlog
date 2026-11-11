@@ -118,7 +118,7 @@ export function GreensByRoleView({
                 selectedRole === role ? "border-primary" : "border-line hover:border-muted"
               }`}
             >
-              <div className="text-muted text-[11px] font-medium uppercase tracking-wide">
+              <div className="text-muted text-[11px] font-medium tracking-wide uppercase">
                 {role}
               </div>
               <div className="font-heading text-foreground-strong mt-1 text-2xl font-bold">
@@ -182,7 +182,7 @@ export function GreensByRoleView({
           {[t("mostFrequent"), "2.", "3."].map((heading) => (
             <span
               key={heading}
-              className="text-muted text-[10px] font-medium uppercase tracking-wide"
+              className="text-muted text-[10px] font-medium tracking-wide uppercase"
             >
               {heading}
             </span>
@@ -219,7 +219,7 @@ export function GreensByRoleView({
 
       {view === "ranking" ? (
         <div className="text-sm">
-          <div className="text-muted grid grid-cols-[28px_130px_170px_1fr_70px] gap-3 px-2 pb-2 text-[10px] font-medium uppercase tracking-wide">
+          <div className="text-muted grid grid-cols-[28px_130px_170px_1fr_70px] gap-3 px-2 pb-2 text-[10px] font-medium tracking-wide uppercase">
             <span>#</span>
             <span>{t("columns.phase")}</span>
             <span>{t("columns.circleRole")}</span>

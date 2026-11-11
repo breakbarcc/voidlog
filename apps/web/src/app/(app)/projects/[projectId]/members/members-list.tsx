@@ -185,7 +185,7 @@ export function MembersList({
       {error ? <p className="text-danger text-sm">{error}</p> : null}
 
       <section aria-labelledby="roles-title" className="flex flex-col gap-2">
-        <h2 id="roles-title" className="text-muted text-xs font-medium uppercase tracking-widest">
+        <h2 id="roles-title" className="text-muted text-xs font-medium tracking-widest uppercase">
           {t("rolesTitle")}
         </h2>
         <dl className="flex flex-col gap-1.5 text-sm">

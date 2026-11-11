@@ -23,13 +23,7 @@ export function SortableColumnHeader({
         className={`flex items-center gap-1 text-left ${active ? "text-foreground" : "text-muted-strong hover:text-foreground"}`}
       >
         {children}
-        {active ? (
-          direction === "asc" ? (
-            <ChevronUpIcon />
-          ) : (
-            <ChevronDownIcon />
-          )
-        ) : null}
+        {active ? direction === "asc" ? <ChevronUpIcon /> : <ChevronDownIcon /> : null}
       </button>
     </Table.ColumnHeaderCell>
   );

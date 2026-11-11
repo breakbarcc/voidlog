@@ -143,7 +143,7 @@ export default async function DashboardPage() {
                 </div>
                 <div className="flex flex-col gap-3.5">
                   <div>
-                    <div className="text-muted mb-1 text-[11px] font-medium uppercase tracking-wide">
+                    <div className="text-muted mb-1 text-[11px] font-medium tracking-wide uppercase">
                       {t("successRate")}
                     </div>
                     <div className="font-heading text-warning text-xl font-bold">
@@ -156,7 +156,7 @@ export default async function DashboardPage() {
                     </div>
                   </div>
                   <div className="min-w-0">
-                    <div className="text-muted mb-1 text-[11px] font-medium uppercase tracking-wide">
+                    <div className="text-muted mb-1 text-[11px] font-medium tracking-wide uppercase">
                       {t("furthestPhase")}
                     </div>
                     {p.kills > 0 ? (

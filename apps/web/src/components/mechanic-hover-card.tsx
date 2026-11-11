@@ -186,7 +186,7 @@ function MechanicSummary({ cluster, icon }: Readonly<{ cluster: MarkerCluster; i
       </div>
       {cluster.players.length > 0 ? (
         <div className="mt-1.5">
-          <div className="text-muted text-[10px] font-semibold uppercase tracking-wide">
+          <div className="text-muted text-[10px] font-semibold tracking-wide uppercase">
             {t("players", { count: cluster.players.length })}
           </div>
           <div className="text-foreground mt-0.5 text-[11px]">
@@ -198,7 +198,7 @@ function MechanicSummary({ cluster, icon }: Readonly<{ cluster: MarkerCluster; i
       ) : null}
       {cluster.causes ? (
         <div className="mt-1.5">
-          <div className="text-muted text-[10px] font-semibold uppercase tracking-wide">
+          <div className="text-muted text-[10px] font-semibold tracking-wide uppercase">
             {t("causes")}
           </div>
           <div className="text-foreground mt-0.5 text-[11px]">

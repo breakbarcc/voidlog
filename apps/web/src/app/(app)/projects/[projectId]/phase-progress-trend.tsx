@@ -241,8 +241,8 @@ export function PhaseProgressTrend({
 
       {isFirst ? null : (
         <div className="border-line-soft bg-surface-2 mt-4 rounded-sm border pb-2">
-          <div className="flex items-center gap-2 px-3 pb-2 pt-2.5 text-[11px]">
-            <span className="text-muted-strong font-bold uppercase tracking-wide">
+          <div className="flex items-center gap-2 px-3 pt-2.5 pb-2 text-[11px]">
+            <span className="text-muted-strong font-bold tracking-wide uppercase">
               {t("changeTitle")}
             </span>
             <span className="text-muted">
