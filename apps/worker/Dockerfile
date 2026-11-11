@@ -1,7 +1,8 @@
 # Build context must be the monorepo root (see docker-compose.yml) — same
 # reasoning as apps/web/Dockerfile (workspace packages, root lockfile,
-# glibc base for Prisma's native query-engine binary, Node 22 because
-# pnpm@11.22.0 requires it — see that Dockerfile's base-image comment).
+# glibc base for Prisma's native query-engine binary, Node 22, and a pnpm
+# version kept in sync with the root package.json's packageManager — see that
+# Dockerfile's base-image comment).
 
 FROM node:22-bookworm-slim AS base
 # See apps/web/Dockerfile's identical line — Prisma needs openssl present to
@@ -9,7 +10,7 @@ FROM node:22-bookworm-slim AS base
 # fails at runtime with a missing .so.node error.
 RUN apt-get update -y && apt-get install -y --no-install-recommends openssl ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
-    && corepack enable && corepack prepare pnpm@11.22.0 --activate
+    && corepack enable && corepack prepare pnpm@12.4.2 --activate
 WORKDIR /repo
 
 FROM base AS deps

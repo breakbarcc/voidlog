@@ -2,9 +2,10 @@
 # apps/web — this needs the workspace packages (@voidlog/db, @voidlog/shared)
 # and the root lockfile.
 #
-# node:22-bookworm-slim (glibc), not alpine: pnpm@11.22.0 (see packageManager
-# in package.json) requires Node >=22.13 (root package.json's engines.node).
-# glibc avoids the musl/OpenSSL-version detection issues Prisma has
+# node:22-bookworm-slim (glibc), not alpine: Node 22 matches the root
+# package.json's engines.node (>=22.13). The pnpm version below must match the
+# root package.json's packageManager (currently pnpm@12.4.2) so images install
+# the lockfile with the same pnpm as local dev. glibc avoids the musl/OpenSSL-version detection issues Prisma has
 # historically had on Alpine.
 
 FROM node:22-bookworm-slim AS base
@@ -16,7 +17,7 @@ FROM node:22-bookworm-slim AS base
 # .so.node error. Confirmed by an actual build without this line.
 RUN apt-get update -y && apt-get install -y --no-install-recommends openssl ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
-    && corepack enable && corepack prepare pnpm@11.22.0 --activate
+    && corepack enable && corepack prepare pnpm@12.4.2 --activate
 WORKDIR /repo
 
 # Installed from only the package.json files first so this layer is cached
