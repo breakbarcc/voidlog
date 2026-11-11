@@ -14,7 +14,7 @@
     "@voidlog/db": "workspace:*",
     "@voidlog/shared": "workspace:*",
     "bullmq": "^6.7.2",
-    "ioredis": "^5.11.1",
+    "ioredis": "^6.0.0",
     "stream-json": "^3.8.0"
   },
   "devDependencies": {
