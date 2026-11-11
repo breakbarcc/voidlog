@@ -1,12 +1,12 @@
 # voidlog — GW2 Log Analysis Platform
 
-![Next.js](https://img.shields.io/badge/Next.js-16.3-black?logo=next.js&logoColor=white)
-![React](https://img.shields.io/badge/React-19.2-149eca?logo=react&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178c6?logo=typescript&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-5.22-2d3748?logo=prisma&logoColor=white)
-![BullMQ](https://img.shields.io/badge/BullMQ-5.28-c53030?logo=redis&logoColor=white)
-![pnpm](https://img.shields.io/badge/pnpm-11.22-f69220?logo=pnpm&logoColor=white)
-![Node](https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white)
+![Next.js](https://img.shields.io/github/package-json/dependency-version/breakbarcc/voidlog/next?filename=apps%2Fweb%2Fpackage.json&label=Next.js&logo=next.js&logoColor=white&color=black)
+![React](https://img.shields.io/github/package-json/dependency-version/breakbarcc/voidlog/react?filename=apps%2Fweb%2Fpackage.json&label=React&logo=react&logoColor=white&color=149eca)
+![TypeScript](https://img.shields.io/github/package-json/dependency-version/breakbarcc/voidlog/typescript?filename=package.json&label=TypeScript&logo=typescript&logoColor=white&color=3178c6)
+![Prisma](https://img.shields.io/github/package-json/dependency-version/breakbarcc/voidlog/@prisma/client?filename=packages%2Fdb%2Fpackage.json&label=Prisma&logo=prisma&logoColor=white&color=2d3748)
+![BullMQ](https://img.shields.io/github/package-json/dependency-version/breakbarcc/voidlog/bullmq?filename=packages%2Fshared%2Fpackage.json&label=BullMQ&logo=redis&logoColor=white&color=c53030)
+![pnpm](https://img.shields.io/badge/pnpm-12.4-f69220?logo=pnpm&logoColor=white)
+![Node](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbreakbarcc%2Fvoidlog%2Fmain%2Fpackage.json&query=%24.engines.node&label=node&logo=node.js&logoColor=white&color=339933)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 A web app for uploading, parsing, and comparing Guild Wars 2 EVTC combat
