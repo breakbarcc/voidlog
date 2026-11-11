@@ -43,18 +43,21 @@ apps/
             (ADR-002/004/008/009)
 packages/
   db/       Prisma schema (User/Project/ProjectMember/UploadBatch/LogFile/
-            EncounterResult/PhaseResult/MechanicEvent/PlayerResult,
+            EncounterResult/PhaseResult/MechanicEvent/PlayerResult/PlayerPhaseDamage,
+            ProjectInvite/ProjectPlayerRole/BatchPlayerRole,
             Auth.js adapter tables)
   shared/   Shared TS types, S3 storage client (ADR-003),
             BullMQ queue configuration (ADR-004)
 scripts/
-  test-e2e.ts          End-to-end test of the data/job flow (step 2)
+  test-e2e.ts          End-to-end test of the data/job flow
+  backfill-greens.ts, backfill-target-buff-stacks.ts
+                       Backfill derived data for already-parsed logs
   seed-test-session.ts Dev login bypass without a real Discord app (see below)
 ```
 
 ## Prerequisites
 
-- Node.js >= 22.13 (required by `pnpm@11.22.0`, see `packageManager` in `package.json`)
+- Node.js >= 22.13 (required by `pnpm@12.4.2`, see `packageManager` in `package.json`)
 - [pnpm](https://pnpm.io/) (enable via `corepack enable`)
 - Docker + Docker Compose (for Postgres, Redis, MinIO)
 
@@ -62,7 +65,6 @@ scripts/
 
 ```bash
 pnpm install
-pnpm approve-builds   # allow native/build scripts (Prisma client generation etc.)
 docker compose up -d
 cp .env.example .env
 ```
@@ -126,7 +128,10 @@ check.
 pnpm build          # builds all apps
 pnpm lint            # ESLint across all packages
 pnpm format          # Prettier across the whole repo
+pnpm format:check     # Prettier check without writing
 pnpm typecheck        # tsc --noEmit across all packages
+pnpm backfill:greens  # backfill greens data for already-parsed logs
+pnpm backfill:target-buff-stacks  # backfill target buff stacks for already-parsed logs
 ```
 
 ## Status & roadmap
