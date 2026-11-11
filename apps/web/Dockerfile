@@ -8,7 +8,7 @@
 # the lockfile with the same pnpm as local dev. glibc avoids the musl/OpenSSL-version detection issues Prisma has
 # historically had on Alpine.
 
-FROM node:22-bookworm-slim AS base
+FROM node:25-bookworm-slim AS base
 # Prisma's query-engine binary selection inspects the system's OpenSSL
 # version at generate-time — without openssl installed, bookworm-slim has
 # none, so Prisma silently defaults to the wrong engine variant
