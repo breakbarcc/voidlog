@@ -2,7 +2,7 @@
 
 ![Next.js](https://img.shields.io/github/package-json/dependency-version/breakbarcc/voidlog/next?filename=apps%2Fweb%2Fpackage.json&label=Next.js&logo=next.js&logoColor=white&color=black)
 ![React](https://img.shields.io/github/package-json/dependency-version/breakbarcc/voidlog/react?filename=apps%2Fweb%2Fpackage.json&label=React&logo=react&logoColor=white&color=149eca)
-![TypeScript](https://img.shields.io/github/package-json/dependency-version/breakbarcc/voidlog/typescript?filename=package.json&label=TypeScript&logo=typescript&logoColor=white&color=3178c6)
+![TypeScript](https://img.shields.io/github/package-json/dependency-version/breakbarcc/voidlog/dev/typescript?filename=package.json&label=TypeScript&logo=typescript&logoColor=white&color=3178c6)
 ![Prisma](https://img.shields.io/github/package-json/dependency-version/breakbarcc/voidlog/@prisma/client?filename=packages%2Fdb%2Fpackage.json&label=Prisma&logo=prisma&logoColor=white&color=2d3748)
 ![BullMQ](https://img.shields.io/github/package-json/dependency-version/breakbarcc/voidlog/bullmq?filename=packages%2Fshared%2Fpackage.json&label=BullMQ&logo=redis&logoColor=white&color=c53030)
 ![pnpm](https://img.shields.io/badge/pnpm-12.4-f69220?logo=pnpm&logoColor=white)
