@@ -1,0 +1,34 @@
+version: 2
+
+# Weekly check for outdated dependencies. Security updates are raised by
+# Dependabot independently of this schedule and ignore the cooldown, so a
+# fix for a known vulnerability is never held back.
+updates:
+  - package-ecosystem: npm
+    directory: "/" # pnpm workspace: one root lockfile covers all packages
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 14 # only propose versions that are at least 2 weeks old
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker
+    directories:
+      - "/apps/web"
+      - "/apps/worker"
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 14
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 14
