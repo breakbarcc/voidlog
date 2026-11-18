@@ -1,6 +1,11 @@
 "use client";
 
-import { CheckCircledIcon, ChevronRightIcon, Cross2Icon } from "@radix-ui/react-icons";
+import {
+  CheckCircledIcon,
+  ChevronRightIcon,
+  Cross2Icon,
+  ExclamationTriangleIcon,
+} from "@radix-ui/react-icons";
 import { Card, Select, Tabs, Table } from "@radix-ui/themes";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -644,6 +649,7 @@ export function BatchAttempts({
   wipesByPhase,
   previousProgress,
   roster,
+  roleIssueHint,
   roles,
   canEdit,
 }: Readonly<{
@@ -658,6 +664,8 @@ export function BatchAttempts({
   wipesByPhase: Record<string, number>;
   previousProgress: PreviousPhaseProgress | null;
   roster: BatchRosterRow[];
+  /** Tooltip text when the batch's roles don't add up to the squad; null otherwise. */
+  roleIssueHint: string | null;
   /** Roles a player can be assigned (lib/player-roles.ts). */
   roles: readonly string[];
 }>) {
@@ -717,14 +725,21 @@ export function BatchAttempts({
     return rosterDirection === "asc" ? rows : rows.reverse();
   }, [roster, rosterSortKey, rosterDirection]);
 
-  function rosterHeader(key: RosterSortKey, label: string, hint?: string) {
+  function rosterHeader(key: RosterSortKey, label: string, hint?: string, warning?: string | null) {
     return (
       <SortableColumnHeader
         active={rosterSortKey === key}
         direction={rosterDirection}
         onClick={() => handleRosterSort(key)}
       >
-        {hint ? (
+        {warning ? (
+          <span className="inline-flex items-center gap-1.5">
+            {label}
+            <span title={warning} aria-label={warning} className="text-warning inline-flex">
+              <ExclamationTriangleIcon />
+            </span>
+          </span>
+        ) : hint ? (
           <span>
             {label}
             <span className="text-muted block text-xs font-normal">{hint}</span>
@@ -1156,7 +1171,7 @@ export function BatchAttempts({
           <Table.Header>
             <Table.Row>
               {rosterHeader("account", t("roster.player"))}
-              {rosterHeader("role", t("roster.role"))}
+              {rosterHeader("role", t("roster.role"), undefined, roleIssueHint)}
               {rosterHeader("encounters", t("roster.participations"))}
               {rosterHeader("kills", t("roster.kills"))}
               {rosterHeader("avgDps", t("roster.avgDps"))}

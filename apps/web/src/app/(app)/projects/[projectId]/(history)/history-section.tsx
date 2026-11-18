@@ -6,10 +6,8 @@ import type { Locale } from "@/i18n/locale";
 import { PhaseBadge } from "@/components/phase-badge";
 import { loadProjectOverview } from "@/lib/project-overview";
 import { loadBatchRoleIssues, type BatchRoleIssues } from "@/lib/role-composition";
+import { roleIssueText } from "@/lib/role-issue-text";
 import { PhaseProgressTrend } from "../phase-progress-trend";
-
-// Distinct deviation sets listed in a flagged row's tooltip before "and N more".
-const SHOWN_DEVIATIONS = 3;
 
 /**
  * The log history page's data part: the progress chart and the raid-night
@@ -30,34 +28,7 @@ export async function HistorySection({
       loadBatchRoleIssues(projectId),
     ]);
 
-  // "Rollen passen in 3 von 12 Versuchen nicht" plus one line per way they don't.
-  const roleIssueText = (issues: BatchRoleIssues) =>
-    [
-      t("roleIssues.title", {
-        mismatched: issues.mismatched,
-        attempts: issues.attempts,
-        expected: [
-          ...Object.entries(issues.composition.counts).map(([role, count]) => `${count}× ${role}`),
-          t("roleIssues.fill", { role: issues.composition.fill }),
-        ].join(", "),
-      }),
-      ...issues.deviations.slice(0, SHOWN_DEVIATIONS).map((deviations) =>
-        deviations
-          .map((d) =>
-            d.role === null
-              ? t("roleIssues.unassigned", { count: d.actual })
-              : t("roleIssues.deviation", {
-                  role: d.role,
-                  actual: d.actual,
-                  expected: d.expected,
-                }),
-          )
-          .join(", "),
-      ),
-      ...(issues.deviations.length > SHOWN_DEVIATIONS
-        ? [t("roleIssues.more", { count: issues.deviations.length - SHOWN_DEVIATIONS })]
-        : []),
-    ].join("\n");
+  const issueText = (issues: BatchRoleIssues) => roleIssueText(t, issues);
 
   return (
     <>
@@ -99,8 +70,8 @@ export async function HistorySection({
                     {issues ? (
                       <Link
                         href={`/projects/${projectId}/batches/${batch.id}?tab=roster`}
-                        title={roleIssueText(issues)}
-                        aria-label={roleIssueText(issues)}
+                        title={issueText(issues)}
+                        aria-label={issueText(issues)}
                         className="text-warning inline-flex hover:opacity-70"
                       >
                         <ExclamationTriangleIcon />

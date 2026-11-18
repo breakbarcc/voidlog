@@ -41,6 +41,8 @@ import {
 } from "@/lib/mechanics";
 import { achievementOutcomes } from "@/lib/achievements";
 import { hasRole, requireProjectMembership } from "@/lib/projects";
+import { loadBatchRoleIssues } from "@/lib/role-composition";
+import { roleIssueText } from "@/lib/role-issue-text";
 import { requireSession } from "@/lib/session";
 import {
   BatchAttempts,
@@ -743,6 +745,8 @@ export default async function BatchDetailPage(
   const batchPhaseStats = computeBatchPhaseStats(encounters, batchBossId, attempts, locale);
   const phaseProgress = computePhaseProgress(batchPhaseStats, encounters, batchBossId, attempts);
   const batchRoster = computeBatchRoster(encounters, await loadBatchRoles(projectId, batchId));
+  const tProject = await getTranslations("project");
+  const roleIssues = (await loadBatchRoleIssues(projectId)).get(batchId);
   // Shockwave card: the squad's shockwaves over all attempts — a wave is
   // failed as soon as it hit anybody (lib/shockwave-stats.ts).
   let shockwavesPlayed = 0;
@@ -939,6 +943,7 @@ export default async function BatchDetailPage(
         wipesByPhase={countWipesByPhase(attemptRows)}
         previousProgress={previousProgress}
         roster={batchRoster}
+        roleIssueHint={roleIssues ? roleIssueText(tProject, roleIssues) : null}
         roles={assignableRoles([...new Set(encounters.map((e) => e.encounter.bossId))])}
       />
     </div>
