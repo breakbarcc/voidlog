@@ -41,8 +41,11 @@ export interface AchievementOutcome {
 export function achievementOutcomes(
   bossId: string,
   success: boolean,
+  isCM: boolean,
   events: readonly { mechanicName: string; context: unknown }[],
 ): AchievementOutcome[] {
+  // The achievements only exist in challenge mode; a normal mode kill earns none.
+  if (!isCM) return [];
   const outcomes: AchievementOutcome[] = [];
   for (const achievement of getBossCuration(bossId)?.stackAchievements ?? []) {
     const targets = events
@@ -91,6 +94,7 @@ export async function loadAchievementUnlocks(
     },
     select: {
       bossId: true,
+      isCM: true,
       recordedAt: true,
       createdAt: true,
       playerResults: { select: { account: true } },
@@ -109,7 +113,7 @@ export async function loadAchievementUnlocks(
   for (const kill of kills) {
     const events = kill.phaseResults.flatMap((p) => p.mechanicEvents);
     const at = kill.recordedAt ?? kill.createdAt;
-    for (const outcome of achievementOutcomes(kill.bossId, true, events)) {
+    for (const outcome of achievementOutcomes(kill.bossId, true, kill.isCM, events)) {
       if (!outcome.earned) continue;
       for (const { account } of kill.playerResults) {
         const own = unlocks.get(account) ?? new Map<string, Date>();

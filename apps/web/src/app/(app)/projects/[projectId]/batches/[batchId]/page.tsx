@@ -549,6 +549,7 @@ function buildAttemptRow(
     achievements: achievementOutcomes(
       encounter.bossId,
       encounter.success,
+      encounter.isCM,
       encounter.phaseResults.flatMap((p) => p.mechanicEvents),
     ),
     // Only meaningful for a wipe (a kill always ends with the boss at 0%) that
