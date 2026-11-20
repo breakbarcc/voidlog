@@ -25,12 +25,13 @@ model User {
   image         String?
   createdAt     DateTime  @default(now())
 
-  accounts       Account[]
-  sessions       Session[]
-  ownedProjects  Project[]       @relation("ProjectOwner")
-  memberships    ProjectMember[]
-  uploadedLogs   LogFile[]
-  createdInvites ProjectInvite[]
+  accounts          Account[]
+  sessions          Session[]
+  ownedProjects     Project[]          @relation("ProjectOwner")
+  memberships       ProjectMember[]
+  uploadedLogs      LogFile[]
+  createdInvites    ProjectInvite[]
+  createdShareLinks ProjectShareLink[]
 
   @@map("users")
 }
@@ -84,6 +85,7 @@ model Project {
   owner         User                @relation("ProjectOwner", fields: [ownerId], references: [id])
   members       ProjectMember[]
   invites       ProjectInvite[]
+  shareLink     ProjectShareLink?
   uploadBatches UploadBatch[]
   playerRoles   ProjectPlayerRole[]
 
@@ -131,6 +133,22 @@ model ProjectInvite {
 
   @@index([projectId])
   @@map("project_invites")
+}
+
+/// Public read-only link (/share/<token>): whoever has it sees the project as a
+/// VIEWER without signing in. At most one per project; the token is kept in
+/// plain text so admins can copy the link again. Revoking deletes the row.
+model ProjectShareLink {
+  id          String   @id @default(cuid())
+  projectId   String   @unique
+  token       String   @unique
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@map("project_share_links")
 }
 
 model UploadBatch {
@@ -307,16 +325,22 @@ model PlayerPhaseDamage {
 }
 
 model PlayerResult {
-  id                String  @id @default(cuid())
-  encounterResultId String
-  account           String
-  characterName     String
-  profession        String
-  group             Int?
-  dps               Int
-  deaths            Int
-  downs             Int
-  role              String?
+  id                  String  @id @default(cuid())
+  encounterResultId   String
+  account             String
+  characterName       String
+  profession          String
+  group               Int?
+  dps                 Int
+  deaths              Int
+  downs               Int
+  role                String?
+  // Quickness / Alacrity this player generated for their group over the whole
+  // fight (EI `groupBuffs[].buffData[0].generation`, in % uptime). Null for logs
+  // processed before it was captured, or when EI reported none. Input of the
+  // role detection (apps/web/src/lib/role-detection.ts).
+  quicknessGeneration Float?
+  alacrityGeneration  Float?
 
   encounterResult EncounterResult     @relation(fields: [encounterResultId], references: [id], onDelete: Cascade)
   mechanicEvents  MechanicEvent[]

@@ -21,6 +21,7 @@ import {
   shockwaveCastTimes,
   shockwaveMechanicNames,
 } from "@/lib/shockwave-stats";
+import { type DetectionEncounter, type DetectionPlayer, detectRoles } from "@/lib/role-detection";
 import { RosterTable } from "./roster-table";
 
 /** A boss-side event (no player) as the shockwave, chomp and Greens stats read it. */
@@ -74,6 +75,8 @@ export async function RosterSection({
         characterName: true,
         dps: true,
         downs: true,
+        quicknessGeneration: true,
+        alacrityGeneration: true,
         encounterResultId: true,
         encounterResult: {
           select: {
@@ -223,12 +226,39 @@ export async function RosterSection({
     byAccount.set(p.account, entry);
   }
 
+  // Role suggestions from Greens, boons and damage (lib/role-detection.ts) —
+  // only shown for players who have no role yet.
+  const waveMarkers = new Set(greenWaveMechanicNames());
+  const detectionPlayers = new Map<string, DetectionPlayer[]>();
+  const detectionBoss = new Map<string, string>();
+  for (const p of playerResults) {
+    const players = detectionPlayers.get(p.encounterResultId) ?? [];
+    players.push({
+      account: p.account,
+      characterName: p.characterName,
+      dps: p.dps,
+      quicknessGeneration: p.quicknessGeneration,
+      alacrityGeneration: p.alacrityGeneration,
+    });
+    detectionPlayers.set(p.encounterResultId, players);
+    detectionBoss.set(p.encounterResultId, p.encounterResult.bossId);
+  }
+  const detectionEncounters: DetectionEncounter[] = [...detectionPlayers].map(([id, players]) => ({
+    bossId: detectionBoss.get(id)!,
+    players,
+    waveContexts: (bossEventsByEncounter.get(id) ?? [])
+      .filter((e) => waveMarkers.has(e.mechanicName))
+      .map((e) => e.context),
+  }));
+  const suggestions = detectRoles(detectionEncounters);
+
   const roster = [...byAccount.values()].map((entry) => {
     const role = projectRoles.get(entry.account) ?? null;
     return {
       account: entry.account,
       characterNames: [...entry.characterNames].join(", "),
       role,
+      suggestion: role === null ? (suggestions.get(entry.account) ?? null) : null,
       encounters: entry.encounters,
       kills: entry.kills,
       avgDps: Math.round(entry.totalDps / entry.encounters),

@@ -40,10 +40,9 @@ import {
   unusedMechanicNames,
 } from "@/lib/mechanics";
 import { achievementOutcomes } from "@/lib/achievements";
-import { hasRole, requireProjectMembership } from "@/lib/projects";
+import { hasRole, requireProjectViewer } from "@/lib/projects";
 import { loadBatchRoleIssues } from "@/lib/role-composition";
 import { roleIssueText } from "@/lib/role-issue-text";
-import { requireSession } from "@/lib/session";
 import {
   BatchAttempts,
   type AttemptRow,
@@ -618,9 +617,8 @@ export default async function BatchDetailPage(
   props: Readonly<PageProps<"/projects/[projectId]/batches/[batchId]">>,
 ) {
   const { projectId, batchId } = await props.params;
-  const session = await requireSession();
-  const membership = await requireProjectMembership(projectId, session.user.id);
-  const canEdit = hasRole(membership.role, ProjectRole.CONTRIBUTOR);
+  const access = await requireProjectViewer(projectId);
+  const canEdit = hasRole(access.role, ProjectRole.CONTRIBUTOR);
   const locale = (await getLocale()) as Locale;
   const t = await getTranslations("batchDetail");
   const tCommon = await getTranslations("common");
@@ -797,7 +795,7 @@ export default async function BatchDetailPage(
       <Breadcrumbs
         items={[
           { label: tSidebar("projects"), href: "/" },
-          { label: membership.project.name, href: `/projects/${projectId}` },
+          { label: access.project.name, href: `/projects/${projectId}` },
           { label: currentTitle },
         ]}
       />

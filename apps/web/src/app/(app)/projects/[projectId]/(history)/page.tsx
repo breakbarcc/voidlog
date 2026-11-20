@@ -4,8 +4,7 @@ import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/locale";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { hasRole, requireProjectMembership } from "@/lib/projects";
-import { requireSession } from "@/lib/session";
+import { hasRole, requireProjectViewer } from "@/lib/projects";
 import { DeleteProjectButton } from "../delete-project-button";
 import { HistorySection } from "./history-section";
 import { HistorySkeleton } from "./history-skeleton";
@@ -14,8 +13,7 @@ export default async function ProjectDetailPage(
   props: Readonly<PageProps<"/projects/[projectId]">>,
 ) {
   const { projectId } = await props.params;
-  const session = await requireSession();
-  const membership = await requireProjectMembership(projectId, session.user.id);
+  const access = await requireProjectViewer(projectId);
   const locale = (await getLocale()) as Locale;
   const t = await getTranslations("project");
   const tSidebar = await getTranslations("sidebar");
@@ -27,17 +25,17 @@ export default async function ProjectDetailPage(
   return (
     <div className="px-10 py-8">
       <Breadcrumbs
-        items={[{ label: tSidebar("projects"), href: "/" }, { label: membership.project.name }]}
+        items={[{ label: tSidebar("projects"), href: "/" }, { label: access.project.name }]}
       />
       <div className="mb-6 flex items-end justify-between">
         <div>
           <h1 className="font-heading text-foreground-strong text-2xl font-bold">
-            {membership.project.name}
+            {access.project.name}
           </h1>
           <p className="text-muted mt-1 text-sm">{t("raidNightsTracked", { count: batchCount })}</p>
         </div>
         <div className="flex items-center gap-3">
-          {hasRole(membership.role, ProjectRole.CONTRIBUTOR) ? (
+          {hasRole(access.role, ProjectRole.CONTRIBUTOR) ? (
             <Link
               href={`/projects/${projectId}/batches/new`}
               className="bg-primary text-primary-foreground inline-flex h-8 items-center justify-center rounded-sm px-3.5 text-sm font-semibold"
@@ -45,8 +43,8 @@ export default async function ProjectDetailPage(
               {t("uploadBatch")}
             </Link>
           ) : null}
-          {membership.role === ProjectRole.ADMIN ? (
-            <DeleteProjectButton projectId={projectId} projectName={membership.project.name} />
+          {access.role === ProjectRole.ADMIN ? (
+            <DeleteProjectButton projectId={projectId} projectName={access.project.name} />
           ) : null}
         </div>
       </div>

@@ -35,6 +35,8 @@
     "whyDiscord": "Mit dem Login erkennt voidlog dich, ordnet Projekte und Logs deinem Konto zu und schützt sie vor fremdem Zugriff. Du brauchst kein weiteres Passwort und keine eigene Registrierung. voidlog liest nur dein Discord-Profil (Name, Avatar und E-Mail-Adresse) und schreibt nie in deinem Namen."
   },
   "sidebar": {
+    "login": "Anmelden",
+    "readOnlyView": "Freigegebene Ansicht (nur lesen)",
     "overview": "Übersicht",
     "projects": "Projekte",
     "currentProject": "Aktuelles Projekt",
@@ -157,6 +159,18 @@
     "errorGeneric": "Aktion fehlgeschlagen ({status})",
     "rolesTitle": "Rollen",
     "soleAdminNote": "Du bist der einzige Admin: Deine Rolle lässt sich nicht ändern und du kannst das Projekt nicht verlassen, bis ein weiteres Mitglied Admin ist.",
+    "share": {
+      "title": "Öffentlicher Link (nur lesen)",
+      "description": "Wer diesen Link hat, sieht das gesamte Projekt ohne Anmeldung, aber nur lesend. Jeder kann ihn weitergeben – teile ihn nur mit Leuten, denen du die Daten zeigen willst.",
+      "enable": "Link aktivieren",
+      "disable": "Link deaktivieren",
+      "regenerate": "Neuen Link erzeugen",
+      "regenerateHint": "Der bisherige Link funktioniert dann nicht mehr.",
+      "linkLabel": "Öffentlicher Link",
+      "copy": "Kopieren",
+      "copied": "Kopiert",
+      "error": "Das hat nicht geklappt ({status})"
+    },
     "invites": {
       "title": "Einladungslinks",
       "description": "Teile einen Link, zum Beispiel in Discord. Wer ihn öffnet und sich anmeldet, tritt mit der gewählten Rolle bei.",
@@ -660,6 +674,17 @@
       "details": "{count} Fails · in {attempts} von {reached} Versuchen",
       "none": "Keine Fails"
     }
+  },
+  "roleSuggestion": {
+    "suggestedHigh": "Erkannt: {role}",
+    "suggestedMedium": "Vermutlich: {role}",
+    "apply": "Übernehmen",
+    "circles": "Greens: in {share}% von {count} Kreis-Auftritten im Kreis dieser Rolle",
+    "boons": "Boons: in {share}% von {count} Versuchen unter den Quickness-/Alacrity-Gebern",
+    "boonsMissing": "Boons: noch keine Daten (Logs vor dieser Auswertung)",
+    "damageFits": "Schaden passt zur Rolle",
+    "damageDiffers": "Schaden passt nicht zur Rolle",
+    "error": "Rolle konnte nicht gespeichert werden ({status})"
   },
   "roleSelect": {
     "none": "Keine Rolle",

@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { RoleSelect } from "@/components/role-select";
+import { RoleSuggestionHint } from "@/components/role-suggestion-hint";
+import type { RoleSuggestion } from "@/lib/role-detection";
 import { SortableColumnHeader } from "@/components/sortable-column-header";
 import type { Locale } from "@/i18n/locale";
 import { formatDate } from "@/lib/utils";
@@ -15,6 +17,8 @@ export interface RosterRow {
   characterNames: string;
   /** Role assigned for the project in this table; null when none is. */
   role: string | null;
+  /** Detected role for a player without one (lib/role-detection.ts). */
+  suggestion: RoleSuggestion | null;
   encounters: number;
   kills: number;
   avgDps: number;
@@ -225,6 +229,14 @@ export function RosterTable({
                 roles={roles}
                 canEdit={canEdit}
               />
+              {entry.suggestion ? (
+                <RoleSuggestionHint
+                  endpoint={`/api/projects/${projectId}/player-roles`}
+                  account={entry.account}
+                  suggestion={entry.suggestion}
+                  canEdit={canEdit}
+                />
+              ) : null}
             </Table.Cell>
             <Table.Cell className="text-muted-strong">{entry.encounters}</Table.Cell>
             <Table.Cell className="text-muted-strong">{entry.kills}</Table.Cell>

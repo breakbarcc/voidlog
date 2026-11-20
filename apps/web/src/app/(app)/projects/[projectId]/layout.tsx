@@ -1,24 +1,23 @@
 import { ProjectRole } from "@voidlog/db";
-import { getTranslations } from "next-intl/server";
 import { Sidebar } from "@/components/sidebar";
-import { hasRole, requireProjectMembership } from "@/lib/projects";
-import { requireSession } from "@/lib/session";
+import { hasRole, requireProjectViewer } from "@/lib/projects";
 
 export default async function ProjectLayout(props: LayoutProps<"/projects/[projectId]">) {
   const { projectId } = await props.params;
-  const session = await requireSession();
-  const membership = await requireProjectMembership(projectId, session.user.id);
-  const tCommon = await getTranslations("common");
+  // Members, and visitors with the project's share link (lib/share-links.ts).
+  const { role, project, session } = await requireProjectViewer(projectId);
+  const user = session?.user;
 
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar
-        userName={session.user.name ?? tCommon("account")}
-        userImage={session.user.image}
+        // No name for a visitor without a session: the sidebar shows a login instead.
+        userName={user ? (user.name ?? "") : null}
+        userImage={user?.image}
         currentProject={{
           id: projectId,
-          name: membership.project.name,
-          canUpload: hasRole(membership.role, ProjectRole.CONTRIBUTOR),
+          name: project.name,
+          canUpload: hasRole(role, ProjectRole.CONTRIBUTOR),
         }}
       />
       <div className="min-w-0 flex-1 overflow-y-auto">{props.children}</div>

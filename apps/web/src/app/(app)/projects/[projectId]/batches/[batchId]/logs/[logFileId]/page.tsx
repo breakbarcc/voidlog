@@ -26,8 +26,7 @@ import {
   isNoiseMechanic,
   isVisibleCastMarker,
 } from "@/lib/mechanics";
-import { requireProjectMembership } from "@/lib/projects";
-import { requireSession } from "@/lib/session";
+import { requireProjectViewer } from "@/lib/projects";
 import {
   LogTimeline,
   type EventCategory,
@@ -99,8 +98,7 @@ export default async function LogAnalysisPage(
   props: Readonly<PageProps<"/projects/[projectId]/batches/[batchId]/logs/[logFileId]">>,
 ) {
   const { projectId, batchId, logFileId } = await props.params;
-  const session = await requireSession();
-  const membership = await requireProjectMembership(projectId, session.user.id);
+  const access = await requireProjectViewer(projectId);
   const locale = (await getLocale()) as Locale;
   const t = await getTranslations("logDetail");
   const tCommon = await getTranslations("common");
@@ -272,7 +270,7 @@ export default async function LogAnalysisPage(
       <Breadcrumbs
         items={[
           { label: tSidebar("projects"), href: "/" },
-          { label: membership.project.name, href: `/projects/${projectId}` },
+          { label: access.project.name, href: `/projects/${projectId}` },
           { label: batchName, href: `/projects/${projectId}/batches/${batchId}` },
           { label: t("attempt", { n: attemptNo }) },
         ]}

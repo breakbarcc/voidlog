@@ -10,8 +10,7 @@ import {
   STEALTH_CAST_MECHANIC,
   playerAttemptStats,
 } from "@/lib/player-attempts";
-import { requireProjectMembership } from "@/lib/projects";
-import { requireSession } from "@/lib/session";
+import { requireProjectViewer } from "@/lib/projects";
 import { formatNumber } from "@/lib/utils";
 import { ChompsChartCard } from "@/components/chomps-chart";
 import {
@@ -56,8 +55,7 @@ export default async function BatchPlayerPage(
 ) {
   const { projectId, batchId, account: rawAccount } = await props.params;
   const account = decodeURIComponent(rawAccount);
-  const session = await requireSession();
-  const membership = await requireProjectMembership(projectId, session.user.id);
+  const access = await requireProjectViewer(projectId);
   const locale = (await getLocale()) as Locale;
   const t = await getTranslations("playerDetail");
   const tChomps = await getTranslations("chomps");
@@ -146,7 +144,7 @@ export default async function BatchPlayerPage(
       <Breadcrumbs
         items={[
           { label: tSidebar("projects"), href: "/" },
-          { label: membership.project.name, href: `/projects/${projectId}` },
+          { label: access.project.name, href: `/projects/${projectId}` },
           { label: title, href: `/projects/${projectId}/batches/${batchId}` },
           { label: account },
         ]}

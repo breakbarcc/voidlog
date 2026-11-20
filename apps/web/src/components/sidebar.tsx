@@ -10,7 +10,8 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { MAIN_SITE_URL } from "@/lib/breakbar";
 
 interface SidebarProps {
-  userName: string;
+  /** Null for a visitor without a session (public share link): a login is shown instead. */
+  userName: string | null;
   userImage?: string | null;
   currentProject?: {
     id: string;
@@ -54,6 +55,7 @@ function NavDot({ shape = "square" }: Readonly<{ shape?: "square" | "circle" | "
 export function Sidebar({ userName, userImage, currentProject }: Readonly<SidebarProps>) {
   const pathname = usePathname();
   const t = useTranslations("sidebar");
+  const signedIn = userName !== null;
 
   return (
     <aside className="bg-surface-2 border-line-soft flex h-full w-[232px] shrink-0 flex-col overflow-y-auto border-r px-3.5 py-5">
@@ -62,13 +64,17 @@ export function Sidebar({ userName, userImage, currentProject }: Readonly<Sideba
         <span className="font-heading text-base font-bold tracking-wide">VOIDLOG</span>
       </Link>
 
-      <div className="text-muted mb-2 px-2 text-[11px] font-medium tracking-wide uppercase">
-        {t("overview")}
-      </div>
-      <NavLink href="/" active={pathname === "/"}>
-        <NavDot />
-        {t("projects")}
-      </NavLink>
+      {signedIn ? (
+        <>
+          <div className="text-muted mb-2 px-2 text-[11px] font-medium tracking-wide uppercase">
+            {t("overview")}
+          </div>
+          <NavLink href="/" active={pathname === "/"}>
+            <NavDot />
+            {t("projects")}
+          </NavLink>
+        </>
+      ) : null}
 
       {currentProject ? (
         <>
@@ -79,6 +85,9 @@ export function Sidebar({ userName, userImage, currentProject }: Readonly<Sideba
             <div className="text-foreground truncate text-[12.5px] font-semibold">
               {currentProject.name}
             </div>
+            {signedIn ? null : (
+              <div className="text-muted mt-0.5 text-[11px]">{t("readOnlyView")}</div>
+            )}
           </div>
           <NavLink
             href={`/projects/${currentProject.id}`}
@@ -101,13 +110,15 @@ export function Sidebar({ userName, userImage, currentProject }: Readonly<Sideba
             <NavDot shape="circle" />
             {t("roster")}
           </NavLink>
-          <NavLink
-            href={`/projects/${currentProject.id}/members`}
-            active={pathname === `/projects/${currentProject.id}/members`}
-          >
-            <NavDot />
-            {t("members")}
-          </NavLink>
+          {signedIn ? (
+            <NavLink
+              href={`/projects/${currentProject.id}/members`}
+              active={pathname === `/projects/${currentProject.id}/members`}
+            >
+              <NavDot />
+              {t("members")}
+            </NavLink>
+          ) : null}
           {currentProject.canUpload ? (
             <Link
               href={`/projects/${currentProject.id}/batches/new`}
@@ -125,34 +136,43 @@ export function Sidebar({ userName, userImage, currentProject }: Readonly<Sideba
         <LanguageSwitcher />
       </div>
 
-      <DropdownMenu.Root>
-        <DropdownMenu.Trigger>
-          <button
-            type="button"
-            className="text-muted hover:text-foreground flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-left text-[12.5px]"
-          >
-            <Avatar
-              size="1"
-              radius="full"
-              src={userImage ?? undefined}
-              fallback={userName.charAt(0).toUpperCase()}
-            />
-            <span className="truncate">{userName}</span>
-          </button>
-        </DropdownMenu.Trigger>
-        <DropdownMenu.Content side="top" align="start">
-          <DropdownMenu.Item asChild>
-            <Link href="/account">{t("account")}</Link>
-          </DropdownMenu.Item>
-          <DropdownMenu.Separator />
-          <DropdownMenu.Item asChild>
-            <a href={MAIN_SITE_URL}>{t("backToMainSite")}</a>
-          </DropdownMenu.Item>
-          <DropdownMenu.Item onSelect={() => signOut({ redirectTo: "/login" })}>
-            {t("logout")}
-          </DropdownMenu.Item>
-        </DropdownMenu.Content>
-      </DropdownMenu.Root>
+      {signedIn ? (
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger>
+            <button
+              type="button"
+              className="text-muted hover:text-foreground flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-left text-[12.5px]"
+            >
+              <Avatar
+                size="1"
+                radius="full"
+                src={userImage ?? undefined}
+                fallback={(userName ?? "").charAt(0).toUpperCase()}
+              />
+              <span className="truncate">{userName}</span>
+            </button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content side="top" align="start">
+            <DropdownMenu.Item asChild>
+              <Link href="/account">{t("account")}</Link>
+            </DropdownMenu.Item>
+            <DropdownMenu.Separator />
+            <DropdownMenu.Item asChild>
+              <a href={MAIN_SITE_URL}>{t("backToMainSite")}</a>
+            </DropdownMenu.Item>
+            <DropdownMenu.Item onSelect={() => signOut({ redirectTo: "/login" })}>
+              {t("logout")}
+            </DropdownMenu.Item>
+          </DropdownMenu.Content>
+        </DropdownMenu.Root>
+      ) : (
+        <Link
+          href="/login"
+          className="text-muted hover:text-foreground rounded-sm px-2.5 py-2 text-[12.5px]"
+        >
+          {t("login")}
+        </Link>
+      )}
     </aside>
   );
 }

@@ -29,8 +29,7 @@ import {
   playerGreens,
 } from "@/lib/green-player-stats";
 import { loadBatchRoleOverrides, loadProjectRoles } from "@/lib/player-roles";
-import { requireProjectMembership } from "@/lib/projects";
-import { requireSession } from "@/lib/session";
+import { requireProjectViewer } from "@/lib/projects";
 import { formatDate, formatNumber } from "@/lib/utils";
 
 function StatCard({
@@ -68,8 +67,7 @@ export default async function ProjectPlayerPage(
 ) {
   const { projectId, account: rawAccount } = await props.params;
   const account = decodeURIComponent(rawAccount);
-  const session = await requireSession();
-  const membership = await requireProjectMembership(projectId, session.user.id);
+  const access = await requireProjectViewer(projectId);
   const locale = (await getLocale()) as Locale;
   const t = await getTranslations("playerDetail");
   const tRoster = await getTranslations("roster");
@@ -231,7 +229,7 @@ export default async function ProjectPlayerPage(
       <Breadcrumbs
         items={[
           { label: tSidebar("projects"), href: "/" },
-          { label: membership.project.name, href: `/projects/${projectId}` },
+          { label: access.project.name, href: `/projects/${projectId}` },
           { label: tRoster("breadcrumb"), href: `/projects/${projectId}/players` },
           { label: account },
         ]}

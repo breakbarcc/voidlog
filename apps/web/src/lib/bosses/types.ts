@@ -118,6 +118,25 @@ export interface BossCuration {
    */
   squadRoles?: readonly string[];
   /**
+   * How a player's role is worked out from the logs (lib/role-detection.ts):
+   * circle positions in the Greens plus boon output decide, damage only
+   * confirms. Omitted = no detection for this boss.
+   */
+  roleDetection?: {
+    /** Roles whose players give Quickness/Alacrity to their group. */
+    boonRoles: readonly string[];
+    /**
+     * Roles that stand in one common circle (so the Greens can't tell them
+     * apart), the boon-giving role first. Boons decide between them.
+     */
+    sharedCircleRoles: readonly (readonly string[])[];
+    /**
+     * The role whose damage is far below the squad's. Only confirms a
+     * detection, never decides one.
+     */
+    lowDamageRole?: string;
+  };
+  /**
    * How many players each `squadRoles` role has in a squad; `fill` is the
    * role everybody else plays. Attempts whose assigned roles don't add up to
    * it get flagged (lib/role-composition.ts). Omitted = no such check.

@@ -100,6 +100,13 @@ export interface EiPlayer {
    * persisted as-is.
    */
   buffUptimesActive?: EiPlayerBuffUptimeActiveEntry[];
+  /**
+   * What this player's buffs generated for their own group, per buff id and
+   * phase (`buffData[phaseIndex]`, index 0 = whole fight). Only the generation
+   * of Quickness and Alacrity is read (extraction/boon-generation.ts), reduced
+   * to two numbers on `PlayerResult`.
+   */
+  groupBuffs?: { id: number; buffData?: { generation?: number }[] }[];
   /** Only kept for bosses with a Greens config. */
   combatReplayData?: EiCombatReplay;
   // statsAll, support, deathRecap, consumables, activeTimes are read by

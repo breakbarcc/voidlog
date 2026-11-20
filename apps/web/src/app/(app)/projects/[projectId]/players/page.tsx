@@ -3,8 +3,7 @@ import { ProjectRole } from "@voidlog/db";
 import { getTranslations } from "next-intl/server";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { TableSkeleton } from "@/components/table-skeleton";
-import { hasRole, requireProjectMembership } from "@/lib/projects";
-import { requireSession } from "@/lib/session";
+import { hasRole, requireProjectViewer } from "@/lib/projects";
 import { ROSTER_COLUMNS, RosterSection } from "./roster-section";
 
 /**
@@ -15,8 +14,7 @@ export default async function RosterPage(
   props: Readonly<PageProps<"/projects/[projectId]/players">>,
 ) {
   const { projectId } = await props.params;
-  const session = await requireSession();
-  const membership = await requireProjectMembership(projectId, session.user.id);
+  const access = await requireProjectViewer(projectId);
   const t = await getTranslations("roster");
   const tSidebar = await getTranslations("sidebar");
 
@@ -25,7 +23,7 @@ export default async function RosterPage(
       <Breadcrumbs
         items={[
           { label: tSidebar("projects"), href: "/" },
-          { label: membership.project.name, href: `/projects/${projectId}` },
+          { label: access.project.name, href: `/projects/${projectId}` },
           { label: t("breadcrumb") },
         ]}
       />
@@ -35,7 +33,7 @@ export default async function RosterPage(
       <Suspense fallback={<TableSkeleton columns={ROSTER_COLUMNS} />}>
         <RosterSection
           projectId={projectId}
-          canEdit={hasRole(membership.role, ProjectRole.CONTRIBUTOR)}
+          canEdit={hasRole(access.role, ProjectRole.CONTRIBUTOR)}
         />
       </Suspense>
     </div>

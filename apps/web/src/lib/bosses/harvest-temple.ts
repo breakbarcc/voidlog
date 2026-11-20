@@ -451,6 +451,13 @@ export const harvestTemple: BossCuration = {
   // The Greens roles (greens.roles above) plus the Venticator, who has no
   // circle of their own and stacks with the DPS (greens.sharedCircles).
   squadRoles: ["HealKite", "Portal", "BoonDPS", "DPS", "Venticator"],
+  // HealKites and BoonDPS give Quickness/Alacrity; BoonDPS, DPS and the
+  // Venticator stack in one circle, so only boons tell BoonDPS from DPS.
+  roleDetection: {
+    boonRoles: ["HealKite", "BoonDPS"],
+    sharedCircleRoles: [["BoonDPS", "DPS"]],
+    lowDamageRole: "HealKite",
+  },
   squadComposition: {
     counts: { HealKite: 2, BoonDPS: 2, Portal: 2, Venticator: 1 },
     fill: "DPS",

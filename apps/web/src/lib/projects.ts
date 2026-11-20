@@ -1,7 +1,10 @@
 import { ProjectRole, prisma } from "@voidlog/db";
-import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
+import { notFound, redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import { cache } from "react";
+import { auth } from "@/auth";
+import { shareCookieName, tokensMatch } from "./share-links";
 
 /**
  * Project-scoping (ADR-007): every project-level page/route must confirm
@@ -54,6 +57,37 @@ export async function requireProjectRole(projectId: string, userId: string, minR
   }
   return membership;
 }
+
+/**
+ * Pages that are read-only for everybody: a member (any role) passes, and so
+ * does anybody holding the project's share link (cookie set by /share/<token>)
+ * — as a VIEWER, signed in or not. Without either, a signed-out visitor goes
+ * to the login and a signed-in one gets a 404. Pages that write or show
+ * member data keep `requireProjectMembership`.
+ */
+export const requireProjectViewer = cache(async (projectId: string) => {
+  const session = await auth();
+  if (session?.user) {
+    const membership = await findMembership(projectId, session.user.id);
+    if (membership) {
+      return { role: membership.role, project: membership.project, session };
+    }
+  }
+
+  const token = (await cookies()).get(shareCookieName(projectId))?.value;
+  if (token) {
+    const link = await prisma.projectShareLink.findUnique({
+      where: { projectId },
+      include: { project: true },
+    });
+    if (link && tokensMatch(link.token, token)) {
+      return { role: ProjectRole.VIEWER, project: link.project, session };
+    }
+  }
+
+  if (!session?.user) redirect("/login");
+  notFound();
+});
 
 type RoleCheck =
   | { ok: true; membership: NonNullable<Awaited<ReturnType<typeof findMembership>>> }

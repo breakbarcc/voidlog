@@ -48,6 +48,8 @@ const PLAYER_KEEP_WHOLE = new Set([
   "defenses",
   "rotation",
   "buffUptimesActive",
+  // Group boon generation — reduced to Quickness/Alacrity in persist-encounter.ts.
+  "groupBuffs",
 ]);
 
 // `targets[]` also carries per-target damage/buff/combat-replay breakdowns

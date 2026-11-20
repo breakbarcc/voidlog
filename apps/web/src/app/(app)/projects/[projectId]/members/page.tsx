@@ -7,6 +7,7 @@ import { requireSession } from "@/lib/session";
 import { formatDate, formatDateTime } from "@/lib/utils";
 import { InvitesSection, type InviteRow } from "./invites-section";
 import { MembersList, type MemberRow } from "./members-list";
+import { ShareLinkSection } from "./share-link-section";
 
 const ROLE_ORDER: Record<ProjectRole, number> = {
   [ProjectRole.ADMIN]: 0,
@@ -46,6 +47,9 @@ export default async function MembersPage(
   }));
 
   const isAdmin = membership.role === ProjectRole.ADMIN;
+  const shareLink = isAdmin
+    ? await prisma.projectShareLink.findUnique({ where: { projectId }, select: { token: true } })
+    : null;
   const inviteRows: InviteRow[] = isAdmin
     ? (
         await prisma.projectInvite.findMany({
@@ -81,9 +85,14 @@ export default async function MembersPage(
       <MembersList projectId={projectId} members={rows} canManage={isAdmin} />
 
       {isAdmin ? (
-        <div className="mt-8">
-          <InvitesSection projectId={projectId} invites={inviteRows} />
-        </div>
+        <>
+          <div className="mt-8">
+            <InvitesSection projectId={projectId} invites={inviteRows} />
+          </div>
+          <div className="mt-8">
+            <ShareLinkSection projectId={projectId} token={shareLink?.token ?? null} />
+          </div>
+        </>
       ) : null}
     </div>
   );

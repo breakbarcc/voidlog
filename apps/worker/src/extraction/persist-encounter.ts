@@ -14,6 +14,7 @@ import { computeFinalBossHealthPercent } from "./boss-health";
 import { computePhaseDamage } from "./phase-damage";
 import { DEATH_MECHANIC_NAME, parseEiTimestamp } from "./ei-json-shape";
 import type { EiMechanicDataPoint, EiRotationEntry } from "./ei-json-shape";
+import { boonGeneration } from "./boon-generation";
 import { greenEventContext, greenWaveContext, resolveGreenWaves } from "./green-waves";
 import type { ExtractedEncounter } from "./extract-encounter";
 
@@ -226,6 +227,7 @@ export async function persistExtractedEncounter(
             dps: Math.round(dps),
             deaths: Math.round(deaths),
             downs: Math.round(downs),
+            ...boonGeneration(player),
           },
         });
         playerIdByCharacterName.set(player.name, created.id);

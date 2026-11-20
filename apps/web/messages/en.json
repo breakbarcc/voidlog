@@ -35,6 +35,8 @@
     "whyDiscord": "Signing in lets voidlog recognize you, tie projects and logs to your account and keep them from outside access. You need no extra password and no separate registration. voidlog only reads your Discord profile (name, avatar and email address) and never posts on your behalf."
   },
   "sidebar": {
+    "login": "Sign in",
+    "readOnlyView": "Shared view (read-only)",
     "overview": "Overview",
     "projects": "Projects",
     "currentProject": "Current Project",
@@ -157,6 +159,18 @@
     "errorGeneric": "Action failed ({status})",
     "rolesTitle": "Roles",
     "soleAdminNote": "You are the only admin, so your role can't be changed and you can't leave until another member is an admin.",
+    "share": {
+      "title": "Public link (read-only)",
+      "description": "Anyone with this link sees the whole project without signing in, read-only. It can be passed on by anyone – only share it with people you want to show the data to.",
+      "enable": "Enable link",
+      "disable": "Disable link",
+      "regenerate": "Generate new link",
+      "regenerateHint": "The current link stops working.",
+      "linkLabel": "Public link",
+      "copy": "Copy",
+      "copied": "Copied",
+      "error": "That didn't work ({status})"
+    },
     "invites": {
       "title": "Invite links",
       "description": "Share a link, for example in Discord. Everyone who opens it and signs in joins with the role you pick.",
@@ -660,6 +674,17 @@
       "details": "{count} fails · in {attempts} of {reached} attempts",
       "none": "No fails"
     }
+  },
+  "roleSuggestion": {
+    "suggestedHigh": "Detected: {role}",
+    "suggestedMedium": "Probably: {role}",
+    "apply": "Apply",
+    "circles": "Greens: stood in this role's circle in {share}% of {count} circle appearances",
+    "boons": "Boons: among the Quickness/Alacrity givers in {share}% of {count} attempts",
+    "boonsMissing": "Boons: no data yet (logs from before this analysis)",
+    "damageFits": "Damage fits the role",
+    "damageDiffers": "Damage doesn't fit the role",
+    "error": "Could not save the role ({status})"
   },
   "roleSelect": {
     "none": "No role",

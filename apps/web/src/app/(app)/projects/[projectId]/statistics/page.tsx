@@ -2,8 +2,7 @@ import { Suspense } from "react";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/locale";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { requireProjectMembership } from "@/lib/projects";
-import { requireSession } from "@/lib/session";
+import { requireProjectViewer } from "@/lib/projects";
 import { FailedMechanicsSection, OverviewSection, SummarySection } from "./sections";
 import { FailedMechanicsSkeleton, OverviewSkeleton, SummarySkeleton } from "./skeletons";
 
@@ -20,8 +19,7 @@ export default async function ProjectStatisticsPage(
   props: Readonly<PageProps<"/projects/[projectId]/statistics">>,
 ) {
   const { projectId } = await props.params;
-  const session = await requireSession();
-  const membership = await requireProjectMembership(projectId, session.user.id);
+  const access = await requireProjectViewer(projectId);
   const locale = (await getLocale()) as Locale;
   const t = await getTranslations("statistics");
   const tSidebar = await getTranslations("sidebar");
@@ -31,7 +29,7 @@ export default async function ProjectStatisticsPage(
       <Breadcrumbs
         items={[
           { label: tSidebar("projects"), href: "/" },
-          { label: membership.project.name, href: `/projects/${projectId}` },
+          { label: access.project.name, href: `/projects/${projectId}` },
           { label: t("breadcrumb") },
         ]}
       />
