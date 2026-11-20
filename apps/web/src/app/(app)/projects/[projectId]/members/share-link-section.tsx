@@ -2,8 +2,11 @@
 
 import { Button, TextField } from "@radix-ui/themes";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
+
+// The origin never changes while the page is open, so there is nothing to subscribe to.
+const subscribeNever = () => () => {};
 
 /**
  * The project's public read-only link: anybody with it sees the project
@@ -21,7 +24,12 @@ export function ShareLinkSection({
   const [copied, setCopied] = useState(false);
   const endpoint = `/api/projects/${projectId}/share-link`;
   // Relative until mounted, so server and client render the same markup.
-  const link = token ? `/share/${token}` : null;
+  const origin = useSyncExternalStore(
+    subscribeNever,
+    () => window.location.origin,
+    () => "",
+  );
+  const link = token ? `${origin}/share/${token}` : null;
 
   async function send(method: "POST" | "DELETE") {
     setPending(true);
@@ -40,7 +48,7 @@ export function ShareLinkSection({
   async function copy() {
     if (!link) return;
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}${link}`);
+      await navigator.clipboard.writeText(link);
       setCopied(true);
     } catch {
       // Clipboard access can be denied; the link stays selectable in the field.
