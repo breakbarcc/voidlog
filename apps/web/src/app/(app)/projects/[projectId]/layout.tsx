@@ -1,6 +1,14 @@
 import { ProjectRole } from "@voidlog/db";
+import type { Metadata } from "next";
 import { Sidebar } from "@/components/sidebar";
 import { hasRole, requireProjectViewer } from "@/lib/projects";
+
+// Project pages can be opened without an account through the share link, so keep
+// them out of search indexes and don't leak the URL as a referrer.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+  referrer: "no-referrer",
+};
 
 export default async function ProjectLayout(props: LayoutProps<"/projects/[projectId]">) {
   const { projectId } = await props.params;

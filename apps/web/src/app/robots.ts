@@ -7,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: ["/login", "/datenschutz"],
       // Signed-in areas and endpoints: nothing there for a crawler.
-      disallow: ["/api/", "/projects/", "/invite/"],
+      disallow: ["/api/", "/projects/", "/invite/", "/share/"],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
   };

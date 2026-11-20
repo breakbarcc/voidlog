@@ -26,7 +26,7 @@ const de: PrivacyContent = {
   title: "Datenschutzerklärung",
   intro:
     "Diese Datenschutzerklärung gilt für voidlog (voidlog.breakbar.cc). Für die Hauptseite breakbar.cc und die übrigen Tools auf den Subdomains gelten deren eigene Datenschutzerklärungen.",
-  updated: "Stand: Oktober 2026",
+  updated: "Stand: November 2026",
   back: "Zurück",
   sections: [
     {
@@ -38,7 +38,7 @@ const de: PrivacyContent = {
     {
       title: "2. Worum es geht",
       paragraphs: [
-        "voidlog ist ein Fanprojekt zum Hochladen, Auswerten und Vergleichen von Guild-Wars-2-Kampflogs (EVTC) in Projekten (z. B. Trainingsgruppen). Es ist kein offizielles Angebot von ArenaNet. Die Nutzung setzt eine Anmeldung über Discord voraus.",
+        "voidlog ist ein Fanprojekt zum Hochladen, Auswerten und Vergleichen von Guild-Wars-2-Kampflogs (EVTC) in Projekten (z. B. Trainingsgruppen). Es ist kein offizielles Angebot von ArenaNet. Die Nutzung setzt eine Anmeldung über Discord voraus; Projekt-Admins können ein Projekt zusätzlich über einen öffentlichen Lese-Link ohne Anmeldung freigeben (siehe Abschnitt 9).",
       ],
     },
     {
@@ -92,7 +92,8 @@ const de: PrivacyContent = {
     {
       title: "9. Sichtbarkeit innerhalb von Projekten",
       paragraphs: [
-        "Logs und Auswertungen sind für alle Mitglieder des jeweiligen Projekts sichtbar, nicht für Außenstehende. Projektmitglieder sehen dabei auch Ihren Anzeigenamen als Uploader und die in den Logs enthaltenen Spielerdaten. Der Zugang erfolgt über Einladungslinks, die von Projekt-Admins erzeugt werden; in der Datenbank wird nur ein Hash des Einladungs-Tokens gespeichert.",
+        "Logs und Auswertungen sind für alle Mitglieder des jeweiligen Projekts sichtbar. Projektmitglieder sehen dabei auch Ihren Anzeigenamen als Uploader und die in den Logs enthaltenen Spielerdaten. Der Zugang erfolgt über Einladungslinks, die von Projekt-Admins erzeugt werden; in der Datenbank wird nur ein Hash des Einladungs-Tokens gespeichert.",
+        "Zusätzlich kann ein Projekt-Admin einen öffentlichen Lese-Link aktivieren. Wer diesen Link kennt, kann das gesamte Projekt ohne Anmeldung ansehen (nur lesend) – einschließlich der in den Logs enthaltenen Spielerdaten wie Accountnamen, Charakternamen, Rollen, Schaden und Mechanik-Ereignisse sowie der Anzeigenamen der Mitglieder, die in Rollen- und Upload-Angaben erscheinen. Admins entscheiden selbst, an wen sie den Link weitergeben; sie können ihn jederzeit deaktivieren oder durch einen neuen ersetzen, der alte Link funktioniert dann nicht mehr. Der Link-Token wird im Klartext in der Datenbank gespeichert, damit Admins den Link erneut kopieren können. Projektseiten sind für Suchmaschinen gesperrt (noindex) und senden keinen Referrer. Wenn Sie nicht möchten, dass Ihre Spielerdaten über einen solchen Link sichtbar sind, wenden Sie sich an den Admin des Projekts oder an info@breakbar.cc.",
       ],
     },
     {
@@ -104,6 +105,7 @@ const de: PrivacyContent = {
         "Sitzungs-Cookie der Anmeldung (authjs.session-token, im Produktivbetrieb mit Präfix __Secure-) – hält Sie angemeldet; die Sitzung wird serverseitig in der Datenbank geführt und läuft automatisch ab.",
         "Sicherheits-Cookies der Anmeldung (authjs.csrf-token, authjs.callback-url, mit Präfix __Host- bzw. __Secure-) – Schutz vor Fälschungen und Rücksprung nach der Anmeldung.",
         "Spracheinstellung (breakbar-language) – speichert Deutsch/Englisch, ein Jahr gültig, wird mit der Hauptseite und den anderen Subdomains von breakbar.cc geteilt.",
+        "Freigabe-Cookie (voidlog-share-<Projektkennung>) – wird nur gesetzt, wenn Sie einen öffentlichen Lese-Link öffnen; merkt sich den Lesezugriff auf dieses eine Projekt für 30 Tage.",
       ],
     },
     {
@@ -148,7 +150,7 @@ const en: PrivacyContent = {
   title: "Privacy Policy",
   intro:
     "This privacy policy applies to voidlog (voidlog.breakbar.cc). The main site breakbar.cc and the other tools on its subdomains have their own privacy policies. The German version is authoritative; this English text is a courtesy translation.",
-  updated: "Last updated: October 2026",
+  updated: "Last updated: November 2026",
   back: "Back",
   sections: [
     {
@@ -160,7 +162,7 @@ const en: PrivacyContent = {
     {
       title: "2. What this is",
       paragraphs: [
-        "voidlog is a fan project for uploading, analysing and comparing Guild Wars 2 combat logs (EVTC) within projects (e.g. training groups). It is not an official ArenaNet service. Using it requires signing in with Discord.",
+        "voidlog is a fan project for uploading, analysing and comparing Guild Wars 2 combat logs (EVTC) within projects (e.g. training groups). It is not an official ArenaNet service. Using it requires signing in with Discord; project admins can additionally share a project read-only without sign-in through a public link (see section 9).",
       ],
     },
     {
@@ -214,7 +216,8 @@ const en: PrivacyContent = {
     {
       title: "9. Visibility within projects",
       paragraphs: [
-        "Logs and analyses are visible to all members of the respective project, not to outsiders. Project members also see your display name as the uploader and the player data contained in the logs. Access is granted through invite links created by project admins; only a hash of the invite token is stored in the database.",
+        "Logs and analyses are visible to all members of the respective project. Project members also see your display name as the uploader and the player data contained in the logs. Access is granted through invite links created by project admins; only a hash of the invite token is stored in the database.",
+        "In addition, a project admin can enable a public read-only link. Anyone who knows this link can view the entire project without signing in (read-only) – including the player data contained in the logs such as account names, character names, roles, damage and mechanic events, as well as the display names of members that appear in role and upload information. Admins decide whom they give the link to; they can disable it at any time or replace it with a new one, after which the old link stops working. The link token is stored in plain text in the database so that admins can copy the link again. Project pages are blocked for search engines (noindex) and send no referrer. If you do not want your player data to be visible through such a link, please contact the project admin or info@breakbar.cc.",
       ],
     },
     {
@@ -226,6 +229,7 @@ const en: PrivacyContent = {
         "Sign-in session cookie (authjs.session-token, prefixed __Secure- in production) – keeps you signed in; the session is kept server-side in the database and expires automatically.",
         "Sign-in security cookies (authjs.csrf-token, authjs.callback-url, prefixed __Host- / __Secure-) – forgery protection and return to the page after signing in.",
         "Language setting (breakbar-language) – stores German/English, valid for one year, shared with the main site and the other breakbar.cc subdomains.",
+        "Share cookie (voidlog-share-<project id>) – only set when you open a public read-only link; remembers read access to that one project for 30 days.",
       ],
     },
     {
